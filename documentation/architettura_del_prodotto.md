@@ -23,8 +23,6 @@ Dovrà essere accessibile da desktop e dispositivi mobili, dunque essere reattiv
 
 A questi scopi, prevediamo di utilizzare tecnologie quali **HTML+CSS** per lo stile, un **framework JavaScript** ancora da stabilire per creare una Single-Page Application, **WebSocket** per la comunicazione in tempo reale con il backend, in particolare per il multiplayer.
 
-(UML per Front-End)
-
 ### Back-End
 
 Si occupa della logica applicativa sottostante alle funzionalità del prodotto. In particolare, saranno qui implementati:
@@ -37,8 +35,6 @@ Si occupa della logica applicativa sottostante alle funzionalità del prodotto. 
 
 A questi scopi, prevediamo di utilizzare tecnologie quali **Node.js** (per la costruzione dei microservizi), **WebSocket** (per la gestione della comunicazione in tempo reale tra i giocatori), **Express.js** (per lo sviluppo di API RESTful per la comunicazione con il Front-End e con servizi esterni), **OAuth 2.0** per l'autenticazione degli utenti tramite servizi esterni (es. Facebook), ed infine eventuali tecnologie per l'AI quali **TensorFlow** (qualora decidessimo di basare i servizi dell'AI su modelli pre-addestrati).
 
-(UML per Back-End)
-
 ### Database
 
 Utilizzato per la memorizzazione e gestione dei dati persistenti necessari al corretto funzionamento persistente del prodotto, ovvero:
@@ -49,8 +45,6 @@ Utilizzato per la memorizzazione e gestione dei dati persistenti necessari al co
 
 Si baserà su una tecnologia per gestione di database quale **MongoDB**.
 
-(UML per Database)
-
 Interazione tra componenti
 --------------------------
 
@@ -60,9 +54,12 @@ Interazione tra componenti
 
 **Backend ↔ API Social**: tramite OAuth2.0.
 
-(UML?)
-
 Deployment
 ----------
 
 Il processo di deployment si baserà su Docker, utilizzato per creare immagini containerizzate per ogni servizio del sistema (frontend, backend, database).
+
+Diagramma UML per use cases
+----------
+
+![Diagramma UML per use cases](uml/sprint0_uml_use_cases.png)
