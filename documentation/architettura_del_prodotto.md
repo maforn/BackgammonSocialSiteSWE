@@ -21,16 +21,16 @@ Dovrà essere accessibile da desktop e dispositivi mobili, dunque essere reattiv
 * **Giocare**: visualizzare ed interagire con il tavolo da gioco.
 * **Visualizzare la leaderboard:** classifiche globali o per amici, con la possibilità di condividere i risultati sui social network.
 
-A questi scopi, prevediamo di utilizzare tecnologie quali **HTML+CSS** per lo stile, un **framework JavaScript** ancora da stabilire per creare una Single-Page Application, **WebSocket** per la comunicazione in tempo reale con il backend, in particolare per il multiplayer.
+A questi scopi, prevediamo di utilizzare tecnologie quali **HTML+CSS** per lo stile, **Vue** come framework JavaScript per creare una Single-Page Application, **WebSocket** per la comunicazione in tempo reale con il backend, in particolare per il multiplayer.
 
 ### Back-End
 
 Si occupa della logica applicativa sottostante alle funzionalità del prodotto. In particolare, saranno qui implementati:
 
 * **Gestore delle partite**: sincronizza gli eventi di gioco, monitora lo stato delle partite e aggiorna ciascun giocatore in tempo reale.
-* **Avversario AI**: modulo dedicato all’AI che si interfaccia con il motore di gioco per selezionare le mosse contro il giocatore umano. Potrebbe basarsi su algoritmi di minimax oppure su modelli AI pre-addestrati, da stabilire.
+* **Avversario AI**: modulo dedicato all’AI che si interfaccia con il motore di gioco per selezionare le mosse contro il giocatore umano. Potrebbe basarsi su algoritmi di minimax oppure su modelli AI pre-addestrati.
 * **Leaderboard e gestione punteggi**: memorizzazione e recupero delle classifiche globali e degli amici, consentendo agli utenti di confrontare i propri punteggi con quelli degli altri giocatori.
-* **Autenticazione**: gestisce l'accesso degli utenti, le registrazioni e l'integrazione con i social network per facilitare il login tramite piattaforme terze.
+* **Autenticazione**: gestisce l'accesso degli utenti, le registrazioni e l'integrazione con i social network.
 * **Gestore delle sessioni di gioco**: Questo componente si occupa di tenere traccia delle sessioni attive, salvare i progressi delle partite in caso di disconnessione e permettere agli utenti di riprendere le partite salvate.
 
 A questi scopi, prevediamo di utilizzare tecnologie quali **Node.js** (per la costruzione dei microservizi), **WebSocket** (per la gestione della comunicazione in tempo reale tra i giocatori), **Express.js** (per lo sviluppo di API RESTful per la comunicazione con il Front-End e con servizi esterni), **OAuth 2.0** per l'autenticazione degli utenti tramite servizi esterni (es. Facebook), ed infine eventuali tecnologie per l'AI quali **TensorFlow** (qualora decidessimo di basare i servizi dell'AI su modelli pre-addestrati).
