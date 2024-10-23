@@ -21,7 +21,7 @@ Dovrà essere accessibile da desktop e dispositivi mobili, dunque essere reattiv
 * **Giocare**: visualizzare ed interagire con il tavolo da gioco.
 * **Visualizzare la leaderboard:** classifiche globali o per amici, con la possibilità di condividere i risultati sui social network.
 
-A questi scopi, prevediamo di utilizzare tecnologie quali **HTML+CSS** per lo stile, **Vue** come framework JavaScript per creare una Single-Page Application, **WebSocket** per la comunicazione in tempo reale con il backend, in particolare per il multiplayer.
+A questi scopi, prevediamo di utilizzare tecnologie quali **HTML+CSS** per lo stile, **Vue.js** come framework JavaScript per creare una Single-Page Application, **WebSocket** per la comunicazione in tempo reale con il backend, in particolare per il multiplayer.
 
 ### Back-End
 
@@ -33,7 +33,7 @@ Si occupa della logica applicativa sottostante alle funzionalità del prodotto. 
 * **Autenticazione**: gestisce l'accesso degli utenti, le registrazioni e l'integrazione con i social network.
 * **Gestore delle sessioni di gioco**: Questo componente si occupa di tenere traccia delle sessioni attive, salvare i progressi delle partite in caso di disconnessione e permettere agli utenti di riprendere le partite salvate.
 
-A questi scopi, prevediamo di utilizzare tecnologie quali **Node.js** (per la costruzione dei microservizi), **WebSocket** (per la gestione della comunicazione in tempo reale tra i giocatori), **Express.js** (per lo sviluppo di API RESTful per la comunicazione con il Front-End e con servizi esterni), **OAuth 2.0** per l'autenticazione degli utenti tramite servizi esterni (es. Facebook), ed infine eventuali tecnologie per l'AI quali **TensorFlow** (qualora decidessimo di basare i servizi dell'AI su modelli pre-addestrati).
+A questi scopi, prevediamo di utilizzare a questo livello tecnologie per la costruzione dei microservizi, per la gestione della comunicazione in tempo reale tra i giocatori, per lo sviluppo di API RESTful per comunicare con il Front-End e con servizi esterni, per l'autenticazione degli utenti tramite servizi esterni (es. Facebook), ed infine eventuali tecnologie per l'AI.
 
 ### Database
 
@@ -43,21 +43,24 @@ Utilizzato per la memorizzazione e gestione dei dati persistenti necessari al co
 * **Partite**: salvataggio delle sessioni di gioco, inclusa la modalità, lo stato delle partite (in corso, completate), il punteggio finale e la cronologia delle mosse.
 * **Leaderboard**: registrazione e aggiornamento continuo dei punteggi dei giocatori e delle classifiche.
 
-Si baserà su una tecnologia per gestione di database quale **MongoDB**.
+Si baserà su una tecnologia per gestione di database.
 
 Interazione tra componenti
 --------------------------
 
 **Frontend ↔ Backend**: tramite WebSocket per il multiplayer, tramite API RESTful per tutto il resto.
 
-**Backend ↔ Database**: tramite MongoDB.
+**Backend ↔ Database**: tramite la tecnologia per gestione di database scelta.
 
-**Backend ↔ API Social**: tramite OAuth2.0.
+**Backend ↔ API Social**: tramite un'apposita tecnologia.
 
-Deployment
+Deployment e diagramma UML di deployment
 ----------
 
-Il processo di deployment si baserà su Docker, utilizzato per creare immagini containerizzate per ogni servizio del sistema (frontend, backend, database).
+Il deployment si baserà sui servizi per i tre livelli descritti sopra: frontend, backend, database.
+
+![Diagramma UML di deployment](uml/sprint0_uml_deployment.png)
+
 
 Diagramma UML per use cases
 ----------
