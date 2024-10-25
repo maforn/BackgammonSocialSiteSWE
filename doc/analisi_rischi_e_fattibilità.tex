@@ -1,0 +1,207 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[a4paper, total={6.5in, 9.5in}]{geometry}
+\usepackage{graphicx} % Required for inserting images
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+
+\usepackage{array}
+\usepackage{hyperref}
+
+\renewcommand\thesection{\arabic{section}}
+
+\title{Analisi dei rischi e della fattibilità}
+
+\date{25 ottobre 2024}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\newpage
+\pagenumbering{arabic}
+
+\chapter*{Analisi dei rischi}
+\setcounter{section}{0}
+
+I rischi possibili possono essere classificati in quattro macro-classi: rischi tecnici, rischi operativi, rischi legati all’infrastruttura e rischi di progetto.
+
+\section{Rischi tecnici}
+\subsection{Complessità dello sviluppo AI per il gioco}
+\begin{itemize}
+    \item \textbf{Descrizione}: Il progetto include lo sviluppo di un'intelligenza artificiale capace di giocare contro l'utente (nel caso del gioco di Backgammon o simile). L'implementazione di una AI che prenda decisioni sensate in tempo breve è complessa e potrebbe richiedere più tempo del previsto.
+    \item \textbf{Probabilità}: Alta.
+    \item \textbf{Impatto}: Alto.
+    \item \textbf{Motivazione}: L’AI è una delle parti centrali del gioco e un avversario debole o prevedibile comprometterebbe l’intera esperienza di gioco.
+    \item \textbf{Strategie di mitigazione}:
+    \begin{itemize}
+        \item Implementare inizialmente un’AI semplificata basata su regole fisse, espandibile successivamente con modelli più avanzati.
+        \item Ricorrere a librerie o framework di AI già esistenti per evitare di sviluppare tutto da zero (ad esempio, algoritmi di minimax per giochi da tavolo).
+        \item Integrare la possibilità di tuning dell’AI per adattarne la difficoltà in modo dinamico.
+    \end{itemize}
+\end{itemize}
+\subsection{Gestione del multiplayer in tempo reale}
+\begin{itemize}
+    \item \textbf{Descrizione}: Il multiplayer richiede una gestione efficace delle connessioni tra giocatori, della sincronizzazione degli eventi di gioco e della gestione delle disconnessioni. Implementare e ottimizzare queste funzionalità può essere complicato.
+    \item \textbf{Probabilità}: Media.
+    \item \textbf{Impatto}: Alto.
+    \item \textbf{Motivazione}: Se il multiplayer non funziona correttamente, gli utenti potrebbero abbandonare il gioco a causa di disconnessioni o lag durante la partita.
+    \item \textbf{Strategie di mitigazione}:
+    \begin{itemize}
+        \item Usare protocolli WebSocket per garantire comunicazioni in tempo reale e bassa latenza.
+        \item Effettuare test intensivi per la gestione delle disconnessioni, assicurando che il sistema sia in grado di recuperare senza compromettere l'esperienza di gioco.
+        \item Salvare sul database centrale lo stato di gioco via via, in modo tale da poter recuperare il gioco in caso di disconnessione.
+    \end{itemize}
+\end{itemize}
+\subsection{Integrazione con API di social network}
+\begin{itemize}
+    \item \textbf{Descrizione}:  L'integrazione con le API di social network (per la condivisione dei risultati o il login) può risultare problematica se le API cambiano o sono soggette a limitazioni di utilizzo.
+    \item \textbf{Probabilità}: Media.
+    \item \textbf{Impatto}: Medio.
+    \item \textbf{Motivazione}: La condivisione sui social è una funzionalità che aggiunge valore al progetto, ma eventuali malfunzionamenti potrebbero influenzare negativamente l'esperienza utente.
+    \item \textbf{Strategie di mitigazione}:
+    \begin{itemize}
+        \item Implementare l’integrazione in modo modulare, così da poter sostituire rapidamente una piattaforma con un’altra in caso di necessità.
+        \item Prevedere funzionalità alternative come salvataggio locale delle partite o dei punteggi legato all’account sulla piattaforma, in caso di indisponibilità dei social.
+    \end{itemize}
+\end{itemize}
+
+\section{Rischi operativi}
+\subsection{Mancanza di competenze specifiche nel team}
+\begin{itemize}
+    \item \textbf{Descrizione}:  Il team potrebbe non avere esperienza sufficiente in alcune delle tecnologie chiave richieste dal progetto, come lo sviluppo di AI, il multiplayer o la gestione di container Docker.
+    \item \textbf{Probabilità}: Media.
+    \item \textbf{Impatto}: Alto.
+    \item \textbf{Motivazione}: La mancanza di competenze potrebbe ritardare lo sviluppo o portare a soluzioni tecnicamente deboli.
+    \item \textbf{Strategie di mitigazione}:
+    \begin{itemize}
+        \item Identificare le competenze mancanti durante lo sprint 0 e organizzare sessioni di autoformazione mirate per i membri del team.
+        \item Considerare il riuso di codice open source o l’impiego di soluzioni preesistenti per le aree più critiche (es. modelli di AI).
+    \end{itemize}
+\end{itemize}
+
+\subsection{Ritardi nella consegna delle funzionalità chiave}
+\begin{itemize}
+    \item \textbf{Descrizione}: Il mancato rispetto delle scadenze per le funzionalità più critiche, come multiplayer, AI o leaderboard, potrebbe compromettere il completamento del progetto nei tempi previsti.
+    \item \textbf{Probabilità}: Alta.
+    \item \textbf{Impatto}: Alto.
+    \item \textbf{Motivazione}: Senza queste funzionalità, il prodotto non raggiungerebbe il livello minimo richiesto per essere rilasciato e testato dopo ogni sprint.
+    \item \textbf{Strategie di mitigazione}:
+    \begin{itemize}
+        \item Suddividere le funzionalità critiche in moduli incrementali che possano essere rilasciati e testati in fasi intermedie.
+        \item Effettuare rilasci anticipati di versioni minime funzionanti (MVP) per ottenere feedback immediato dal Requirement Owner e correggere eventuali errori prima che diventino critici.
+        \item Mantenere aggiornato il backlog e monitorare costantemente lo stato di avanzamento tramite strumenti come Taiga e GitLab.
+    \end{itemize}
+\end{itemize}
+
+\section{Rischi legati all’infrastruttura}
+\subsection{Problemi di sicurezza e vulnerabilità del codice}
+\begin{itemize}
+    \item \textbf{Descrizione}: Il sistema potrebbe essere soggetto a vulnerabilità di sicurezza, soprattutto se il gioco è accessibile online. Un attacco potrebbe compromettere i dati degli utenti o interrompere il servizio.
+    \item \textbf{Probabilità}: Media.
+    \item \textbf{Impatto}: Alto.
+    \item \textbf{Motivazione}: La compromissione della sicurezza potrebbe esporre i dati personali dei giocatori o rendere il servizio inaffidabile, danneggiando la reputazione del prodotto.
+    \item \textbf{Strategie di mitigazione}:
+    \begin{itemize}
+        \item Usare SonarQube per analizzare continuamente il codice alla ricerca di vulnerabilità e debolezze.
+        \item Implementare protocolli di sicurezza robusti, come l'autenticazione OAuth per l'accesso ai social network e la crittografia delle comunicazioni (SSL/TLS).
+    \end{itemize}
+\end{itemize}
+
+\section{Rischi di progetto}
+\subsection{Mancanza di feedback dal Requirement Owner (Cliente)}
+\begin{itemize}
+    \item \textbf{Descrizione}: Un feedback limitato o ritardato da parte del Requirement Owner potrebbe portare a sviluppare funzionalità non desiderate o non allineate con le aspettative del cliente.
+    \item \textbf{Probabilità}: Bassa.
+    \item \textbf{Impatto}: Alto.
+    \item \textbf{Motivazione}: La mancanza di comunicazione può causare deviazioni significative rispetto ai requisiti del prodotto, con conseguenti ritardi e revisioni del lavoro svolto.
+    \item \textbf{Strategie di mitigazione}:
+    \begin{itemize}
+        \item Pianificare revisioni periodiche (Sprint Review) con il cliente alla fine di ogni sprint per ottenere feedback tempestivo.
+    \end{itemize}
+\end{itemize}
+
+\section{Tabella dei rischi}
+
+% Add vertical padding
+\renewcommand{\arraystretch}{2}
+
+\begin{tabular}{p{5cm} c c p{6cm}}
+\textbf{Rischio} & \textbf{Probabilità} & \textbf{Impatto} & \textbf{Mitigazione} \\
+\hline
+Complessità sviluppo AI & Alta & Alto & Usare AI semplice, integrare librerie open source \\
+\hline
+Gestione multiplayer & Media & Alto & Utilizzo di WebSocket, test disconnessioni, salvataggio partita \\
+\hline
+Integrazione con API social & Media & Medio & Approccio modulare, alternative in caso di fallimento \\
+\hline
+Mancanza di competenze & Media & Alto & Autoformazione interna, riuso di codice open source \\
+\hline
+Ritardi funzionalità chiave & Alta & Alto & Sviluppo modulare, rilascio MVP, monitoraggio continuo con Taiga/GitLab \\
+\hline
+Sicurezza e vulnerabilità & Media & Alto & Analisi continua del codice con SonarQube, autenticazione sicura, crittografia SSL \\
+\hline
+Mancanza di feedback dal cliente & Bassa & Alto & Sprint review regolari \\
+\hline
+\end{tabular}
+
+
+\section{Conclusioni}
+L'analisi dei rischi ha evidenziato i principali ostacoli che potrebbero compromettere il progetto. Tuttavia, la pianificazione di strategie di mitigazione adeguate consente di affrontare tali rischi in modo proattivo. Un monitoraggio continuo e un approccio agile permetteranno di adattarsi rapidamente a eventuali problemi emergenti.
+
+\clearpage
+
+\chapter*{Analisi della fattibilità}
+\setcounter{section}{0}
+
+La fattibilità del progetto dipende da sei macro-fattori principali: la disponibilità delle risorse, la fattibilità economica, commerciale, tecnica, legale e temporale.
+
+\section{Disponibilità delle risorse}
+
+\paragraph{Risorse umane}
+Il team di progetto è composto da sei membri, una dimensione ideale per garantire un numero sufficiente di persone e un'adozione efficace del metodo Scrum. Grazie a questa metodologia, il team può gestire le attività in modo agile, con i membri che hanno assunto i ruoli previsti da Scrum.
+
+\paragraph{Strumenti di sviluppo}
+L'ambiente di sviluppo CAS garantisce accesso gratuito a tutti gli strumenti necessari per un ciclo di sviluppo efficiente, offrendo strumenti per la gestione del progetto, controllo delle versioni, analisi della qualità del codice, esecuzione automatica di test, monitoraggio del tempo di lavoro e comunicazione.
+
+\paragraph{Infrastruttura tecnologica}
+Il Dipartimento di Ingegneria e Scienze dell'Informazione (DISI) fornisce una solida infrastruttura tecnologica, che comprende hosting, server e servizi di database, offrendo tutto il necessario per supportare il progetto.
+
+\section{Fattibilità economica}
+Il progetto presenta un'elevata fattibilità economica per i RO poiché i costi sono praticamente nulli. Di seguito una suddivisione:
+\begin{itemize}
+    \item \textbf{Costi di sviluppo}: gli strumenti impiegati sono open-source e resi disponibili gratuitamente dal DISI. Il team lavora senza compenso;
+    \item \textbf{Costi operativi e di distribuzione}: tutti i servizi per il deployment sono forniti dal DISI e la manutenzione è gestita internamente. Gli unici costi operativi derivano dall'uso di API di social network;
+    \item \textbf{Costi di marketing e pubblicità}: non sono previste campagne promozionali;
+    \item \textbf{Costi di scalabilità}: eventuali spese potrebbero essere necessarie se il prodotto dovesse raggiungere un ampio pubblico globale, ma questo scenario non è previsto nel progetto iniziale.
+\end{itemize}
+
+\section{Fattibilità commerciale}
+Esistono numerosi siti che consentono di giocare a backgammon online, sia tra due persone che contro un'intelligenza artificiale. Allo stesso modo, esistono numerose app mobili che offrono tali funzionalità, talvolta includendo anche la possibilità di partecipare a tornei. Tuttavia, non abbiamo ancora trovato una piattaforma che integri tutte queste opzioni contemporaneamente. Inoltre, molti di questi servizi non valorizzano a sufficienza l'aspetto sociale del gioco, che invece è un elemento centrale in questo prodotto.
+
+\section{Fattibilità tecnica}
+Pur in presenza di alcuni rischi tecnici e possibili lacune di competenze all'interno del team, la fattibilità tecnica complessiva è elevata. Le strategie di mitigazione delineate nell'analisi dei rischi affrontano i fattori di rischio, garantendo che il team possa superare con successo eventuali difficoltà tecniche.
+
+\section{Fattibilità legale}
+
+\paragraph{Proprietà intellettuale}
+Se il progetto utilizza musica o immagini di terze parti, sarà necessario assicurarsi di disporre dei diritti o delle licenze per l'uso. Un'attenzione alle licenze del materiale e, dove richiesta, un'appropriata attribuzione dell'autore dovrebbero garantire il rispetto della proprietà intellettuale.
+
+\paragraph{Protezione dei dati personali}
+Considerando che il progetto prevede funzionalità online, potrebbe essere necessario raccogliere dati personali degli utenti. Il team deve impegnarsi a minimizzare la raccolta dei dati e informare gli utenti in modo trasparente. Ciò potrebbe essere complesso, vista la mancanza di conoscenze giuridiche tra gli attori coinvolti nella creazione del prodotto.
+
+\paragraph{Rispetto dei termini di servizio}
+L'utilizzo di API di social network richiede il pieno rispetto dei relativi termini di servizio. Considerando che il prodotto non richiede usi particolari delle API, il rispetto dei termini di servizio dovrebbe essere raggiungibile.
+
+\section{Fattibilità temporale}
+L'analisi dei rischi evidenzia possibili ritardi nello sviluppo delle funzionalità critiche, che potrebbero compromettere il completamento nei tempi previsti. Tuttavia, le strategie di mitigazione delineate, insieme all'adozione di metodologie agili, dovrebbero ridurre significativamente questi rischi. L'approccio iterativo e incrementale consente di rilasciare progressivamente le funzionalità prioritarie, migliorando la flessibilità nella gestione di eventuali ritardi o cambiamenti. Questo permette di mantenere il controllo sui tempi di consegna, minimizzando il rischio di sforamenti significativi rispetto alle scadenze stabilite.
+
+\section{Conclusioni}
+Il progetto ha solide basi per essere portato a termine con successo. La disponibilità delle risorse umane e tecnologiche, l'assenza di costi significativi e il supporto infrastrutturale fornito dal DISI garantiscono un'elevata fattibilità economica e operativa. Nonostante la presenza di alcuni rischi tecnici e temporali, l'adozione di metodologie agili e strategie di mitigazione consente di gestire efficacemente le criticità, minimizzando il rischio di ritardi significativi. Sul piano legale, resta l'esigenza di integrare competenze specialistiche per la gestione della protezione dei dati.
+
+Dal punto di vista della fattibilità commerciale, il progetto si inserisce in un mercato competitivo, ma presenta elementi distintivi. La combinazione di diverse modalità di gioco e l'attenzione agli aspetti sociali offrono un valore aggiunto rispetto agli attuali prodotti esistenti. La mancanza di un servizio che integri tutte queste caratteristiche rappresenta una significativa opportunità commerciale. Se ben eseguito, il progetto ha quindi il potenziale per attrarre una nicchia di utenti interessati a un'esperienza di gioco completa e socialmente coinvolgente.
+
+In conclusione, l'unico ostacolo alla piena realizzazione del progetto è di natura legale, poiché mancano figure con le competenze adeguate in questo ambito. Tuttavia, concentrandosi esclusivamente sugli aspetti del prodotto, si può affermare che il progetto è ben strutturato e gestibile, con ottime possibilità di essere completato nei tempi e nelle modalità previsti.
+
+
+\end{document}
