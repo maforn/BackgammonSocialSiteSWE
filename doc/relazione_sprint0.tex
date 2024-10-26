@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage[utf8]{inputenc}
+\usepackage[a4paper, total={6.5in, 9.5in}]{geometry}
 \usepackage{geometry}
 \geometry{a4paper, margin=1in}
 \usepackage{enumitem}
@@ -26,6 +26,40 @@ I ruoli ricoperti dal team sono:
     \item \textbf{Developer 4:} Lorenzo Giarrusso
 \end{itemize}
 
+\section{Modalità di lavoro}
+
+\subsection{Tempi}
+Il team sceglie di lavorare cinque giorni a settimana, al fine di avere sufficiente tempo libero per riposare e riacquistare energie. Non sono stati posti limiti invece all'orario giornaliero, lasciando ad ogni sviluppatore la libertà di lavorare il numero di ore preferito e nei momenti preferiti. Questo permette di gestire al meglio gli stili di vita dinamici e differenziati dei membri del team. 
+
+\subsection{Canali di comunicazione}
+Il team sceglie di utilizzare Mattermost per instant messaging, necessario quotidianamente nel processo di sviluppo, e Microsoft Teams per videochiamate, che potrebbero essere necessarie in caso di impossibilità di uno o più membri a partecipare ad attività in presenza, ma anche per permettere una comunicazione più rapida e diretta.
+
+\subsection{Convenzioni}
+\subsubsection{Generale}
+        \begin{itemize}
+            \item \textbf{Lingua}: Inglese (solo per codice).
+        \end{itemize}
+\subsubsection{Python}
+        \begin{itemize}
+            \item PEP8;
+            \item Documentazione Docstring;
+            \item Utilizzo di type hinting dove possibile.
+        \end{itemize}
+\subsubsection{TypeScript}
+    \begin{itemize}
+        \item camelCase per nomi di variabili e funzioni;
+        \item PascalCase per nomi di classi e interfacce;
+        \item Documentazione JSDoc;
+        \item Evitare l'uso di ``any'', preferendo il più possibile tipi specifici.
+    \end{itemize}
+\subsubsection{Versioning}
+    \begin{itemize}
+        \item \textbf{Workflow}: branching workflow;
+        \item \textbf{Branch naming convention}: prefisso (e.g. ``feature/'', ``bugfix/'', ``docs/'') seguito da parte descrittiva composta da sole lettere minuscole con `-' come separatore (e.g. ``game-board'');
+        \item \textbf{Commit naming convention}: formato imperativo (e.g. ``Add login endpoint'');
+        \item \textbf{Merge su main}: solo previa preview positiva di un altro membro.
+    \end{itemize}
+
 \section{Attività di Team Building}
 Durante lo Sprint zero sono state organizzate due attività di team building attraverso i due giochi: “Scrumble” e “Escape the Boom”. Queste attività hanno permesso ai membri del team di conoscersi meglio, migliorando collaborazione, intesa e comunicazione. Le attività hanno anche portato a creare un ambiente di sviluppo positivo, fondamentale per gli sprint successivi. Concluse le attività, è stata compilata la tabella di autovalutazione del team e una breve autovalutazione più discorsiva.
 
@@ -47,6 +81,8 @@ Durante lo Sprint zero, è stata condotta un'analisi dei rischi e della fattibil
 
 \section{Conclusione}
 In conclusione, lo Sprint zero ha fornito una base solida per il progetto, con un focus sulla creazione di un backlog prioritario, preparazione delle architetture tecniche, sulla definizione dei ruoli e sul conoscimento del team.
+
+
 
 \end{document}
 
