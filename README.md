@@ -48,7 +48,7 @@ Per la gestione dei container, il progetto utilizza un Dockerfile con multi-stag
 
 1. Clona il repository:
    ```bash
-   git clone https://aminsep.disi.unibo.it/gitlab/swe-team-3/backgammon.git
+   git clone https://aminsep.disi.unibo.it/gitlab/swe-team-3/backgammon-social-site.git
    cd backgammon-social-site
    ```
 
