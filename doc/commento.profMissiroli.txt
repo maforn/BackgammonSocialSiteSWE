@@ -1,0 +1,27 @@
+Checklist Sprint0
+IM(optS0):  
+Taiga: non lo vedo al momento
+SRS (opt): -
+Scrumble: Relazione/Autovalutazione;;
+Codice (ling/FW/librerie) (optS0): 
+Readme: OK (aggiungete i ruoli)
+IDE: ?
+Diagrammi: Presenti e generalmente chiari. 
+Nel diagrama USe case, non avete indicato il contorno del sistema per cui alcuni attori potrebbero non esserlo. Per esempio, "sistema autenticazione", "sistema AI". 
+Product URL (optS1):
+
+
+
+Checklist S1-4 
+Prodotto online: 
+Aggiornamento US, BACKLOG, BURNDOWN, SPRINT GOAL, DOD, DOR, SPRINT BACKLOG, BACKLOG SNAPSHOTS:
+Sprint review: 
+	S1:
+Retrospective: 
+	S1:
+Git Stats:
+Testing/Coverage: 
+SQ: 
+Devops: 
+
+
