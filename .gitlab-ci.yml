@@ -6,11 +6,17 @@ variables:
   DOCKER_DRIVER: overlay2
 
 services:
-  - docker:dind
+  - name: docker:dind
+    alias: docker
 
 before_script:
-  - docker info
-  - docker-compose --version
+  - apk add --no-cache docker-cli bash curl  # Install Docker CLI, Bash, and Curl
+  # Install Docker Compose
+  - LATEST_COMPOSE=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')  # Fetch the latest version tag
+  - curl -L "https://github.com/docker/compose/releases/download/$LATEST_COMPOSE/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  - chmod +x /usr/local/bin/docker-compose  # Make Docker Compose executable
+  - docker info  # Check if Docker daemon is running
+  - docker-compose --version  # Verify Docker Compose installation
 
 build:
   stage: build
@@ -18,11 +24,11 @@ build:
     SECURE_FILES_DOWNLOAD_PATH: './server/.env'
   script:
     - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
-    - docker-compose -f docker-compose.yml build
+    - docker-compose -f docker-compose.yml build  # Use docker-compose command
 
 test:
   stage: test
   script:
-    - docker-compose -f docker-compose.yml up --build --abort-on-container-exit --exit-code-from test
+    - docker-compose -f docker-compose.yml up --build --abort-on-container-exit --exit-code-from test  # Use docker-compose command
   after_script:
-    - docker-compose -f docker-compose.yml down
+    - docker-compose -f docker-compose.yml down  # Use docker-compose command
