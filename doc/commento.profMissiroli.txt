@@ -1,6 +1,10 @@
 Checklist Sprint0
 IM(optS0):  
-Taiga: non lo vedo al momento
+Taiga: OK
+	Le storie sono presenti, sono stimate ma mi sembrano non priorizzate. Manca il "business value"
+	L'impressione è che le storie siano molto "ciccione" nel senso che un'epica con 2-4 storie forse non è tanto epica o i task sono molto grossi
+	Non riuscite a spezzarle un po'
+	Lo sprint1 va bene (mi sembra molto pieno, ma vedremo) mancano DOD o DOR
 SRS (opt): -
 Scrumble: Relazione/Autovalutazione;;
 Codice (ling/FW/librerie) (optS0): 
