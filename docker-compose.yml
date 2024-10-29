@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: ./server
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+    ports:
+    - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: backgammon
+
+  client:
+    build:
+      context: ./client
+    ports:
+      - "8080:80"
+
+  test:
+    build:
+      context: ./server
+    command: ["pytest", "--disable-warnings", "-v"]
+    env_file:
+      - ./server/.env
+    depends_on:
+      - mongodb
