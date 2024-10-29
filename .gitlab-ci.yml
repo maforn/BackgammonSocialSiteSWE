@@ -21,14 +21,17 @@ before_script:
 build:
   stage: build
   variables:
-    SECURE_FILES_DOWNLOAD_PATH: './server/.env'
+    SECURE_FILES_DOWNLOAD_PATH: './server/'
   script:
     - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
     - docker-compose -f docker-compose.yml build  # Use docker-compose command
 
 test:
   stage: test
+  variables:
+    SECURE_FILES_DOWNLOAD_PATH: './server/'
   script:
+    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
     - docker-compose -f docker-compose.yml up --build --abort-on-container-exit --exit-code-from test  # Use docker-compose command
   after_script:
     - docker-compose -f docker-compose.yml down  # Use docker-compose command
