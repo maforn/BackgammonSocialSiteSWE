@@ -1,0 +1,28 @@
+stages:
+  - build
+  - test
+
+variables:
+  DOCKER_DRIVER: overlay2
+
+services:
+  - docker:dind
+
+before_script:
+  - docker info
+  - docker-compose --version
+
+build:
+  stage: build
+  variables:
+    SECURE_FILES_DOWNLOAD_PATH: './server/.env'
+  script:
+    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
+    - docker-compose -f docker-compose.yml build
+
+test:
+  stage: test
+  script:
+    - docker-compose -f docker-compose.yml up --build --abort-on-container-exit --exit-code-from test
+  after_script:
+    - docker-compose -f docker-compose.yml down
