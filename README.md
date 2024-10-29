@@ -1,69 +1,68 @@
 # Backgammon Social Site
 
-Questo progetto è una web application per giocare a backgammon online, consentendo a due persone o a una persona contro un agente intelligente (bot) di sfidarsi. La piattaforma permette anche di organizzare tornei tra giocatori e include una classifica (leaderboard) aggiornata con i punteggi personali.
+This project is a web application for playing backgammon online, allowing two players or a player against an intelligent agent (bot) to compete. The platform also enables tournament organization among players and features a leaderboard updated with personal scores.
 
-## Indice
-- [Introduzione](#introduzione)
-- [Caratteristiche del Progetto](#caratteristiche-del-progetto)
-- [Ruoli del Team](#ruoli-del-team)
-- [Modalità di Lavoro](#modalità-di-lavoro)
-- [Architettura e Tecnologie](#architettura-e-tecnologie)
-- [Istruzioni per l'Installazione](#istruzioni-per-linstallazione)
-- [Contributi e Convenzioni](#contributi-e-convenzioni)
+## Table of Contents
+- [Introduction](#introduction)
+- [Project Features](#project-features)
+- [Team Roles](#team-roles)
+- [Working Methodology](#working-methodology)
+- [Architecture and Technologies](#architecture-and-technologies)
+- [Installation Instructions](#installation-instructions)
+- [Contributions and Conventions](#contributions-and-conventions)
 
+## Introduction
+Sprint Zero was essential for planning the project, outlining the main features, establishing communication foundations, and structuring the backlog of user stories necessary for the development sprints.
 
-## Introduzione
-Lo Sprint Zero è stato essenziale per pianificare il progetto, delineare le funzionalità principali, stabilire le basi per la comunicazione e strutturare il backlog delle user stories, necessario per procedere con gli sprint di sviluppo.
+## Project Features
+- **Online Play**: Compete in backgammon online against other users or an intelligent agent.
+- **Tournaments**: Organize and participate in tournaments with up to four players.
+- **Leaderboard**: Updated ranking based on personal ratings.
+- **User Interface**: Simple and intuitive UI designed for an optimal gaming experience.
+- **Communication**: Notifications and messaging for tournaments and challenges.
 
-## Caratteristiche del Progetto
-- **Gioco Online**: Gioca a backgammon online contro altri utenti o contro un agente intelligente.
-- **Tornei**: Organizza e partecipa a tornei fino a quattro giocatori.
-- **Leaderboard**: Classifica aggiornata basata sui rating personali.
-- **Interfaccia Utente**: UI semplice e intuitiva, progettata per un'esperienza di gioco ottimale.
-- **Comunicazione**: Notifiche e messaggistica per tornei e sfide.
+## Team Roles
+- **Scrum Master**: Cristian Orsi
+- **Product Owner**: Enis Brajevic
+- **Developer 1**: Matteo Fornaini
+- **Developer 2**: Mattia Ferrarini
+- **Developer 3**: Enrico Mazzotti
+- **Developer 4**: Lorenzo Giarrusso
 
-## Ruoli del Team
-- Scrum Master: Cristian Orsi
-- Product Owner: Enis Brajevic
-- Developer 1: Matteo Fornaini
-- Developer 2: Mattia Ferrarini
-- Developer 3: Enrico Mazzotti
-- Developer 4: Lorenzo Giarrusso
+## Working Methodology
+The team works five days a week, with flexible hours for each member. Communication occurs via Mattermost for messaging and Microsoft Teams for video calls, while English is the primary language for code and technical documentation.
 
-## Modalità di Lavoro
-Il team lavora cinque giorni a settimana, con orari flessibili per ogni membro. La comunicazione avviene su Mattermost per i messaggi e su Microsoft Teams per le videochiamate, mentre il linguaggio principale per codice e documentazione tecnica è l'inglese.
-
-## Architettura e Tecnologie
-Il progetto è suddiviso in tre principali componenti:
-- **Frontend**: Sviluppato in Vue.js.
-- **Backend**: Sviluppato in Python .
-- **Database**: Gestione dati per utenti, tornei e classifiche.
+## Architecture and Technologies
+The project is divided into three main components:
+- **Frontend**: Developed in Vue.js.
+- **Backend**: Developed in Python using FastAPI.
+- **Database**: Manages data for users, tournaments, and rankings.
 
 ### Docker
-Per la gestione dei container, il progetto utilizza un Dockerfile con multi-stage build:
-- **Stage Frontend**: Costruisce l'app Vue per generare i file statici.
-- **Stage Backend**: Configura e avvia l'applicazione Python, che serve i file statici del frontend e gestisce le API.
+The project utilizes a multi-stage Dockerfile for container management:
+- **Frontend Stage**: Builds the Vue app to generate static files.
+- **Backend Stage**: Configures and runs the Python application, serving the static frontend files and managing APIs.
 
-## Istruzioni per l'Installazione
+## Installation Instructions
 
-1. Clona il repository:
+1. Clone the repository:
    ```bash
    git clone https://aminsep.disi.unibo.it/gitlab/swe-team-3/backgammon-social-site.git
    cd backgammon-social-site
    ```
 
-2. Crea e avvia i container Docker:
+2. Create and start the Docker containers:
    ```bash
-   docker-compose up --build
+   docker compose up --build
    ```
 
-3. Accedi all'app: L'app sarà disponibile su `http://localhost:8080`.
+3. Access the app: The application will be available at `http://localhost:8080`.
 
-## Contributi e Convenzioni
+## Contributions and Conventions
 
-- **Lingua**: Inglese per codice.
+- **Language**: English for code and documentation.
 - **Versioning**:
-  - Workflow di branching: usa prefissi (`feature/`, `bugfix/`, `docs/`).
-  - Nome branch: minuscolo, separato da `-` (e.g. `feature/game-board`).
-  - Nome commit: in forma imperativa (e.g. `Add login endpoint`).
-  - Merge su main: previa revisione positiva di un altro membro del team.
+  - Branching workflow: Use prefixes (`feature/`, `bugfix/`, `docs/`).
+  - Branch naming: Lowercase, separated by hyphens (e.g., `feature/game-board`).
+  - Commit messages: In imperative form (e.g., `Add login endpoint`).
+  - Merging to main: Requires positive review from another team member.
