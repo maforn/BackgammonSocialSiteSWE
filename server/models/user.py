@@ -1,9 +1,5 @@
 from pydantic import BaseModel, Field, EmailStr
-from typing import Optional
-from bson import ObjectId
-
-def default_id():
-    return str(ObjectId())
+from services.database import default_id
 
 class UserInDB(BaseModel):
     id: str = Field(default_factory=default_id, alias="_id")
