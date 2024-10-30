@@ -72,24 +72,6 @@ pip freeze > requirements.txt
 deactivate
 ```
 
-## Testingp install -r requirements.txt
-```
-
-4. Install new packages as needed as usual
-```sh
-pip install <package-name>
-```
-
-5. Update the ``requirements.txt`` file with new dependencies
-```sh
-pip freeze > requirements.txt
-```
-
-6. To deactivate the environment
-```sh
-deactivate
-```
-
 ## Testing
 
 To test the server code you can use ``pytest``. Run the following command:
