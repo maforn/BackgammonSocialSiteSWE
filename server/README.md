@@ -20,28 +20,12 @@ The `server` folder contains the backend code for the application. Below is a de
 
 To manage dependency versions you should use Python virtual environments.
 
-1. Create one with
+1. Create one with the following command (name it ``venv`` to use the current ``.gitignore`` configuration)
 ```sh
 python3 -m venv venv
 ```
 
-2. Activate the virtual environment (name it venv to use the current ``.gitignore`` configuration)
-
-- On Windows:
-    ```sh
-    .\venv\Scripts\activate
-    ```
-- On macOS and Linux:
-  ## Usage guidelines 
-
-To manage dependency versions you should use Python virtual environments.
-
-1. Create one with
-```sh
-python3 -m venv venv
-```
-
-2. Activate the virtual environment (name it venv to use the current ``.gitignore`` configuration)
+2. Activate the virtual environment
 
 - On Windows:
     ```sh
