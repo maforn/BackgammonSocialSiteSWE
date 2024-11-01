@@ -1,10 +1,19 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import contextlib
 import uvicorn
 from services.database import create_indexes, initialize_db_connection
 from routes import routers
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Adjust this to your needs
+    allow_credentials=True,
+    allow_methods=["*"],  # This allows all methods, including OPTIONS
+    allow_headers=["*"],
+)
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
