@@ -1,19 +1,20 @@
 <template>
-    <router-view class="p-4"></router-view>
+  <router-view></router-view>
 </template>
 
 <script lang="ts">
 export default {
-    name: 'App',
+  name: 'App',
 
-    mounted() {
-        console.log('App mounted');
-    }
-};
+  mounted() {
+    console.log('App mounted')
+  },
+}
 </script>
 
 <style>
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;

@@ -22,7 +22,7 @@
                     Play human
                 </div>
             </router-link>
-            <router-link to="/" class="flex justify-end items-center pl-3 py-2 bg-gray-600 text-white rounded-r-full rounded-l-full hover:bg-gray-700 shadow-md">
+            <router-link to="/game" class="flex justify-end items-center pl-3 py-2 bg-gray-600 text-white rounded-r-full rounded-l-full hover:bg-gray-700 shadow-md">
                 <div class="circle flex items-center justify-center rounded-full">
                     <v-icon name="fa-robot" class="text-black" scale="2"/>
                 </div>

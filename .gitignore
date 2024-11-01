@@ -5,6 +5,9 @@
 # Cache
 __pycache__
 
+# Reports
+.coverage
+
 # Environment
 ./**/.env
 .env
