@@ -34,8 +34,19 @@ npm run build
 
 ### Run Unit Tests with [Vitest](https://vitest.dev/)
 
+Custom-made command:
+```sh
+npm run test
+```
+
+Default command:
 ```sh
 npm run test:unit
+```
+
+Check test coverage:
+```sh
+npx vitest run --coverage
 ```
 
 ### Lint with [ESLint](https://eslint.org/)

@@ -61,5 +61,10 @@ deactivate
 To test the server code you can use ``pytest``. Run the following command:
 
 ```sh
-pytest
+pytest -v
+```
+
+To generate an HTML code coverage report that can be opened in the browser:
+```sh
+pytest --cov --cov-report=html:coverage_re
 ```
