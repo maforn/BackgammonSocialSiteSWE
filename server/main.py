@@ -4,6 +4,7 @@ import contextlib
 import uvicorn
 from services.database import create_indexes, initialize_db_connection
 from routes import routers
+from middlewares.auth import AuthMiddleware
 
 app = FastAPI()
 
@@ -24,6 +25,7 @@ async def lifespan(app: FastAPI):
     # Add any shutdown tasks here if needed
 
 app.router.lifespan_context = lifespan
+app.add_middleware(AuthMiddleware)
 
 # Include the routers
 for router in routers:

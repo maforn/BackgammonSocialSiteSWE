@@ -7,6 +7,11 @@ class UserInDB(BaseModel):
     email: EmailStr
     password: str
 
+class UserOnline(BaseModel):
+    id: str = Field(default_factory=default_id, alias="_id")
+    username: str
+    online: bool = False
+
 class UserCreate(BaseModel):
     username: str
     email: EmailStr

@@ -30,3 +30,10 @@ services:
       - ./server/.env
     depends_on:
       - mongodb
+
+  client-test:
+    build:
+      context: ./client
+    command: [ "npm", "run", "test:unit" ]
+    depends_on:
+      - client

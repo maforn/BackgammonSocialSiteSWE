@@ -9,11 +9,11 @@ async def test_register_user(client: AsyncClient):
         "password": "testpassword"
     })
     assert response.status_code == 200
-    assert response.json()["username"] == "testuser"
+    assert "access_token" in response.json()
 
 @pytest.mark.anyio
 async def test_login_user(client: AsyncClient):
-    response = await client.post("/token", data={
+    response = await client.post("/token", json={
         "username": "testuser",
         "password": "testpassword"
     })
@@ -21,12 +21,7 @@ async def test_login_user(client: AsyncClient):
     assert "access_token" in response.json()
 
 @pytest.mark.anyio
-async def test_read_users_me(client: AsyncClient):
-    login_response = await client.post("/token", data={
-        "username": "testuser",
-        "password": "testpassword"
-    })
-    token = login_response.json()["access_token"]
+async def test_read_users_me(client: AsyncClient, token: str):
     response = await client.get("/users/me", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     assert response.json()["username"] == "testuser"

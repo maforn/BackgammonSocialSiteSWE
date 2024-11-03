@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, status
 from datetime import timedelta
 from services.database import get_db
 from models.user import UserCreate, LoginRequest
@@ -9,7 +9,7 @@ from pymongo.errors import DuplicateKeyError
 
 router = APIRouter()
 
-@router.post("/register", response_model=UserCreate)
+@router.post("/register")
 async def register_user(user: UserCreate):
     user_dict = user.dict(by_alias=True)
     user_dict["password"] = get_password_hash(user_dict.pop("password"))
