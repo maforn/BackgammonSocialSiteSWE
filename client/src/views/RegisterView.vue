@@ -477,10 +477,13 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
+import { registerOrLogin } from '@/services/auth'
 
 export default defineComponent({
   name: 'RegisterView',
   setup() {
+    const router = useRouter()
     const showRegisterForm = ref(true)
     const showPassword = ref(false)
     const name = ref('')
@@ -509,15 +512,8 @@ export default defineComponent({
     const registerUser = async () => {
       try {
         errorMessage.value = ''
-        const data = {
-          username: name.value,
-          password: password.value
-        }
-        const response = await axios.post(`http://localhost:8000/${showRegisterForm.value ? 'register' : 'token'}`,
-          showRegisterForm.value ? { ...data, email: email.value } : data
-        )
-        console.log(response.data)
-        //TODO: set the token in local storage
+        await registerOrLogin(name.value, password.value, email.value, showRegisterForm.value)
+        await router.push({ name: 'home' }) // Navigate to home
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
           errorMessage.value = error.response.data.detail

@@ -1,18 +1,23 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { OhVueIcon, addIcons } from 'oh-vue-icons'
-import { IoPerson, IoPeople, IoStatsChart, FaRobot, IoTriangleSharp } from 'oh-vue-icons/icons'
+import { addIcons, OhVueIcon } from 'oh-vue-icons'
+import { FaRobot, IoPeople, IoPerson, IoStatsChart, IoTriangleSharp } from 'oh-vue-icons/icons'
 import App from './App.vue'
 import router from './router'
+import './assets/tailwind.css'
 import './index.css'
+import piniaPluginPersistedState from 'pinia-plugin-persistedstate'
 
-addIcons(IoPerson, IoPeople, IoStatsChart, FaRobot, IoTriangleSharp);
+const app = createApp(App)
 
-const app = createApp(App);
+addIcons(IoPerson, IoPeople, IoStatsChart, FaRobot, IoTriangleSharp)
 
-app.component('v-icon', OhVueIcon);
+app.component('v-icon', OhVueIcon)
 
-app.use(createPinia());
-app.use(router);
+const pinia = createPinia()
+pinia.use(piniaPluginPersistedState)
 
-app.mount('#app');
+app.use(pinia)
+app.use(router)
+
+app.mount('#app')
