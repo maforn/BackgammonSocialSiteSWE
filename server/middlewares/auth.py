@@ -9,11 +9,12 @@ from services.auth import oauth2_scheme
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # Bypass authentication for specific routes
-        if request.url.path in ["/register", "/token"]:
+        if request.url.path in ["/register", "/token"] or request.method == "OPTIONS":
             return await call_next(request)
 
-        token = await oauth2_scheme(request)
-        if not token:
+        try:
+            token = await oauth2_scheme(request)
+        except HTTPException:
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={"detail": "Not authenticated"},
