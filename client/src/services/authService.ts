@@ -1,5 +1,6 @@
 import axios from 'axios'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/authStore'
+import router from '@/router'
 
 export const registerOrLogin = async (username: string, password: string, email: string | undefined, isRegistering: boolean) => {
   const data = {
@@ -14,6 +15,7 @@ export const registerOrLogin = async (username: string, password: string, email:
 
 export const logout = async () => {
   useAuthStore().logout()
+  await router.push({ name: 'register' })
 }
 
 export function isAuthenticated(): boolean {

@@ -1,13 +1,15 @@
-from fastapi import APIRouter, HTTPException, status
 from datetime import timedelta
-from services.database import get_db
+
+from core.config import ACCESS_TOKEN_EXPIRE_MINUTES
+from fastapi import APIRouter, HTTPException, status
 from models.user import UserCreate, LoginRequest
+from pymongo.errors import DuplicateKeyError
 from services.auth import get_password_hash, authenticate_user, create_access_token
 from services.database import default_id
-from core.config import ACCESS_TOKEN_EXPIRE_MINUTES
-from pymongo.errors import DuplicateKeyError
+from services.database import get_db
 
 router = APIRouter()
+
 
 @router.post("/register")
 async def register_user(user: UserCreate):
@@ -26,6 +28,7 @@ async def register_user(user: UserCreate):
         data={"sub": user.username}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
 
 @router.post("/token")
 async def login_for_access_token(login_request: LoginRequest):

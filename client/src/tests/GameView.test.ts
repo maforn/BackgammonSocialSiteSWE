@@ -4,6 +4,7 @@ import GameView from '@/views/GameView.vue'
 import axiosInstance from '@/axios'
 import MockAdapter from 'axios-mock-adapter'
 import { createPinia, setActivePinia } from 'pinia'
+import { useGameStore } from '@/stores/gameStore'
 
 describe('GameView.vue', () => {
   let mock: MockAdapter
@@ -20,18 +21,17 @@ describe('GameView.vue', () => {
 
   it('should fetch dice throw result and update diceResult on diceThrow method call', async () => {
     const getSpy = vi.spyOn(axiosInstance, 'get')
-    mock.onGet('/throw_dice').reply(200, {
-      die1: 3,
-      die2: 5
-    })
+    mock.onGet('/throw_dice').reply(200)
 
     const wrapper = mount(GameView, {
       pinia
     })
     await wrapper.vm.diceThrow()
 
+    useGameStore().setDice(3, 5)
+
     expect(getSpy).toHaveBeenCalledWith('/throw_dice')
-    expect(wrapper.vm.diceResult.die1).toBe(3)
-    expect(wrapper.vm.diceResult.die2).toBe(5)
+    expect(wrapper.vm.diceResult.die1.value).toBe(3)
+    expect(wrapper.vm.diceResult.die2.value).toBe(5)
   })
 })

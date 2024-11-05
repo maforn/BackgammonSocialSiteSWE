@@ -1,10 +1,14 @@
+import contextlib
+
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import contextlib
-import uvicorn
-from services.database import create_indexes, initialize_db_connection
-from routes import routers
+from starlette.websockets import WebSocket, WebSocketDisconnect
+
 from middlewares.auth import AuthMiddleware
+from routes import routers
+from services.database import create_indexes, initialize_db_connection
+from services.websocket import get_current_user, manager
 
 app = FastAPI()
 
@@ -16,6 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
     # Initialize the database connection
@@ -24,12 +29,27 @@ async def lifespan(app: FastAPI):
     yield
     # Add any shutdown tasks here if needed
 
+
 app.router.lifespan_context = lifespan
 app.add_middleware(AuthMiddleware)
 
 # Include the routers
 for router in routers:
     app.include_router(router)
+
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket, token: str):
+    username = await get_current_user(token)
+    await manager.connect(websocket, username)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await manager.handle_message(data, websocket, username)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, username)
+        await manager.broadcast(f"{username} left the chat")
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

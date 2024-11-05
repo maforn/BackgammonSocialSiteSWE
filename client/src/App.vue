@@ -1,14 +1,40 @@
 <template>
   <router-view></router-view>
+  <ErrorContainer />
 </template>
 
 <script lang="ts">
+import { watch } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
+import { useWsStore } from '@/stores/wsStore'
+import ErrorContainer from '@/components/ErrorContainer.vue'
+
 export default {
   name: 'App',
+  components: { ErrorContainer },
 
-  mounted() {
-    console.log('App mounted')
+  setup() {
+    watch(
+      () => useAuthStore().token,
+      (newToken) => {
+        const wsStore = useWsStore()
+        if (newToken) {
+          wsStore.connect()
+        } else {
+          wsStore.disconnect()
+        }
+      }
+    )
   },
+  mounted() {
+    const newToken = useAuthStore().token
+    const wsStore = useWsStore()
+    if (newToken) {
+      wsStore.connect()
+    } else {
+      wsStore.disconnect()
+    }
+  }
 }
 </script>
 
