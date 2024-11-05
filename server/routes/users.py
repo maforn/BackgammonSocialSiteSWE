@@ -2,6 +2,10 @@ from core.config import SECRET_KEY, ALGORITHM
 from fastapi import APIRouter, HTTPException, Depends, status
 from jose import JWTError, jwt
 from models.user import UserInDB
+from services.user import get_user, get_usernames_starting_with
+from core.config import SECRET_KEY, ALGORITHM
+from services.auth import oauth2_scheme
+
 from models.user import UserOnline
 from services.auth import oauth2_scheme
 from services.user import get_all_users
@@ -37,3 +41,8 @@ async def get_users():
     for user in users:
         user.online = user.username in manager.online_users
     return users
+
+@router.get("/users/search")
+async def search_usernames(query: str):
+    usernames = await get_usernames_starting_with(query)
+    return usernames

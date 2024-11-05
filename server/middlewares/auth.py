@@ -9,7 +9,7 @@ from services.auth import oauth2_scheme
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # Bypass authentication for specific routes
-        if request.url.path in ["/register", "/token", "/ws"] or request.method == "OPTIONS":
+        if request.url.path in ["/register", "/token", "/docs", "/openapi.json", "/ws"] or request.method == "OPTIONS":
             return await call_next(request)
 
         try:
