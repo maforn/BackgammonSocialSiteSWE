@@ -42,3 +42,16 @@ class BoardConfiguration(BaseModel):
 
     def __init__(self, points: List[Point] = DEFAULT_POINTS, bar: Point = Point(player1=0, player2=0)):
         super().__init__(points=points, bar=bar)
+
+
+class Match(BaseModel):
+    player1: str
+    player2: str
+    board_configuration: BoardConfiguration
+    dice: List[int] = []
+    used: List[int] = []
+    turn: int = 0
+    status: str = "pending"
+
+    def __init__(self, player1: str, player2: str, board_configuration: BoardConfiguration = BoardConfiguration(), dice: List[int] = [], used: List[int] = [], turn: int = 0, status: str = "pending"):
+        super().__init__(player1=player1, player2=player2, board_configuration=board_configuration, dice=dice, used=used, turn=turn, status=status)
