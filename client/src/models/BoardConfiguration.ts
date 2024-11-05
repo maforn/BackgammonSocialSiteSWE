@@ -45,3 +45,4 @@ export class BoardConfiguration {
 		this.bar = bar ?? new PointConfiguration(0, 0);
 	}
 }
+
