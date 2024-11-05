@@ -1,42 +1,46 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import axios from 'axios'
-import { logout, registerOrLogin } from '@/services/auth'
-import { useAuthStore } from '@/stores/auth'
+import MockAdapter from 'axios-mock-adapter'
+import { logout, registerOrLogin } from '@/services/authService'
+import { useAuthStore } from '@/stores/authStore'
 import { createPinia, setActivePinia } from 'pinia'
 
-vi.mock('axios')
-
 describe('auth service', () => {
+  let mock: MockAdapter
+
   beforeEach(() => {
     setActivePinia(createPinia())
     useAuthStore().logout()
+    mock = new MockAdapter(axios)
   })
 
   it('should register a user', async () => {
-    const mockResponse = { data: { access_token: 'fake_token' } }
-    axios.post = vi.fn().mockResolvedValue(mockResponse)
+    const mockResponse = { access_token: 'fake_token' }
+    mock.onPost('http://localhost:8000/register').reply(200, mockResponse)
 
     await registerOrLogin('testuser', 'password', 'test@example.com', true)
 
-    expect(axios.post).toHaveBeenCalledWith('http://localhost:8000/register', {
+    expect(mock.history.post[0].url).toBe('http://localhost:8000/register')
+    expect(mock.history.post[0].data).toBe(JSON.stringify({
       username: 'testuser',
       password: 'password',
       email: 'test@example.com'
-    })
+    }))
     expect(useAuthStore().token).toBe('fake_token')
     expect(useAuthStore().username).toBe('testuser')
   })
 
   it('should login a user', async () => {
-    const mockResponse = { data: { access_token: 'fake_token' } }
-    axios.post = vi.fn().mockResolvedValue(mockResponse)
+    const mockResponse = { access_token: 'fake_token' }
+    mock.onPost('http://localhost:8000/token').reply(200, mockResponse)
 
     await registerOrLogin('testuser', 'password', undefined, false)
 
-    expect(axios.post).toHaveBeenCalledWith('http://localhost:8000/token', {
+    expect(mock.history.post[0].url).toBe('http://localhost:8000/token')
+    expect(mock.history.post[0].data).toBe(JSON.stringify({
       username: 'testuser',
       password: 'password'
-    })
+    }))
     expect(useAuthStore().token).toBe('fake_token')
     expect(useAuthStore().username).toBe('testuser')
   })
@@ -45,6 +49,6 @@ describe('auth service', () => {
     useAuthStore().setUserData('fake_token', 'testuser')
     logout()
     expect(useAuthStore().token).toBeNull()
-    expect(useAuthStore().token).toBeNull()
+    expect(useAuthStore().username).toBeNull()
   })
 })

@@ -2,18 +2,18 @@
   <div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center">
     <div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
       <div to="/game"
-        class="flex justify-end items-center px-8 py-3 bg-gray-600 text-white rounded-r-full rounded-l-full shadow- font-medium">
+           class="flex justify-end items-center px-8 py-3 bg-gray-600 text-white rounded-r-full rounded-l-full shadow- font-medium">
         Player 1 vs Player 2
       </div>
       <Board class="shadow-lg" :configuration="configuration" />
       <div to="/game"
-        class="flex justify-end items-center px-8 py-3 bg-gray-600 text-white rounded-r-full rounded-l-full shadow-md">
-        Your turn
+           class="flex justify-end items-center px-8 py-3 bg-gray-600 text-white rounded-r-full rounded-l-full shadow-md">
+        Player {{ thrower }}
       </div>
       <button @click="diceThrow" class="px-4 py-2 bg-blue-500 text-white rounded">Throw Dice</button>
       <div class="dice-container">
-        <DieFace v-if="diceResult.die1 !== null" :value="diceResult.die1" />
-        <DieFace v-if="diceResult.die2 !== null" :value="diceResult.die2" />
+        <DieFace v-if="diceResult.die1.value !== null" :value="diceResult.die1.value" />
+        <DieFace v-if="diceResult.die2.value !== null" :value="diceResult.die2.value" />
       </div>
     </div>
   </div>
@@ -22,32 +22,35 @@
 <script lang="ts">
 import Board from '@/components/Board.vue'
 import DieFace from '@/components/DieFace.vue'
-import { defineComponent } from 'vue'
+import { defineComponent, computed } from 'vue'
 import { BoardConfiguration } from '@/models/BoardConfiguration'
+import { storeToRefs } from 'pinia'
+import { useGameStore } from '@/stores/gameStore'
 import axiosInstance from '@/axios'
 
 export default defineComponent({
   name: 'GameView',
   components: {
     Board,
-    DieFace,
+    DieFace
   },
-  data() {
+  setup() {
+    const gameStore = useGameStore()
+    const { currentPlayer, diceResult } = storeToRefs(gameStore)
+
     return {
       configuration: new BoardConfiguration(),
+      thrower: computed(() => currentPlayer.value),
       diceResult: {
-        die1: null,
-        die2: null,
-      },
+        die1: computed(() => diceResult.value.die1),
+        die2: computed(() => diceResult.value.die2)
+      }
     }
   },
   methods: {
     async diceThrow() {
       try {
-        const response = await axiosInstance.get('/throw_dice')
-        this.diceResult.die1 = response.data.die1
-        this.diceResult.die2 = response.data.die2
-        console.log('Dice throw result:', response.data)
+        await axiosInstance.get('/throw_dice')
       } catch (error) {
         console.error('Error fetching dice throw result:', error)
       }

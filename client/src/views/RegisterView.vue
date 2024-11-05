@@ -478,12 +478,12 @@
 import { defineComponent, ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
-import { registerOrLogin } from '@/services/auth'
+import { registerOrLogin } from '@/services/authService'
 
 export default defineComponent({
   name: 'RegisterView',
   setup() {
-    const router = useRouter()
+    const router = useRouter();
     const showRegisterForm = ref(true)
     const showPassword = ref(false)
     const name = ref('')
@@ -513,7 +513,7 @@ export default defineComponent({
       try {
         errorMessage.value = ''
         await registerOrLogin(name.value, password.value, email.value, showRegisterForm.value)
-        await router.push({ name: 'home' }) // Navigate to home
+        await router.push({ name: 'home' }); // Navigate to home
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
           errorMessage.value = error.response.data.detail

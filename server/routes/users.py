@@ -1,15 +1,15 @@
+from core.config import SECRET_KEY, ALGORITHM
 from fastapi import APIRouter, HTTPException, Depends, status
 from jose import JWTError, jwt
 from models.user import UserInDB
-from services.user import get_user
-from core.config import SECRET_KEY, ALGORITHM
-from services.auth import oauth2_scheme
-
 from models.user import UserOnline
-from routes.websocket import manager
+from services.auth import oauth2_scheme
 from services.user import get_all_users
+from services.user import get_user
+from services.websocket import manager
 
 router = APIRouter()
+
 
 @router.get("/users/me", response_model=UserInDB)
 async def read_users_me(token: str = Depends(oauth2_scheme)):

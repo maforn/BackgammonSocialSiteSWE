@@ -57,7 +57,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { logout as authLogout } from '@/services/auth'
+import { logout as authLogout } from '@/services/authService'
 import { useRouter } from 'vue-router'
 
 export default defineComponent({

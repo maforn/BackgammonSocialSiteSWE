@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import GameView from '../views/GameView.vue'
 import RegisterView from '../views/RegisterView.vue'
-import { isAuthenticated } from '@/services/auth'
+import { isAuthenticated } from '@/services/authService'
+import GameView from '@/views/GameView.vue'
 
 const routes = [
   {
@@ -12,9 +12,10 @@ const routes = [
     component: HomeView
   },
   {
-    meta: { requiresAuth: true },
+
     path: '/game',
     name: 'game',
+    meta: { requiresAuth: true },
     component: GameView
   },
   {
