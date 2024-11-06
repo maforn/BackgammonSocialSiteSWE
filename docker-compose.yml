@@ -7,7 +7,7 @@ services:
     depends_on:
       - mongodb
     volumes:
-      - ./coverage:/coverage
+      - coverage:/tests
 
   mongodb:
     image: mongo:latest
@@ -25,13 +25,14 @@ services:
   test:
     build:
       context: ./server
-    command: ["pytest", "--disable-warnings", "-v", "--cov=./", "--cov-config=./.coveragerc", "--cov-report=xml:coverage/server-coverage.xml"]
+    command: ["pytest", "--disable-warnings", "-v", "--cov=./", "--cov-config=.coveragerc", "--cov-report=xml:/tests/server-coverage.xml"]
     env_file:
       - ./server/.env
     depends_on:
       - mongodb
     volumes:
-      - ./coverage:/app/coverage
+      - coverage:/tests
+
 
   client-test:
     build:
@@ -40,3 +41,6 @@ services:
     command: [ "npm", "run", "test" ]
     depends_on:
       - client
+
+volumes:
+  coverage:

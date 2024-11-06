@@ -37,12 +37,12 @@ test:
     - docker-compose -f docker-compose.yml run client-test
     - docker-compose -f docker-compose.yml run test
   after_script:
+    - docker run --rm -v coverage:/tests -v $(pwd)/coverage:/host-coverage alpine sh -c "cp /tests/server-coverage.xml /host-coverage/server-coverage.xml"
     - docker-compose -f docker-compose.yml down
-    - ls -lah /coverage
-    - ls -lah ./
   artifacts:
     paths:
-      - coverage
+      - coverage/server-coverage.xml
+    expire_in: 1 hour
 
 sonarqube-check:
   stage: sonarqube-check
