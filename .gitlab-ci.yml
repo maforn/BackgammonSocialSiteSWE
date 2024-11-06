@@ -38,9 +38,10 @@ test:
     - docker-compose -f docker-compose.yml run test
   after_script:
     - docker-compose -f docker-compose.yml down
+    - ls -l ./coverage
   artifacts:
     paths:
-      - coverage/coverage.xml
+      - coverage
 
 sonarqube-check:
   stage: sonarqube-check
