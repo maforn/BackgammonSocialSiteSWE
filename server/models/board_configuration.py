@@ -1,5 +1,8 @@
-from typing import List, Optional
-from pydantic import BaseModel
+from typing import List
+
+from pydantic import BaseModel, Field
+from services.database import default_id
+
 
 class Point(BaseModel):
     player1: int
@@ -7,6 +10,7 @@ class Point(BaseModel):
 
     def __init__(self, player1: int = 0, player2: int = 0):
         super().__init__(player1=player1, player2=player2)
+
 
 # Starting configuration of the board
 DEFAULT_POINTS: List[Point] = [
@@ -33,8 +37,9 @@ DEFAULT_POINTS: List[Point] = [
     Point(0, 0),  # Point 21
     Point(0, 0),  # Point 22
     Point(0, 0),  # Point 23
-    Point(2, 0)   # Point 24
+    Point(2, 0)  # Point 24
 ]
+
 
 class BoardConfiguration(BaseModel):
     points: List[Point] = DEFAULT_POINTS
@@ -45,13 +50,11 @@ class BoardConfiguration(BaseModel):
 
 
 class Match(BaseModel):
+    id: str = Field(default_factory=default_id, alias="_id")
     player1: str
     player2: str
-    board_configuration: BoardConfiguration
+    board_configuration: BoardConfiguration = BoardConfiguration()
     dice: List[int] = []
     used: List[int] = []
     turn: int = 0
     status: str = "pending"
-
-    def __init__(self, player1: str, player2: str, board_configuration: BoardConfiguration = BoardConfiguration(), dice: List[int] = [], used: List[int] = [], turn: int = 0, status: str = "pending"):
-        super().__init__(player1=player1, player2=player2, board_configuration=board_configuration, dice=dice, used=used, turn=turn, status=status)
