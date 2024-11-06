@@ -35,6 +35,7 @@ async def client():
 async def clear_db():
     db = get_db()
     await db.users.delete_one({"username": "testuser"})
+    await db.matches.delete_one({"player1": "testuser"})
 
 
 @pytest.fixture(scope="session")

@@ -36,10 +36,7 @@ class ConnectionManager:
             message_type = json_decoded.get("type")
             message_content = json_decoded.get("msg")
 
-            if message_type == "move":
-                # TODO: move on board when game is available: update db and so on
-                pass
-            elif message_type == "invite":
+            if message_type == "invite":
                 # TODO: create invites in db
                 recipient = json_decoded.get("recipient")
                 if recipient in self.online_users:

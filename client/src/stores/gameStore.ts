@@ -1,63 +1,58 @@
 // client/src/stores/gameStore.ts
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
+import axiosInstance from '@/axios';
+import { BoardConfiguration, Match, PointConfiguration } from '@/models/BoardConfiguration';
 
-interface Player {
-  username: string
-  score: number
+interface GameData {
+  player1: string;
+  player2: string;
+  board_configuration: {
+    points: PointConfiguration[];
+    bar: PointConfiguration;
+  };
+  dice: number[];
+  used: number[];
+  turn: number;
+  created_at: string;
+  updated_at: string;
+  status: string;
 }
 
-interface DiceResult {
-  die1: number | null
-  die2: number | null
-}
-
-interface GameBoard {
-  // Define the structure of the game board
-  // For simplicity, let's assume it's an array of arrays representing the board state
-  board: number[][]
-}
-
-interface GameState {
-  players: Player[]
-  currentPlayer: number
-  diceResult: DiceResult
-  gameBoard: GameBoard
-  gameStatus: 'not_started' | 'in_progress' | 'finished'
-}
 
 export const useGameStore = defineStore('game', {
-  state: (): GameState => ({
-    players: [],
-    currentPlayer: 0,
-    diceResult: { die1: null, die2: null },
-    gameBoard: { board: Array(24).fill([]) }, // Example board initialization
-    gameStatus: 'not_started'
-  }),
-  actions: {
-    addPlayer(player: Player) {
-      this.players.push(player)
-    },
-    startGame() {
-      if (this.players.length === 2) {
-        this.gameStatus = 'in_progress'
-        this.currentPlayer = 0
-      } else {
-        throw new Error('Two players are required to start the game')
-      }
-    },
-    setDice(die1: number, die2: number) {
-      this.diceResult.die1 = die1
-      this.diceResult.die2 = die2
-    },
-    movePiece(from: number, to: number) {
-      // Implement the logic to move a piece on the board
-      // This is a simplified example
-    },
-    endTurn() {
-      this.currentPlayer = (this.currentPlayer + 1) % 2
-    },
-    finishGame() {
-      this.gameStatus = 'finished'
-    }
-  }
-})
+	state: (): Match => ({
+		player1: '',
+		player2: '',
+		boardConfiguration: new BoardConfiguration(),
+		dice: { roll: [], used: [] },
+		turn: 0,
+		created_at: new Date(),
+		updated_at: new Date(),
+		status: 'pending',
+	}),
+	actions: {
+		fetchGame() {
+			axiosInstance.get('/game').then(response => {
+				const data = response.data;
+				this.setMatch(data);
+			});
+		},
+		setMatch(data: GameData) {
+			this.player1 = data.player1;
+			this.player2 = data.player2;
+			this.boardConfiguration = new BoardConfiguration(
+				data.board_configuration.points.map((p: PointConfiguration) => new PointConfiguration(p.player1, p.player2)),
+				new PointConfiguration(data.board_configuration.bar.player1, data.board_configuration.bar.player2),
+			);
+			this.dice.roll = data.dice;
+			this.dice.used = data.used;
+			this.turn = data.turn;
+			this.created_at = new Date(data.created_at);
+			this.updated_at = new Date(data.updated_at);
+			this.status = data.status;
+		},
+		setDice(die1: number, die2: number) {
+			this.dice.roll = [die1, die2];
+		},
+	},
+});

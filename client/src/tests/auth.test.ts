@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import axios from 'axios'
+import axios, { type AxiosError } from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 import { logout, registerOrLogin } from '@/services/authService'
 import { useAuthStore } from '@/stores/authStore'
@@ -21,13 +21,40 @@ describe('auth service', () => {
     await registerOrLogin('testuser', 'password', 'test@example.com', true)
 
     expect(mock.history.post[0].url).toBe('http://localhost:8000/register')
-    expect(mock.history.post[0].data).toBe(JSON.stringify({
-      username: 'testuser',
-      password: 'password',
-      email: 'test@example.com'
-    }))
+    expect(mock.history.post[0].data).toBe(
+      JSON.stringify({
+        username: 'testuser',
+        password: 'password',
+        email: 'test@example.com'
+      })
+    )
     expect(useAuthStore().token).toBe('fake_token')
     expect(useAuthStore().username).toBe('testuser')
+  })
+
+  it('should throw an error', async () => {
+    const mockResponse = { details: 'Error message' }
+    mock.onPost('http://localhost:8000/register').reply(422, mockResponse)
+
+    try {
+      await registerOrLogin('testuser', 'password', 'test@example.com', true)
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError
+        expect(axiosError.response?.data.details).toBe('Error message')
+      } else {
+        throw error
+      }
+    }
+
+    expect(mock.history.post[0].url).toBe('http://localhost:8000/register')
+    expect(mock.history.post[0].data).toBe(
+      JSON.stringify({
+        username: 'testuser',
+        password: 'password',
+        email: 'test@example.com'
+      })
+    )
   })
 
   it('should login a user', async () => {
@@ -37,10 +64,12 @@ describe('auth service', () => {
     await registerOrLogin('testuser', 'password', undefined, false)
 
     expect(mock.history.post[0].url).toBe('http://localhost:8000/token')
-    expect(mock.history.post[0].data).toBe(JSON.stringify({
-      username: 'testuser',
-      password: 'password'
-    }))
+    expect(mock.history.post[0].data).toBe(
+      JSON.stringify({
+        username: 'testuser',
+        password: 'password'
+      })
+    )
     expect(useAuthStore().token).toBe('fake_token')
     expect(useAuthStore().username).toBe('testuser')
   })
