@@ -6,6 +6,8 @@ services:
       - "8000:8000"
     depends_on:
       - mongodb
+    volumes:
+      - ./coverage:/coverage
 
   mongodb:
     image: mongo:latest
@@ -23,11 +25,13 @@ services:
   test:
     build:
       context: ./server
-    command: [ "pytest", "--disable-warnings", "-v" ]
+    command: ["pytest", "--disable-warnings", "-v", "--cov=./", "--cov-config=./.coveragerc", "--cov-report=xml:coverage/server-coverage.xml"]
     env_file:
       - ./server/.env
     depends_on:
       - mongodb
+    volumes:
+      - ./coverage:/app/coverage
 
   client-test:
     build:

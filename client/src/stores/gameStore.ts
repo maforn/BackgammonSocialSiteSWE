@@ -1,7 +1,23 @@
 // client/src/stores/gameStore.ts
 import { defineStore } from 'pinia';
 import axiosInstance from '@/axios';
-import { BoardConfiguration, Match, PointConfiguration } from '@/models/BoardConfiguration';
+import { BoardConfiguration, PointConfiguration } from '@/models/BoardConfiguration';
+import { Match } from '@/models/Match';
+
+interface GameData {
+	player1: string;
+	player2: string;
+	board_configuration: {
+		points: PointConfiguration[];
+		bar: PointConfiguration;
+	};
+	dice: number[];
+	used: number[];
+	turn: number;
+	created_at: string;
+	updated_at: string;
+	status: string;
+}
 
 interface GameData {
   player1: string;
@@ -32,7 +48,7 @@ export const useGameStore = defineStore('game', {
 	}),
 	actions: {
 		fetchGame() {
-			axiosInstance.get('/game').then(response => {
+			return axiosInstance.get('/game').then(response => {
 				const data = response.data;
 				this.setMatch(data);
 			});

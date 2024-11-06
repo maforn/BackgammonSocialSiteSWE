@@ -1,15 +1,32 @@
 import { mount, VueWrapper } from '@vue/test-utils';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import Board from '@/components/GameBoard.vue';
+import { describe, it, expect, beforeEach, vi, beforeAll, afterEach } from 'vitest';
+import GameBoard from '@/components/GameBoard.vue';
 import { BoardConfiguration, PointConfiguration } from '@/models/BoardConfiguration';
+import MockAdapter from 'axios-mock-adapter';
+import { createPinia, setActivePinia } from 'pinia';
+import axiosInstance from '@/axios';
+
+let mock: MockAdapter;
+const pinia = createPinia();
+
+beforeAll(() => {
+	mock = new MockAdapter(axiosInstance);
+	setActivePinia(pinia);
+});
+
+afterEach(() => {
+	mock.reset();
+});
 
 describe('Empty Board component tests', () => {
 	let wrapper: VueWrapper<any>;
 
 	beforeEach(() => {
-		wrapper = mount(Board, {
+		wrapper = mount(GameBoard, {
 			props: {
 				configuration: new BoardConfiguration(Array(24).fill({ player1: 0, player2: 0 }), { player1: 0, player2: 0 }),
+				dices: [],
+				yourTurn: false,
 			},
 		});
 	});
@@ -19,7 +36,7 @@ describe('Empty Board component tests', () => {
 	});
 
 	it('Renders the correct number of points', () => {
-		const points = wrapper.findAllComponents({ name: 'Point' });
+		const points = wrapper.findAllComponents({ name: 'PointComponent' });
 		expect(points.length).toBe(24); // 4 rows * 6 points each
 	});
 
@@ -39,9 +56,11 @@ describe('Default board configuration tests', () => {
 	let wrapper: VueWrapper<any>;
 
 	beforeEach(() => {
-		wrapper = mount(Board, {
+		wrapper = mount(GameBoard, {
 			props: {
 				configuration: new BoardConfiguration(),
+				dices: [],
+				yourTurn: false,
 			},
 		});
 	});
@@ -55,7 +74,7 @@ describe('Default board configuration tests', () => {
 	});
 
 	it('Pieces are grouped correctly', () => {
-		const points = wrapper.findAllComponents({ name: 'Point' });
+		const points = wrapper.findAllComponents({ name: 'PointComponent' });
 		const pieces1 = points.map(point => point.findAll('.piece.player-1').length).sort((a, b) => a - b);
 		const pieces2 = points.map(point => point.findAll('.piece.player-2').length).sort((a, b) => a - b);
 
@@ -91,9 +110,11 @@ describe('Custom board configuration tests', () => {
 		// Add two pieces to the bar
 		configuration.bar = new PointConfiguration(1, 1);
 
-		wrapper = mount(Board, {
+		wrapper = mount(GameBoard, {
 			props: {
 				configuration: configuration,
+				dices: [],
+				yourTurn: false,
 			},
 		});
 	});
@@ -107,7 +128,7 @@ describe('Custom board configuration tests', () => {
 	});
 
 	it('Pieces are grouped correctly', () => {
-		const points = wrapper.findAllComponents({ name: 'Point' });
+		const points = wrapper.findAllComponents({ name: 'PointComponent' });
 		const pieces1 = points.map(point => point.findAll('.piece.player-1').length).sort((a, b) => a - b);
 		const pieces2 = points.map(point => point.findAll('.piece.player-2').length).sort((a, b) => a - b);
 
@@ -128,8 +149,13 @@ describe('Custom board configuration tests', () => {
 
 		// Add one piece per player to the bar
 		configuration.bar = { player1: 1, player2: 1 };
-		wrapper = mount(Board, { props: { configuration: configuration } });
-
+		wrapper = mount(GameBoard, {
+			props: {
+				configuration: configuration,
+				dices: [],
+				yourTurn: false,
+			},
+		});
 		let bar = wrapper.find('#bar');
 		expect(bar.findAll('.bar-piece').length).toBe(2);
 		expect(bar.findAll('.bar-piece.player-1').length).toBe(1);
@@ -137,7 +163,13 @@ describe('Custom board configuration tests', () => {
 
 		// Add piece for player 1 only
 		configuration.bar = { player1: 1, player2: 0 };
-		wrapper = mount(Board, { props: { configuration: configuration } });
+		wrapper = mount(GameBoard, {
+			props: {
+				configuration: configuration,
+				dices: [],
+				yourTurn: false,
+			},
+		});
 		bar = wrapper.find('#bar');
 		expect(bar.findAll('.bar-piece').length).toBe(1);
 		expect(bar.findAll('.bar-piece.player-1').length).toBe(1);
@@ -145,7 +177,13 @@ describe('Custom board configuration tests', () => {
 
 		// Add piece for player 2 only
 		configuration.bar = { player1: 0, player2: 1 };
-		wrapper = mount(Board, { props: { configuration: configuration } });
+		wrapper = mount(GameBoard, {
+			props: {
+				configuration: configuration,
+				dices: [],
+				yourTurn: false,
+			},
+		});
 		bar = wrapper.find('#bar');
 		expect(bar.findAll('.bar-piece').length).toBe(1);
 		expect(bar.findAll('.bar-piece.player-1').length).toBe(0);
@@ -157,21 +195,24 @@ describe('Board component point selection tests', () => {
 	let wrapper: VueWrapper<any>;
 
 	beforeEach(() => {
-		wrapper = mount(Board, {
+		wrapper = mount(GameBoard, {
 			props: {
 				configuration: new BoardConfiguration(),
+				dices: [],
+				yourTurn: true,
 			},
 		});
 	});
 
 	it('Calls movePiece with correct parameters when there are pieces in the bar', () => {
 		wrapper.vm.internalConfig.bar.player1 = 1;
+		wrapper.vm.availableDices = [1];
+
 		const movePieceSpy = vi.spyOn(wrapper.vm, 'movePiece');
-		wrapper.vm.availableDices = [5];
 
-		wrapper.vm.selectPoint(19);
+		wrapper.vm.selectPoint(23);
 
-		expect(movePieceSpy).toHaveBeenCalledWith(24, 19);
+		expect(movePieceSpy).toHaveBeenCalledWith(24, 23);
 	});
 
 	it('Selects correct point when no point is selected yet', () => {
@@ -208,9 +249,11 @@ describe('Board component movePiece method tests', () => {
 	let wrapper: VueWrapper<any>;
 
 	beforeEach(() => {
-		wrapper = mount(Board, {
+		wrapper = mount(GameBoard, {
 			props: {
 				configuration: new BoardConfiguration(),
+				dices: [],
+				yourTurn: true,
 			},
 		});
 	});
