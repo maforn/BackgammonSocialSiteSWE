@@ -38,7 +38,8 @@ test:
     - docker-compose -f docker-compose.yml run test
   after_script:
     - docker-compose -f docker-compose.yml down
-    - ls -l ./coverage
+    - ls -lah /coverage
+    - ls -lah ./
   artifacts:
     paths:
       - coverage
