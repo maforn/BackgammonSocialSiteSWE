@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import axios, { type AxiosError } from 'axios'
+import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 import { logout, registerOrLogin } from '@/services/authService'
 import { useAuthStore } from '@/stores/authStore'
@@ -38,13 +38,8 @@ describe('auth service', () => {
 
     try {
       await registerOrLogin('testuser', 'password', 'test@example.com', true)
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError
-        expect(axiosError.response?.data.details).toBe('Error message')
-      } else {
-        throw error
-      }
+    } catch (error: any) {
+      expect(error.response.data.details).toBe('Error message')
     }
 
     expect(mock.history.post[0].url).toBe('http://localhost:8000/register')

@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import RegisterView from '../views/RegisterView.vue'
-import { isAuthenticated } from '@/services/auth'
+import { isAuthenticated } from '@/services/authService'
 import PlayHumanView from '@/views/PlayHumanView.vue'
 import GameView from '@/views/GameView.vue'
 
