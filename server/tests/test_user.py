@@ -13,3 +13,9 @@ async def test_get_users(client: AsyncClient, token: str):
     response = await client.get("/users", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     assert isinstance(response.json(), list)
+
+@pytest.mark.anyio
+async def test_search_usernames(client: AsyncClient, token: str):
+    response = await client.get("/users/search", params={"query": "test"}, headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)

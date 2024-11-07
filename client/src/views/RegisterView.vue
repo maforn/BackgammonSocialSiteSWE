@@ -143,9 +143,6 @@
             class="text-green-600 font-semibold hover:underline ml-1 register-login-switch"
             @click="toggleRegisterLogin">Register</a></p>
         </form>
-        <button @click="goBack"
-                class="absolute bottom-4 left-4 px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800">Back
-        </button>
       </div>
     </div>
 
@@ -492,10 +489,6 @@ export default defineComponent({
     const showTerms = ref(false)
     const errorMessage = ref('')
 
-    const goBack = () => {
-      window.history.back()
-    }
-
     const toggleTerms = () => {
       showTerms.value = !showTerms.value
     }
@@ -524,7 +517,6 @@ export default defineComponent({
     }
 
     return {
-      goBack,
       showRegisterForm,
       showPassword,
       toggleRegisterLogin,
@@ -537,9 +529,6 @@ export default defineComponent({
       toggleTerms,
       errorMessage
     }
-  },
-  mounted() {
-    console.log('RegisterView mounted')
   }
 })
 </script>

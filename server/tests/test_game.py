@@ -1,14 +1,14 @@
 import pytest
 from httpx import AsyncClient
 
-from routes.game import create_match
+from services.game import create_started_match
 
 from services.database import get_db
 
 
 @pytest.mark.anyio
 async def test_throw_dice(client: AsyncClient, token: str):
-    await create_match("testuser", "a")
+    await create_started_match("testuser", "a")
     old_match = await get_db().matches.find_one({"player1": "testuser"})
     response = await client.get("/throw_dice", headers={"Authorization": f"Bearer {token}"})
     updated_match = await get_db().matches.find_one({"player1": "testuser"})
@@ -19,7 +19,7 @@ async def test_throw_dice(client: AsyncClient, token: str):
 
 @pytest.mark.anyio
 async def test_move_piece(client: AsyncClient, token: str):
-    await create_match("testuser", "a")
+    await create_started_match("testuser", "a")
     await get_db().matches.update_one({"player1": "testuser"}, {"$set": {"dice": [3, 5], "used": []}})
     move_data = {
         "board": {
@@ -37,7 +37,7 @@ async def test_move_piece(client: AsyncClient, token: str):
 
 @pytest.mark.anyio
 async def test_game(client: AsyncClient, token: str):
-    await create_match("testuser", "a")
+    await create_started_match("testuser", "a")
     response = await client.get("/game", headers={"Authorization": f"Bearer {token}"})
     assert "dice" in response.json()
     assert response.status_code == 200
@@ -45,7 +45,7 @@ async def test_game(client: AsyncClient, token: str):
 
 @pytest.mark.anyio
 async def test_move_piece(client: AsyncClient, token: str):
-    await create_match("testuser", "a")
+    await create_started_match("testuser", "a")
     await get_db().matches.update_one({"player1": "testuser"}, {"$set": {"dice": [3, 5], "used": []}})
     move_data = {
         "board": {
