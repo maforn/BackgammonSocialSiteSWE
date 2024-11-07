@@ -4,7 +4,7 @@ from httpx import AsyncClient
 
 @pytest.mark.anyio
 async def test_register_user(client: AsyncClient):
-    response = await client.post("/register", json={
+    response = await client.post("/api/register", json={
         "username": "testuser",
         "email": "testuser@example.com",
         "password": "testpassword"
@@ -14,7 +14,7 @@ async def test_register_user(client: AsyncClient):
 
 @pytest.mark.anyio
 async def test_login_user(client: AsyncClient):
-    response = await client.post("/token", json={
+    response = await client.post("/api/token", json={
         "username": "testuser",
         "password": "testpassword"
     })

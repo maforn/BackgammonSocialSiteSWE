@@ -16,11 +16,11 @@ describe('auth service', () => {
 
   it('should register a user', async () => {
     const mockResponse = { access_token: 'fake_token' }
-    mock.onPost('http://localhost:8000/register').reply(200, mockResponse)
+    mock.onPost('/api/register').reply(200, mockResponse)
 
     await registerOrLogin('testuser', 'password', 'test@example.com', true)
 
-    expect(mock.history.post[0].url).toBe('http://localhost:8000/register')
+    expect(mock.history.post[0].url).toBe('/api/register')
     expect(mock.history.post[0].data).toBe(
       JSON.stringify({
         username: 'testuser',
@@ -34,7 +34,7 @@ describe('auth service', () => {
 
   it('should throw an error', async () => {
     const mockResponse = { details: 'Error message' }
-    mock.onPost('http://localhost:8000/register').reply(422, mockResponse)
+    mock.onPost('/api/register').reply(422, mockResponse)
 
     try {
       await registerOrLogin('testuser', 'password', 'test@example.com', true)
@@ -42,7 +42,7 @@ describe('auth service', () => {
       expect(error.response.data.details).toBe('Error message')
     }
 
-    expect(mock.history.post[0].url).toBe('http://localhost:8000/register')
+    expect(mock.history.post[0].url).toBe('/api/register')
     expect(mock.history.post[0].data).toBe(
       JSON.stringify({
         username: 'testuser',
@@ -54,11 +54,11 @@ describe('auth service', () => {
 
   it('should login a user', async () => {
     const mockResponse = { access_token: 'fake_token' }
-    mock.onPost('http://localhost:8000/token').reply(200, mockResponse)
+    mock.onPost('/api/token').reply(200, mockResponse)
 
     await registerOrLogin('testuser', 'password', undefined, false)
 
-    expect(mock.history.post[0].url).toBe('http://localhost:8000/token')
+    expect(mock.history.post[0].url).toBe('/api/token')
     expect(mock.history.post[0].data).toBe(
       JSON.stringify({
         username: 'testuser',

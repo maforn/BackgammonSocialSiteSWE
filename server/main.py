@@ -1,8 +1,10 @@
 import contextlib
-
 import uvicorn
 from fastapi import FastAPI
+from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from middlewares.auth import AuthMiddleware
@@ -11,8 +13,9 @@ from services.database import create_indexes, initialize_db_connection
 from services.websocket import get_current_user, manager
 
 app = FastAPI()
+api_app = FastAPI()
 
-app.add_middleware(
+api_app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Adjust this to your needs
     allow_credentials=True,
@@ -31,11 +34,25 @@ async def lifespan(app: FastAPI):
 
 
 app.router.lifespan_context = lifespan
-app.add_middleware(AuthMiddleware)
+api_app.add_middleware(AuthMiddleware)
 
-# Include the routers
+# Include the routers in the sub-application
 for router in routers:
-    app.include_router(router)
+    api_app.include_router(router)
+
+# Mount the sub-application under the /api path
+app.mount("/api", api_app)
+
+
+class SPAStaticFiles(StaticFiles):
+    async def get_response(self, path: str, scope):
+        try:
+            return await super().get_response(path, scope)
+        except (HTTPException, StarletteHTTPException) as ex:
+            if ex.status_code == 404:
+                return await super().get_response("index.html", scope)
+            else:
+                raise ex
 
 
 @app.websocket("/ws")
@@ -50,6 +67,8 @@ async def websocket_endpoint(websocket: WebSocket, token: str):
         manager.disconnect(websocket, username)
         await manager.broadcast(f"{username} left the chat")
 
+
+app.mount('/', SPAStaticFiles(directory='../client/dist', html=True), name='client')
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

@@ -8,13 +8,18 @@ from services.database import get_db
 
 @pytest.mark.anyio
 async def test_throw_dice(client: AsyncClient, token: str):
+    response = await client.get("/api/throw_dice", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 400
     await create_started_match("testuser", "a")
     old_match = await get_db().matches.find_one({"player1": "testuser"})
-    response = await client.get("/throw_dice", headers={"Authorization": f"Bearer {token}"})
+    response = await client.get("/api/throw_dice", headers={"Authorization": f"Bearer {token}"})
     updated_match = await get_db().matches.find_one({"player1": "testuser"})
     assert updated_match != old_match
     assert updated_match["dice"] != []
     assert response.status_code == 200
+    response = await client.get("/api/throw_dice", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 400
+
 
 
 @pytest.mark.anyio
@@ -28,7 +33,7 @@ async def test_move_piece(client: AsyncClient, token: str):
         },
         "dice": 3
     }
-    response = await client.post("/move_piece", json=move_data, headers={"Authorization": f"Bearer {token}"})
+    response = await client.post("/api/move_piece", json=move_data, headers={"Authorization": f"Bearer {token}"})
     updated_match = await get_db().matches.find_one({"player1": "testuser"})
     assert updated_match != old_match
     assert updated_match["dice"] != []
@@ -38,7 +43,7 @@ async def test_move_piece(client: AsyncClient, token: str):
 @pytest.mark.anyio
 async def test_game(client: AsyncClient, token: str):
     await create_started_match("testuser", "a")
-    response = await client.get("/game", headers={"Authorization": f"Bearer {token}"})
+    response = await client.get("/api/game", headers={"Authorization": f"Bearer {token}"})
     assert "dice" in response.json()
     assert response.status_code == 200
 
@@ -54,7 +59,7 @@ async def test_move_piece(client: AsyncClient, token: str):
         },
         "dice": 3
     }
-    response = await client.post("/move_piece", json=move_data, headers={"Authorization": f"Bearer {token}"})
+    response = await client.post("/api/move_piece", json=move_data, headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     updated_game = await get_db().matches.find_one({"player1": "testuser"})
     assert updated_game is not None

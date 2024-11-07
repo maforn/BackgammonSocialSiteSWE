@@ -9,7 +9,7 @@ class WebSocketService {
   connect() {
     const authStore = useAuthStore()
     if (authStore.token) {
-      this.socket = new WebSocket(`ws://localhost:8000/ws?token=${authStore.token}`)
+      this.socket = new WebSocket(`${import.meta.env.VITE_WS_URL}/ws?token=${authStore.token}`)
       this.socket.onmessage = this.handleMessage.bind(this)
       this.socket.onerror = () => logout()
     }

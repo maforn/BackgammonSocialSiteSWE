@@ -18,7 +18,6 @@ export const useWsStore = defineStore('ws', {
     connect() {
       const authStore = useAuthStore()
       if (authStore.token) {
-        console.log('Connecting to ws://localhost:8000/ws')
         wsService.connect()
         this.socket = wsService.socket
       }
