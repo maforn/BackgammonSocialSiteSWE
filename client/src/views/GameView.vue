@@ -1,5 +1,6 @@
 <template>
 	<div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center">
+		<div class="background"></div>
 		<div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
 			<div class="flex items-center px-8 py-3 bg-gray-600 text-white rounded-r-full rounded-l-full shadow- font-medium">
 				{{ player1 }} vs {{ player2 }}
@@ -135,6 +136,20 @@ export default defineComponent({
 </script>
 
 <style>
+.background{
+	position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    background-color: #563232;
+    background-image: url("../assets/wood-pattern.png");
+    overflow: hidden;
+    z-index: -101;
+}
+
 .dice-button {
 	aspect-ratio: 1;
 	border-radius: 50%;

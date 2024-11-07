@@ -1,48 +1,49 @@
 <template>
-  <div class="w-screen h-screen flex flex-col pt-20 items-center">
-    <h1 class="text-center text-6xl font-black">SOCIAL BACKGAMMON</h1>
-    <div class="flex flex-col mt-20 w-4/5 sm:w-3/5 md:w-2/5 gap-3 text-lg">
+  <div class="w-screen h-screen flex flex-col pt-20 content-start ml-5">
+    <div class="bg"></div>
+    <div class="flex justify-start"><h1 class="text-left mt-3 text-6xl text-white font-black">SOCIAL<br>BACKGAMMON</h1></div>
+    <div class="flex flex-col mt-20 w-4/5 sm:w-3/5 lg:w-1/5 gap-5 text-lg">
 
       <router-link to="/human"
-                   class="flex justify-end items-center pl-3 py-2 bg-gray-600 text-white rounded-r-full rounded-l-full hover:bg-gray-700 shadow-md">
+                   class="flex justify-end items-center pl-3 py-2 bg-white text-black rounded-r-full rounded-l-full hover:bg-gray-300 shadow-md">
         <div class="circle flex items-center justify-center rounded-full">
-          <v-icon name="io-person" class="text-black" scale="1.5" />
+          <v-icon name="io-person" class="text-white" scale="1.5" />
         </div>
         <div class="w-full h-full flex justify-center items-center pr-8 uppercase font-medium">
           Play human
         </div>
       </router-link>
-      <router-link to="/game"
-                   class="flex justify-end items-center pl-3 py-2 bg-gray-600 text-white rounded-r-full rounded-l-full hover:bg-gray-700 shadow-md">
+      <router-link to="/"
+                   class="flex justify-end items-center pl-3 py-2 bg-white text-black rounded-r-full rounded-l-full hover:bg-gray-300 shadow-md">
         <div class="circle flex items-center justify-center rounded-full">
-          <v-icon name="fa-robot" class="text-black" scale="2" />
+          <v-icon name="fa-robot" class="text-white" scale="1.5" />
         </div>
         <div class="w-full h-full flex justify-center items-center pr-8 uppercase font-medium">
           Play AI
         </div>
       </router-link>
       <router-link to="/"
-                   class="flex justify-end items-center pl-3 py-2 bg-gray-600 text-white rounded-r-full rounded-l-full hover:bg-gray-700 shadow-md">
+                   class="flex justify-end items-center pl-3 py-2 bg-white text-black rounded-r-full rounded-l-full hover:bg-gray-300 shadow-md">
         <div class="circle flex items-center justify-center rounded-full">
-          <v-icon name="io-people" class="text-black" scale="1.5" />
+          <v-icon name="io-trophy-sharp" class="text-white" scale="1.5" />
         </div>
         <div class="w-full h-full flex justify-center items-center pr-8 uppercase font-medium">
           Tournament
         </div>
       </router-link>
       <router-link to="/"
-                   class="flex justify-end items-center pl-3 py-2 bg-gray-600 text-white rounded-r-full rounded-l-full hover:bg-gray-700 shadow-md">
+                   class="flex justify-end items-center pl-3 py-2 bg-white text-black rounded-r-full rounded-l-full hover:bg-gray-300 shadow-md">
         <div class="circle flex items-center justify-center rounded-full">
-          <v-icon name="io-stats-chart" class="text-black" scale="1.5" />
+          <v-icon name="io-stats-chart" class="text-white" scale="1.5" />
         </div>
         <div class="w-full h-full flex justify-center items-center pr-8 uppercase font-medium">
           Leaderboards
         </div>
       </router-link>
         <button to="/" @click.prevent="showInvites"
-              class="flex justify-end items-center pl-3 py-2 bg-gray-600 text-white rounded-r-full rounded-l-full hover:bg-gray-700 shadow-md">
+              class="flex justify-end items-center pl-3 py-2 bg-white text-black rounded-r-full rounded-l-full hover:bg-gray-300 shadow-md">
         <div class="circle flex items-center justify-center rounded-full">
-            <v-icon name="io-mail-sharp" class="text-black" scale="1.5" />
+            <v-icon name="io-mail-sharp" class="text-white" scale="1.5" />
         </div>
         <div class="w-full h-full flex justify-center items-center pr-8 uppercase font-medium">
           Receive invites
@@ -51,25 +52,27 @@
     </div>
 
     <div v-if="showOverlay" class="overlay">
-      <div class="overlay-content">
-        <h2>Pending Invites</h2>
+      <div class="overlay-content relative">
+        <button @click="closeOverlay" class="absolute top-0 right-0 m-2 text-black">
+          <v-icon name="io-close-sharp" scale="1.5" />
+        </button>
+        <h2 class="font-black mb-1 text-lg">PENDING INVITES</h2>
         <ul class="max-h-[80vh] overflow-auto">
-          <li v-for="(invite,index) in invites" :key="index" class="flex flex-col justify-center">
+          <li v-for="(invite,index) in invites" :key="index" class="flex flex-col justify-center items-center">
             <button @click="acceptInvite(index)"
-                    class="flex justify-center items-center pl-3 pe-3 py-2 mt-1 mb-1 bg-gray-400 text-white rounded-r-full rounded-l-full hover:bg-gray-700 shadow-md">
-              Invite from {{ invite.player1 }}
+                    class="flex justify-center items-center pl-3 pe-3 py-2 mt-1 mb-1 w-3/5 bg-gray-400 text-white rounded-r-full rounded-l-full hover:bg-gray-700 shadow-md">
+              Invite from&nbsp;<p class="font-black">{{ invite.player1 }}</p>
             </button>
           </li>
         </ul>
-        <button @click="closeOverlay">Close</button>
       </div>
     </div>
-    <div class="fixed top-0 right-2 p-4 flex justify-end">
-      <div class="flex flex-col justify-evenly me-2">
-        <div class="text-md font-bold text-right">{{username}}</div>
-        <div @click="logout" class="text-sm text-right hover:underline hover:cursor-pointer">Logout</div>
+    <div class="fixed top-0 left-2 p-4 flex justify-start">
+      <v-icon name="fa-user-circle" class="text-white" scale="3" />
+      <div class="flex flex-col justify-evenly ms-2">
+        <div class="text-lg text-white font-bold text-left">{{username}}</div>
+        <div @click="logout" class="text-sm text-left text-white hover:underline hover:cursor-pointer">Logout</div>
       </div>
-      <v-icon name="fa-user-circle" class="text-black" scale="2.5" />
     </div>
   </div>
 </template>
@@ -140,10 +143,29 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.bg {
+  /* Photo credit: FIGIST CO on Unsplash */
+  background-image: url("../assets/bg.jpg");
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  z-index: -1;
+  overflow: hidden;
+  filter: brightness(50%);
+  transform: scaleX(-1);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 .circle {
   width: 3rem; /* 48px */
   aspect-ratio: 1;
-  background-color: white;
+  background-color: black;
   border-radius: 50%;
 }
 
@@ -167,5 +189,6 @@ export default defineComponent({
   width: 80%;
   max-width: 600px;
   text-align: center;
+  position: relative;
 }
 </style>
