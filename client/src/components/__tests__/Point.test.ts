@@ -137,11 +137,15 @@ describe('Point component emits events correctly', () => {
 				configuration: { player1: 1, player2: 1 },
 				upperPoint: false,
 				isEven: false,
-				disabled: false,
+				available: true,
 			},
 		});
 
 		await wrapper.trigger('click');
+
+		console.log(wrapper.emitted());
+		console.log(wrapper.emitted());
+
 		expect(wrapper.emitted('select-point')).toBeTruthy();
 	});
 
@@ -151,7 +155,6 @@ describe('Point component emits events correctly', () => {
 				configuration: { player1: 1, player2: 1 },
 				upperPoint: false,
 				isEven: false,
-				disabled: true,
 			},
 		});
 
