@@ -13,7 +13,7 @@ export const registerOrLogin = async (
 		password: password,
 	};
 	const response = await axios.post(
-		`/api/${isRegistering ? 'register' : 'token'}`,
+		`${import.meta.env.VITE_API_URL}/api/${isRegistering ? 'register' : 'token'}`,
 		isRegistering ? { ...data, email: email } : data,
 	);
 	useAuthStore().setUserData(response.data.access_token, username);
