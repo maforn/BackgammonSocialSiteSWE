@@ -7,7 +7,7 @@
 			</div>
 			<div class="relative">
 				<GameBoard
-					class="shadow-lg"
+					style="box-shadow: 0px 0px 3px black;"
 					:configuration="configuration"
 					:player1="isPlayer1"
 					:dices="availableDices"
@@ -144,8 +144,9 @@ export default defineComponent({
     left: 0;
     margin: 0;
     padding: 0;
-    background-color: #563232;
+    background-color: #7f5353;
     background-image: url("../assets/wood-pattern.png");
+	filter: brightness(70%);
     overflow: hidden;
     z-index: -101;
 }
