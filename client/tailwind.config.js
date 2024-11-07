@@ -4,6 +4,10 @@ export default {
     "./index.html",
     "./src/**/*.{vue,html,js,ts,jsx,tsx}"
   ],
+  safelist: [
+    'bg-red-500',
+    'bg-green-500',
+  ],
   theme: {
     extend: {
       animation: {

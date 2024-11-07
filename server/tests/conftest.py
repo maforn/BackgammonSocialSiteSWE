@@ -1,8 +1,7 @@
 import os
+import pytest
 import sys
 from datetime import timedelta
-
-import pytest
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -36,6 +35,7 @@ async def clear_db():
     db = get_db()
     await db.users.delete_one({"username": "testuser"})
     await db.matches.delete_one({"player1": "testuser"})
+    await db.matches.delete_many({"$or": [{"player1": "testuser"}, {"player2": "testuser"}]})
 
 
 @pytest.fixture(scope="session")

@@ -1,3 +1,6 @@
+from fastapi.security import OAuth2PasswordBearer
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 from typing import List
 
 from pydantic import BaseModel, Field
@@ -58,3 +61,11 @@ class Match(BaseModel):
     used: List[int] = []
     turn: int = 0
     status: str = "pending"
+
+
+class CreateInviteRequest(BaseModel):
+    opponent_username: str
+
+
+class AcceptInviteRequest(BaseModel):
+    invite_id: str

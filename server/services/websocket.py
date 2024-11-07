@@ -36,15 +36,7 @@ class ConnectionManager:
             message_type = json_decoded.get("type")
             message_content = json_decoded.get("msg")
 
-            if message_type == "invite":
-                # TODO: create invites in db
-                recipient = json_decoded.get("recipient")
-                if recipient in self.online_users:
-                    await self.send_personal_message({"type": "invite", "from": username},
-                                                     self.online_users[recipient])
-                else:
-                    await self.send_personal_message({"type": "error", "msg": f"User {recipient} is not online"}, websocket)
-            elif message_type == "msg":
+            if message_type == "msg":
                 recipient = json_decoded.get("recipient")
                 if recipient in self.online_users:
                     await self.send_personal_message({"type": "msg", "msg": f"{username} says: {message_content}"},

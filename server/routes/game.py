@@ -8,19 +8,12 @@ from services.websocket import manager
 router = APIRouter()
 
 
-# DEBUG
-async def create_match(player1: str, player2: str):
-    new_match = Match(player1=player1, player2=player2)
-    match_data = new_match.dict(by_alias=True)
-    await get_db().matches.insert_one(match_data)
-
-
 @router.get("/game")
 async def game(token: str = Depends(oauth2_scheme)):
     user = await get_user_from_token(token)
     current_game = await get_current_game(user.username)
     if not current_game:
-        raise HTTPException(status_code=400, detail="No pending game found")
+        raise HTTPException(status_code=400, detail="No started game found")
     return current_game.dict(by_alias=True)
 
 
@@ -29,7 +22,7 @@ async def move(move_data: dict, token: str = Depends(oauth2_scheme)):
     user = await get_user_from_token(token)
     current_game = await get_current_game(user.username)
 
-    if not current_game or current_game.status != "pending":
+    if not current_game or current_game.status != "started":
         raise HTTPException(status_code=400, detail="No ongoing game found")
 
     if (current_game.turn % 2 == 0 and current_game.player1 != user.username) or \
@@ -64,12 +57,11 @@ async def move(move_data: dict, token: str = Depends(oauth2_scheme)):
 
 @router.get("/throw_dice")
 async def dice_endpoint(token: str = Depends(oauth2_scheme)):
-    await create_match("m", "a")
     user = await get_user_from_token(token)
     current_game = await get_current_game(user.username)
 
-    if not current_game or current_game.status != "pending":
-        raise HTTPException(status_code=400, detail="No pending game found")
+    if not current_game or current_game.status != "started":
+        raise HTTPException(status_code=400, detail="No started game found")
 
     if (current_game.turn % 2 == 0 and current_game.player1 != user.username) or \
             (current_game.turn % 2 == 1 and current_game.player2 != user.username):

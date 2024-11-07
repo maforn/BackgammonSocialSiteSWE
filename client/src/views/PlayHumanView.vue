@@ -40,17 +40,25 @@
           </ul>
         </div>
         <div class="flex justify-center">
-          <button id="invite-btn" :disabled="isButtonDisabled" class="mt-2 px-4 py-2 w-2/3 rounded-xl">Invite</button>
+          <button id="invite-btn" :disabled="isButtonDisabled" @click="sendInvite"
+                  class="mt-2 px-4 py-2 w-2/3 rounded-xl">Invite
+          </button>
         </div>
       </div>
     </div>
+    
+    <button @click="goHome"
+      class="absolute bottom-4 left-4 px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800"><v-icon name="io-home-sharp" />
+    </button>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { debounce } from 'lodash'
+import { sendInviteService } from '@/services/invitesService';
 import axiosInstance from '@/axios'
+import router from '@/router';
 
 export default defineComponent({
   name: 'PlayHumanView',
@@ -88,6 +96,9 @@ export default defineComponent({
         this.showDropdown = false
       }
     }, 300),
+    async goHome() {
+      await router.push({ name: 'home' });
+    },
     async fetchUsers() {
       try {
         const response = await axiosInstance.get('/users/search', {
@@ -108,6 +119,15 @@ export default defineComponent({
       this.searchQuery = user.username
       this.showDropdown = false
       this.isButtonDisabled = false
+    },
+    async sendInvite() {
+      try {
+        await sendInviteService(this.searchQuery)
+        this.searchQuery = ''
+        this.isButtonDisabled = true
+      } catch (error) {
+        console.error('Error sending invite:', error)
+      }
     }
   },
   watch: {
