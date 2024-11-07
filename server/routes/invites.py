@@ -1,6 +1,3 @@
-from types import NoneType
-
-from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from models.board_configuration import CreateInviteRequest, AcceptInviteRequest

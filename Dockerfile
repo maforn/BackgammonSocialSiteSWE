@@ -3,6 +3,7 @@ FROM node:18 AS build
 
 WORKDIR /app
 COPY client/package*.json ./
+COPY server/.env ./
 RUN npm install
 COPY client/ ./
 RUN npm run build
