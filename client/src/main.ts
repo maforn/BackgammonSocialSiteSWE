@@ -8,7 +8,9 @@ import {
   IoPeople,
   IoPerson,
   IoStatsChart,
-  IoTriangleSharp
+  IoTriangleSharp,
+  IoMailSharp,
+  FaUserCircle
 } from 'oh-vue-icons/icons'
 import App from './App.vue'
 import router from './router'
@@ -18,7 +20,7 @@ import piniaPluginPersistedState from 'pinia-plugin-persistedstate'
 
 const app = createApp(App)
 
-addIcons(IoPerson, IoPeople, IoStatsChart, FaRobot, IoTriangleSharp, IoHomeSharp, GiRollingDices)
+addIcons(IoPerson, IoPeople, IoStatsChart, FaRobot, IoTriangleSharp, IoHomeSharp, GiRollingDices, IoMailSharp, FaUserCircle)
 
 app.component('v-icon', OhVueIcon)
 
