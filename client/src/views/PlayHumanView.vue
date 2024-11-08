@@ -6,7 +6,7 @@
 
       <h1 class="text-center text-6xl font-black">PLAY HUMAN</h1>
 
-      <div class="flex flex-col mt-20 w-1/2 sm:p-8 p-6 shadow-md rounded-md gap-3 pl-3 py-2 text-lg bg-gray-600">
+      <div class="flex flex-col mt-20 w-1/2 sm:p-8 p-6 shadow-md rounded-md gap-3 pl-3 py-2 text-sm md:text-lg bg-gray-600">
         <button
           class="flex justify-center items-center pl-3 py-2 bg-green-600 text-white rounded-r-full rounded-l-full hover:bg-green-700 shadow-md">
           RANDOM OPPONENT

@@ -53,11 +53,12 @@
 
     <div v-if="showOverlay" class="overlay">
       <div class="overlay-content relative">
-        <button @click="closeOverlay" class="absolute top-0 right-0 m-2 text-black">
-          <v-icon name="io-close-sharp" scale="1.5" />
+        <button @click="closeOverlay" class="absolute top-0 right-0 m-2 text-black x-receive-invites">
+          <v-icon name="io-close-sharp" scale="1.5"/>
         </button>
         <h2 class="font-black mb-1 text-lg">PENDING INVITES</h2>
-        <ul class="max-h-[80vh] overflow-auto">
+        <p v-if="invites?.length == 0" class="text-sm text-gray-500 italic">No invites.</p>
+        <ul v-else class="max-h-[80vh] overflow-auto">
           <li v-for="(invite,index) in invites" :key="index" class="flex flex-col justify-center items-center">
             <button @click="acceptInvite(index)"
                     class="flex justify-center items-center pl-3 pe-3 py-2 mt-1 mb-1 w-3/5 bg-gray-400 text-white rounded-r-full rounded-l-full hover:bg-gray-700 shadow-md">
@@ -190,5 +191,9 @@ export default defineComponent({
   max-width: 600px;
   text-align: center;
   position: relative;
+}
+
+.x-receive-invites:hover {
+  transform: scale(1.3);
 }
 </style>
