@@ -41,7 +41,7 @@
           Leaderboards
         </div>
       </router-link>
-        <button to="/" @click.prevent="showInvites"
+        <button id="show-invites-btn" to="/" @click.prevent="showInvites"
               class="flex justify-end items-center pl-3 py-2 bg-white text-black rounded-r-full rounded-l-full hover:bg-gray-300 shadow-md">
         <div class="circle flex items-center justify-center rounded-full">
             <v-icon name="io-mail-sharp" class="text-white" scale="1.5" />
@@ -73,7 +73,7 @@
       <v-icon name="fa-user-circle" class="text-white" scale="3" />
       <div class="flex flex-col justify-evenly ms-2">
         <div class="text-lg text-white font-bold text-left">{{username}}</div>
-        <div @click="logout" class="text-sm text-left text-white hover:underline hover:cursor-pointer">Logout</div>
+        <div id="logout" @click="logout" class="text-sm text-left text-white hover:underline hover:cursor-pointer">Logout</div>
       </div>
     </div>
   </div>
@@ -85,7 +85,6 @@ import { logout as authLogout } from '@/services/authService'
 import { acceptInviteService, receiveInviteService as receiveInvites } from '@/services/invitesService'
 import { useRouter } from 'vue-router'
 import { useGameStore } from '@/stores/gameStore';
-import { useWsStore } from '@/stores/wsStore';
 import { isAxiosError } from 'axios';
 import axiosInstance from '@/axios';
 
@@ -118,7 +117,7 @@ export default defineComponent({
 
     const logout = () => {
       authLogout()
-      router.push('register')
+      router?.push('register')
     }
 
     const debugReceiveInvites = async () => {

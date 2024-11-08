@@ -500,7 +500,7 @@ export default defineComponent({
       try {
         errorMessage.value = ''
         await registerOrLogin(name.value, password.value, email.value, showRegisterForm.value)
-        await router.push({ name: 'home' }); // Navigate to home
+        await router?.push({ name: 'home' }); // Navigate to home
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
           errorMessage.value = error.response.data.detail
