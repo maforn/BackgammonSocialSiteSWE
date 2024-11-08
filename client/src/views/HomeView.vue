@@ -4,13 +4,14 @@
     <div class="flex justify-center lg:justify-start"><h1 class="text-center mt-3 text-5xl sm:text-6xl lg:text-left text-white font-black">SOCIAL<br>BACKGAMMON</h1></div>
     <div class="flex flex-col mt-10 w-4/5 sm:w-3/5 lg:w-1/5 gap-4 text-lg content-center">
 
-      <router-link to="/human"
+      <router-link :to="hasSuspendedGame ? '/game' : '/human'"
                    class="flex justify-end items-center pl-3 py-2 bg-white text-black rounded-r-full rounded-l-full hover:bg-gray-300 shadow-md">
         <div class="circle flex items-center justify-center rounded-full">
-          <v-icon name="io-person" class="text-white" scale="1.5" />
+          <v-icon v-if="hasSuspendedGame" name="io-hourglass-sharp" class="text-white" scale="1.5" />
+          <v-icon v-else name="io-person" class="text-white" scale="1.5" />
         </div>
         <div class="w-full h-full flex justify-center items-center pr-8 uppercase font-medium">
-          Play human
+          {{hasSuspendedGame ? "RESUME MATCH" : "NEW MATCH"}}
         </div>
       </router-link>
       <router-link to="/"
@@ -83,6 +84,9 @@ import { defineComponent, onMounted, ref } from 'vue'
 import { logout as authLogout } from '@/services/authService'
 import { acceptInviteService, receiveInviteService as receiveInvites } from '@/services/invitesService'
 import { useRouter } from 'vue-router'
+import { useGameStore } from '@/stores/gameStore';
+import { useWsStore } from '@/stores/wsStore';
+import { isAxiosError } from 'axios';
 import axiosInstance from '@/axios';
 
 interface Invite {
@@ -93,15 +97,24 @@ interface Invite {
 export default defineComponent({
   name: 'HomeView',
   setup() {
-    const username = ref('')
     const router = useRouter()
+    
+    const username = ref('')
     const showOverlay = ref(false)
-
-    const invites = ref<Invite[]>([])
+    const invites = ref<Invite[]>([]);
+    const hasSuspendedGame = ref(true)
 
     onMounted(async() => {
       username.value = await axiosInstance.get('/users/me').then(res => res.data.username)
     })
+
+		useGameStore()
+			.fetchGame()
+			.catch(error => {
+				if (isAxiosError(error)) {
+					hasSuspendedGame.value = false
+				}
+			});
 
     const logout = () => {
       authLogout()
@@ -138,7 +151,7 @@ export default defineComponent({
       showOverlay.value = false
     }
 
-    return { logout, debugReceiveInvites, showInvites, closeOverlay, showOverlay, invites, acceptInvite, username }
+    return { logout, debugReceiveInvites, showInvites, closeOverlay, showOverlay, invites, acceptInvite, username, hasSuspendedGame }
   }
 })
 </script>
