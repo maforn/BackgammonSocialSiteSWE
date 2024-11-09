@@ -1,38 +1,39 @@
 <template>
   <div class="play-human-view">
+    <div class="bg"></div>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <div class="w-screen h-screen flex flex-col pt-20 items-center">
 
-      <h1 class="text-center text-6xl font-black">PLAY HUMAN</h1>
+      <h1 class="text-center text-6xl font-black text-white">PLAY HUMAN</h1>
 
-      <div class="flex flex-col mt-20 w-1/2 sm:p-8 p-6 shadow-md rounded-md gap-3 pl-3 py-2 text-lg bg-gray-600">
+      <div class="flex flex-col mt-20 w-1/2 sm:p-8 p-6 shadow-md rounded-md gap-3 pl-3 py-2 text-sm md:text-lg bg-white">
         <button
           class="flex justify-center items-center pl-3 py-2 bg-green-600 text-white rounded-r-full rounded-l-full hover:bg-green-700 shadow-md">
           RANDOM OPPONENT
         </button>
 
         <div class="flex justify-evenly items-center pl-3 py-2">
-          <hr>
-          <span class="text-white text-sm">OR</span>
-          <hr>
+          <hr style="border-color: black;">
+          <span class="text-black text-sm">OR</span>
+          <hr style="border-color: black;">
         </div>
 
         <div
-          class="relative flex justify-center items-center pl-3 pe-3 py-2 bg-white text-gray-800 rounded-r-full rounded-l-full shadow-md">
+          class="relative flex justify-center items-center pl-3 pe-3 py-2 bg-gray-900 text-white rounded-r-full rounded-l-full shadow-sm">
           <input
             v-model="searchQuery"
             @input="onInput"
-            class="flex-grow pl-3 py-2 bg-transparent outline-none"
+            class="flex-grow pl-3 py-2 outline-none bg-gray-900 text-white"
             placeholder="Search by username..."
           />
-          <i class="fas fa-search text-gray-800 pr-3"></i>
+          <i class="fas fa-search text-white pr-3"></i>
           <ul v-if="showDropdown"
               class="absolute top-full left-0 w-full bg-white border border-gray-300 rounded-md mt-1 z-10">
             <li
               v-for="user in filteredUsers"
               :key="user.username"
-              class="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+              class="px-4 py-2 hover:bg-gray-200 cursor-pointer text-black"
               @click="selectUser(user)"
             >
               {{ user.username }}
@@ -141,6 +142,25 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.bg {
+  /* Photo credit: FIGIST CO on Unsplash */
+  background-image: url("../assets/bg.jpg");
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  z-index: -1;
+  overflow: hidden;
+  filter: brightness(50%);
+  transform: scaleX(-1);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 hr {
   width: 30%;
   height: 1px;
