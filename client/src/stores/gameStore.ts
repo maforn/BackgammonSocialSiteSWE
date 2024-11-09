@@ -52,6 +52,11 @@ export const useGameStore = defineStore('game', {
 				this.setMatch(data);
 			});
 		},
+		checkSuspendedGameExists() {
+			return axiosInstance.get('/game/exists').then(response => {
+				return response.data;
+			});
+		},
 		setMatch(data: GameData) {
 			this.player1 = data.player1;
 			this.player2 = data.player2;
