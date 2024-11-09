@@ -1,44 +1,85 @@
-import { mount } from '@vue/test-utils'
-import { describe, it, expect, vi } from 'vitest'
-import RegisterView from '@/views/RegisterView.vue'
-
-vi.mock('vue-router', () => ({
-    useRouter: vi.fn()
-}))
-
-vi.mock('@/services/authService', () => ({
-    registerOrLogin: vi.fn()
-}))
+import { mount, VueWrapper } from '@vue/test-utils';
+import { afterEach, describe, expect, it, beforeEach } from 'vitest';
+import RegisterView from '@/views/RegisterView.vue';
+import axios from 'axios';
+import MockAdapter from 'axios-mock-adapter';
+import { createPinia, setActivePinia } from 'pinia';
+import { createRouter, createWebHistory } from 'vue-router';
 
 describe('RegisterView.vue', () => {
-    const mockRouter = {
-        push: vi.fn()
-    }
+	let mock: MockAdapter;
+	const pinia = createPinia();
+	let wrapper: VueWrapper<any>;
 
-    it('renders the component correctly', () => {
-        const wrapper = mount(RegisterView)
-        expect(wrapper.exists()).toBe(true)
-        expect(wrapper.find('h3').text()).toBe('Sign in')
-    })
+	const router = createRouter({
+		history: createWebHistory(),
+		routes: [
+			{ path: '/', component: RegisterView },
+			{ path: '/home', name: 'home', component: { template: '<div>Home</div>' } },
+		],
+	});
 
-    it('toggles between register and login forms', async () => {
-        const wrapper = mount(RegisterView)
-        expect(wrapper.find('h3').text()).toBe('Sign in')
-        await wrapper.find('.register-login-switch').trigger('click')
-        expect(wrapper.find('h3').text()).toBe('Register')
-    })
+	beforeEach(() => {
+		mock = new MockAdapter(axios);
+		setActivePinia(pinia);
+		wrapper = mount(RegisterView, {
+			global: {
+				plugins: [pinia, router],
+			},
+		});
+	});
 
-    it('shows and hides terms and conditions', async () => {
-        const wrapper = mount(RegisterView)
-        expect(wrapper.find('.fixed').exists()).toBe(false)
-        await wrapper.vm.toggleTerms()
-        expect(wrapper.find('.fixed').exists()).toBe(true)
-    })
+	afterEach(() => {
+		mock.reset();
+	});
 
-    it('calls registerUser method on form submit', async () => {
-        const wrapper = mount(RegisterView)
-        const registerUserSpy = vi.spyOn(wrapper.vm, 'registerUser')
-        await wrapper.find('form').trigger('submit.prevent')
-        expect(registerUserSpy).toHaveBeenCalled()
-    })
-})
+	it('should navigate to /home on successful registration', async () => {
+		wrapper.vm.name = 'test-name';
+		wrapper.vm.password = 'test-password';
+		wrapper.vm.email = 'test-email';
+		wrapper.vm.showRegisterForm = true;
+
+		const mockResponse = { access_token: 'fake_token' };
+		mock.onPost('http://localhost:8000/register').reply(200, mockResponse);
+
+		await wrapper.vm.registerUser();
+
+		expect(wrapper.vm.$router.currentRoute.value.name).toBe('home');
+	});
+
+	it('should set errorMessage on failed registration', async () => {
+		wrapper.vm.name = 'test-name';
+		wrapper.vm.password = 'test-password';
+		wrapper.vm.email = 'test-email';
+		wrapper.vm.showRegisterForm = true;
+
+		const mockErrorResponse = { detail: 'Registration failed' };
+		mock.onPost('http://localhost:8000/register').reply(400, mockErrorResponse);
+
+		await wrapper.vm.registerUser();
+
+		expect(wrapper.vm.errorMessage).toBe('Registration failed');
+	});
+
+	it('toggles should work correctly', () => {
+		wrapper.vm.showTerms = false;
+		wrapper.vm.toggleTerms();
+		expect(wrapper.vm.showTerms).toBe(true);
+		wrapper.vm.toggleTerms();
+		expect(wrapper.vm.showTerms).toBe(false);
+
+		wrapper.vm.showRegisterForm = false;
+		wrapper.vm.toggleRegisterLogin();
+		expect(wrapper.vm.showRegisterForm).toBe(true);
+		expect(wrapper.vm.showPassword).toBe(false);
+		wrapper.vm.toggleRegisterLogin();
+		expect(wrapper.vm.showRegisterForm).toBe(false);
+		expect(wrapper.vm.showPassword).toBe(false);
+
+		wrapper.vm.showPassword = false;
+		wrapper.vm.togglePasswordVisibility();
+		expect(wrapper.vm.showPassword).toBe(true);
+		wrapper.vm.togglePasswordVisibility();
+		expect(wrapper.vm.showPassword).toBe(false);
+	});
+});

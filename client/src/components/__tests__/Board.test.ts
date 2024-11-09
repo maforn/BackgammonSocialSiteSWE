@@ -204,6 +204,23 @@ describe('Board component point selection tests', () => {
 		});
 	});
 
+	it('Points call selectPoint method when clicked', async () => {
+		wrapper.vm.availableDices = [1];
+		wrapper.vm.internalConfig.points[0] = new PointConfiguration(1, 0);
+		for (let i = 1; i < wrapper.vm.internalConfig.points.length; i++) {
+			wrapper.vm.internalConfig.points[i] = new PointConfiguration(0, wrapper.vm.internalConfig.points[i].player2);
+		}
+
+		const selectPointSpy = vi.spyOn(wrapper.vm, 'selectPoint');
+
+		const points = wrapper.findAllComponents({ name: 'PointComponent' });
+		for (const point of points) {
+			await point.trigger('click');
+		}
+
+		expect(selectPointSpy).toHaveBeenCalledTimes(1);
+	});
+
 	it('Calls movePiece with correct parameters when there are pieces in the bar', () => {
 		wrapper.vm.internalConfig.bar.player1 = 1;
 		wrapper.vm.availableDices = [1];
@@ -227,6 +244,7 @@ describe('Board component point selection tests', () => {
 	it('Calls movePiece with correct parameters when a point is already selected', () => {
 		wrapper.vm.internalConfig.bar.player1 = 0;
 		wrapper.vm.srcPointIndex = 5;
+		wrapper.vm.internalConfig.points[5].player1 = 1;
 		wrapper.vm.availableDices = [2];
 		wrapper.vm.internalConfig.points[3].player2 = 0;
 
@@ -333,5 +351,35 @@ describe('Board component movePiece method tests', () => {
 		wrapper.vm.internalConfig.points[23] = new PointConfiguration(1, 0);
 		wrapper.vm.internalConfig.points[22] = new PointConfiguration(0, 0);
 		expect(() => wrapper.vm.movePiece(23, 22)).toThrow('The destination point is not allowed');
+	});
+});
+
+describe('Board swap test', () => {
+	it('swaps players correctly', () => {
+		const initialBoard = new BoardConfiguration();
+		const wrapper = mount(GameBoard, {
+			props: {
+				configuration: initialBoard,
+				dices: [],
+				yourTurn: true,
+			},
+		});
+
+		const initialPlayer1 = initialBoard.points.map(point => point.player1);
+		const initialPlayer2 = initialBoard.points.map(point => point.player2);
+		const initialBar1 = initialBoard.bar.player1;
+		const initialBar2 = initialBoard.bar.player2;
+
+		const swappedBoard = wrapper.vm.swapPlayers(initialBoard);
+
+		const swappedPlayer1 = swappedBoard.points.map(point => point.player1);
+		const swappedPlayer2 = swappedBoard.points.map(point => point.player2);
+		const swappedBar1 = swappedBoard.bar.player1;
+		const swappedBar2 = swappedBoard.bar.player2;
+
+		expect(initialPlayer1).toEqual(swappedPlayer2.reverse());
+		expect(initialPlayer2).toEqual(swappedPlayer1.reverse());
+		expect(initialBar1).toBe(swappedBar2);
+		expect(initialBar2).toBe(swappedBar1);
 	});
 });

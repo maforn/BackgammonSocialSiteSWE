@@ -221,7 +221,7 @@ export default defineComponent({
 		 * Swaps the players on the board. Changes the perspective of the board.
 		 * @param board Board configuration to swap the players on.
 		 */
-		swapPlayers(board: BoardConfiguration) {
+		swapPlayers(board: BoardConfiguration): BoardConfiguration {
 			const newBoard = JSON.parse(JSON.stringify(board));
 
 			// Swap pieces on each point

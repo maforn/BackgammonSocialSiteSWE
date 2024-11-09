@@ -20,20 +20,19 @@ interface GameData {
 }
 
 interface GameData {
-  player1: string;
-  player2: string;
-  board_configuration: {
-    points: PointConfiguration[];
-    bar: PointConfiguration;
-  };
-  dice: number[];
-  used: number[];
-  turn: number;
-  created_at: string;
-  updated_at: string;
-  status: string;
+	player1: string;
+	player2: string;
+	board_configuration: {
+		points: PointConfiguration[];
+		bar: PointConfiguration;
+	};
+	dice: number[];
+	used: number[];
+	turn: number;
+	created_at: string;
+	updated_at: string;
+	status: string;
 }
-
 
 export const useGameStore = defineStore('game', {
 	state: (): Match => ({
@@ -66,6 +65,18 @@ export const useGameStore = defineStore('game', {
 			this.created_at = new Date(data.created_at);
 			this.updated_at = new Date(data.updated_at);
 			this.status = data.status;
+		},
+		getMatch(): Match {
+			return new Match(
+				this.player1,
+				this.player2,
+				this.boardConfiguration,
+				this.dice,
+				this.turn,
+				new Date(this.created_at),
+				new Date(this.updated_at),
+				this.status,
+			);
 		},
 		setDice(die1: number, die2: number) {
 			this.dice.roll = [die1, die2];

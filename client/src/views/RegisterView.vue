@@ -483,6 +483,10 @@ export default defineComponent({
     const showTerms = ref(false)
     const errorMessage = ref('')
 
+    const goBack = () => {
+      window.history.back()
+    }
+
     const toggleTerms = () => {
       showTerms.value = !showTerms.value
     }
@@ -511,6 +515,7 @@ export default defineComponent({
     }
 
     return {
+      goBack,
       showRegisterForm,
       showPassword,
       toggleRegisterLogin,
@@ -523,6 +528,9 @@ export default defineComponent({
       toggleTerms,
       errorMessage
     }
+  },
+  mounted() {
+    console.log('RegisterView mounted')
   }
 })
 </script>
