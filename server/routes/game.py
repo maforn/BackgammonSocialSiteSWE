@@ -16,6 +16,14 @@ async def game(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=400, detail="No started game found")
     return current_game.dict(by_alias=True)
 
+@router.get("/game/exists")
+async def gameExists(token: str = Depends(oauth2_scheme)):
+    user = await get_user_from_token(token)
+    current_game = await get_current_game(user.username)
+    if not current_game:
+        return False
+    return True
+
 
 @router.post("/move_piece")
 async def move(move_data: dict, token: str = Depends(oauth2_scheme)):
