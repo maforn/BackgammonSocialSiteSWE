@@ -108,11 +108,9 @@ export default defineComponent({
     })
 
 		useGameStore()
-			.fetchGame()
-			.catch(error => {
-				if (isAxiosError(error)) {
-					hasSuspendedGame.value = false
-				}
+			.checkSuspendedGameExists()
+			.then((exists) => {
+        hasSuspendedGame.value = exists
 			});
 
     const logout = () => {
