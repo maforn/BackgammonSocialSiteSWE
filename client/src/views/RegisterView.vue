@@ -10,7 +10,7 @@
               <p v-if="!showRegisterForm" class="text-sm mt-4 text-gray-800">Don't have an account? <a @click.prevent="toggleRegisterLogin" class="text-green-600 font-semibold hover:underline ml-1 whitespace-nowrap register-login-switch">Register</a></p>
               <p v-else class="text-sm mt-4 text-gray-800">Already have an account? <a @click.prevent="toggleRegisterLogin" class="text-green-600 font-semibold hover:underline ml-1 whitespace-nowrap register-login-switch">Login</a></p>
             </div>
-  
+
             <div class="space-y-6">
               <div>
                 <label class="text-sm mb-2 block">Username
@@ -92,16 +92,16 @@
               </div>
               <p class="mb-3 text-red-500">{{ errorMessage }}</p>
             </div>
-  
+
             <div class="!mt-8">
               <input v-if="showRegisterForm" type="submit"
                      class="w-full py-2.5 px-4 text-sm tracking-wider font-semibold rounded-md bg-green-600 hover:bg-green-700 text-white focus:outline-none"
                      value="Create Account" />
-  
+
               <input v-else type="submit"
                      value="Login"
                      class="w-full py-2.5 px-4 text-sm tracking-wider font-semibold rounded-md bg-green-600 hover:bg-green-700 text-white focus:outline-none" />
-            </div>           
+            </div>
 
             <div class="space-x-6 flex justify-center mt-6">
               <button type="button"
@@ -556,8 +556,8 @@ export default defineComponent({
 }
 
 #box{
-  background-color: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(70%); 
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(70%);
 }
 
 .register-login-switch:hover {
