@@ -1,0 +1,23 @@
+Checklist S1
+Prodotto online: Manca
+User Stories (Taiga/Text)
+	Manca burndown chart iniziale e finale
+	Provate a rivedere alcune US, alcune sono troppo fini e non sono "vere" US story
+	esempio #67 e #82: questi in realtà sono un SUBTASK di una us che potrebbe chiamarsi
+	"voglio poter giocare una partita regolare" - questa dà valore all'utente, le prime due no. 
+	Rivedete le US dal punto di vista dell'utente (@PO)
+	Inoltre forse non sono sufficienti a coprire l'intera app.
+
+Documenti: nulla di aggiornato
+Sprint preparation: 
+	Manca tutto, backlog, DOD, DOR
+Sprint review: 
+	S1:Manca
+Retrospective: 
+	S1: Ok, stile starfish. Manca forse un maggiore chiarimento sulle azioni da intraprendere, indicando
+	anche chi se ne dovrà occupare
+Git Stats/tag? Manca tag sprint0
+	Un po' di squilibrio nei contributi git
+Testing/Coverage: Presenti test sia in front che back (questi ultimi sembrano tutti integration test, voluto?)
+SQ: Presente, non configurato
+Devops: SI
