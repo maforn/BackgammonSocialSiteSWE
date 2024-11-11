@@ -17,7 +17,7 @@ async def game(token: str = Depends(oauth2_scheme)):
     return current_game.dict(by_alias=True)
 
 @router.get("/game/exists")
-async def gameExists(token: str = Depends(oauth2_scheme)):
+async def game_exists(token: str = Depends(oauth2_scheme)):
     user = await get_user_from_token(token)
     current_game = await get_current_game(user.username)
     if not current_game:
