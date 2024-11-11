@@ -59,7 +59,7 @@
     </div>
 
     <button @click="goHome"
-      class="absolute bottom-4 left-4 px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800"><v-icon name="io-home-sharp" />
+      class="absolute top-4 left-4 px-4 py-2 bg-white text-black rounded-md hover:bg-gray-400"><v-icon name="io-home-sharp" />
     </button>
   </div>
 </template>

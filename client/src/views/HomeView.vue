@@ -138,7 +138,7 @@ export default defineComponent({
       const invite_id = invites.value[index]._id
       try {
         await acceptInviteService(invite_id)
-        console.log('Accepted invite.')
+        hasSuspendedGame.value = true
       } catch (error) {
         console.error('Error in acceptInvite:', error)
       } finally {

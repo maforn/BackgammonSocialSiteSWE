@@ -17,21 +17,7 @@ interface GameData {
 	created_at: string;
 	updated_at: string;
 	status: string;
-}
-
-interface GameData {
-	player1: string;
-	player2: string;
-	board_configuration: {
-		points: PointConfiguration[];
-		bar: PointConfiguration;
-	};
-	dice: number[];
-	used: number[];
-	turn: number;
-	created_at: string;
-	updated_at: string;
-	status: string;
+	first_to: number;
 }
 
 export const useGameStore = defineStore('game', {
@@ -44,6 +30,9 @@ export const useGameStore = defineStore('game', {
 		created_at: new Date(),
 		updated_at: new Date(),
 		status: 'pending',
+		first_to: 0,
+		winsP1: 0,
+		winsP2: 0,
 	}),
 	actions: {
 		fetchGame() {
@@ -70,6 +59,7 @@ export const useGameStore = defineStore('game', {
 			this.created_at = new Date(data.created_at);
 			this.updated_at = new Date(data.updated_at);
 			this.status = data.status;
+			this.first_to = data.first_to;
 		},
 		getMatch(): Match {
 			return new Match(
@@ -81,6 +71,7 @@ export const useGameStore = defineStore('game', {
 				new Date(this.created_at),
 				new Date(this.updated_at),
 				this.status,
+				this.first_to,
 			);
 		},
 		setDice(die1: number, die2: number) {
