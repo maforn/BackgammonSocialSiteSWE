@@ -66,5 +66,5 @@ pytest -v
 
 To generate an HTML code coverage report that can be opened in the browser:
 ```sh
-pytest --cov --cov-report=html:coverage_re
+pytest --cov --cov-report=xml:coverage.xml --cov-config=.coveragerc
 ```

@@ -1,2 +1,4 @@
-[run]
+[coverage:run]
+relative_files = False
+source = ./
 omit = tests/*
