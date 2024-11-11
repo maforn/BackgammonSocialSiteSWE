@@ -42,8 +42,8 @@
         </div>
 
         <div class="flex justify-center items-center pl-3 py-2 gap-x-2">
-          <label for="firstTo">Matches to win:</label>
-          <select name="firstTo" id="firstTo" v-model="firstTo">
+          <label for="first_to">Matches to win:</label>
+          <select name="first_to" id="first_to" v-model="first_to">
             <option value="1">1</option>
             <option value="3">3</option>
             <option value="5">5</option>
@@ -78,14 +78,14 @@ export default defineComponent({
     users: Array<{ id: number; username: string }>;
     showDropdown: boolean;
     isButtonDisabled: boolean,
-    firstTo: number
+    first_to: number
   } {
     return {
       searchQuery: '',
       users: [] as Array<{ id: number; username: string }>,
       showDropdown: false,
       isButtonDisabled: true,
-      firstTo: 1
+      first_to: 1
     }
   },
   computed: {
@@ -135,7 +135,7 @@ export default defineComponent({
     },
     async sendInvite() {
       try {
-        await sendInviteService(this.searchQuery, this.firstTo)
+        await sendInviteService(this.searchQuery, this.first_to)
         this.searchQuery = ''
         this.isButtonDisabled = true
       } catch (error) {
