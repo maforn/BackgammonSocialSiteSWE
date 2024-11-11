@@ -16,7 +16,8 @@ db = None
 
 def initialize_db_connection():
     global client, db
-    client = AsyncIOMotorClient(config.MONGODB_URL)
+    # client = AsyncIOMotorClient(config.MONGODB_URL)
+    client = AsyncIOMotorClient("mongodb://0.0.0.0:27017")
     db = client.backgammon
     print("Database connection initialized.")
 

@@ -1,12 +1,13 @@
 <template>
 	<div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center">
+		<div class="background"></div>
 		<div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
 			<div class="flex items-center px-8 py-3 bg-gray-600 text-white rounded-r-full rounded-l-full shadow- font-medium">
 				{{ player1 }} vs {{ player2 }}
 			</div>
 			<div class="relative">
 				<GameBoard
-					class="shadow-lg"
+					style="box-shadow: 0px 0px 3px black;"
 					:configuration="configuration"
 					:player1="isPlayer1"
 					:dices="availableDices"
@@ -135,6 +136,21 @@ export default defineComponent({
 </script>
 
 <style>
+.background{
+	position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    background-color: #7f5353;
+    background-image: url("../assets/wood-pattern.png");
+	filter: brightness(70%);
+    overflow: hidden;
+    z-index: -101;
+}
+
 .dice-button {
 	aspect-ratio: 1;
 	border-radius: 50%;
