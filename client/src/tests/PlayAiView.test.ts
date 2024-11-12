@@ -27,7 +27,6 @@ describe('PlayAiView.vue', () => {
     })
 
     it('calls startGame method and navigates to game', async () => {
-        sendInviteService.mockResolvedValueOnce()
         const wrapper = mount(PlayAiView)
         await wrapper.find('#start-btn').trigger('click')
         expect(sendInviteService).toHaveBeenCalledWith('ai_easy', 1)
