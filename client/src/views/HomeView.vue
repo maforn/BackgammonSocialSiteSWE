@@ -21,7 +21,7 @@
           <v-icon name="fa-robot" class="text-white" scale="1.5" />
         </div>
         <div class="w-full h-full flex justify-center items-center pr-8 uppercase font-medium">
-          Play AI
+          PLAY AI
         </div>
       </router-link>
       <router-link to="/"
@@ -30,7 +30,7 @@
           <v-icon name="io-trophy-sharp" class="text-white" scale="1.5" />
         </div>
         <div class="w-full h-full flex justify-center items-center pr-8 uppercase font-medium">
-          Tournament
+          TOURNAMENT
         </div>
       </router-link>
       <router-link to="/"
@@ -39,7 +39,7 @@
           <v-icon name="io-stats-chart" class="text-white" scale="1.5" />
         </div>
         <div class="w-full h-full flex justify-center items-center pr-8 uppercase font-medium">
-          Leaderboards
+          LEADERBOARDS
         </div>
       </router-link>
         <button id="show-invites-btn" to="/" @click.prevent="showInvites"
@@ -48,7 +48,7 @@
             <v-icon name="io-mail-sharp" class="text-white" scale="1.5" />
         </div>
         <div class="w-full h-full flex justify-center items-center pr-8 uppercase font-medium">
-          Receive invites
+          RECEIVE INVITES
         </div>
       </button>
     </div>

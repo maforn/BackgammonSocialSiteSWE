@@ -45,7 +45,7 @@
         </div>
       </div>
   
-      <button @click="goHome"
+      <button @click="goHome" id="home-btn"
         class="absolute top-4 left-4 px-4 py-2 bg-white text-black rounded-md hover:bg-gray-400"><v-icon name="io-home-sharp" />
       </button>
     </div>
