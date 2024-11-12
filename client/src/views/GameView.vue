@@ -1,13 +1,13 @@
 <template>
-	<div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 p-4 justify-center">
+	<div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center">
 		<div class="background"></div>
 		<div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
 			<div class="flex items-center px-8 py-3 bg-gray-600 text-white rounded-r-full rounded-l-full shadow- font-medium">
-				{{ player1 }} vs {{ player2 }}
+				{{ player1 }} ({{ winsP1 }}/{{ first_to }}) vs {{ player2 }} ({{ winsP2 }}/{{ first_to }})
 			</div>
 			<div class="relative">
 				<GameBoard
-					style="box-shadow: 0px 0px 3px black"
+					style="box-shadow: 0px 0px 3px black;"
 					:configuration="configuration"
 					:player1="isPlayer1"
 					:dices="availableDices"
@@ -78,7 +78,7 @@ export default defineComponent({
 	},
 	setup() {
 		const gameStore = useGameStore();
-		const { turn, dice, boardConfiguration, player1, player2 } = storeToRefs(gameStore);
+		const { turn, dice, boardConfiguration, player1, player2, first_to, winsP1, winsP2 } = storeToRefs(gameStore);
 
 		useGameStore()
 			.fetchGame()
@@ -100,6 +100,9 @@ export default defineComponent({
 			player1,
 			player2,
 			turn,
+			first_to,
+			winsP1,
+			winsP2
 		};
 	},
 	methods: {
@@ -136,19 +139,19 @@ export default defineComponent({
 </script>
 
 <style>
-.background {
+.background{
 	position: fixed;
-	width: 100vw;
-	height: 100vh;
-	top: 0;
-	left: 0;
-	margin: 0;
-	padding: 0;
-	background-color: #7f5353;
-	background-image: url('../assets/wood-pattern.png');
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    background-color: #7f5353;
+    background-image: url("../assets/wood-pattern.png");
 	filter: brightness(70%);
-	overflow: hidden;
-	z-index: -101;
+    overflow: hidden;
+    z-index: -101;
 }
 
 .dice-button {

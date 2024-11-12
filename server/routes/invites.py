@@ -26,9 +26,10 @@ async def receive_invite_endpoint(token: str = Depends(oauth2_scheme)):
 async def create_invite_endpoint(request: CreateInviteRequest, token: str = Depends(oauth2_scheme)):
     user = await get_user_from_token(token)
     opponent_username = request.opponent_username
+    first_to = request.first_to
     if user.username == opponent_username:
         raise HTTPException(status_code=400, detail="You cannot invite yourself")
-    await create_invite(user.username, opponent_username)
+    await create_invite(user.username, opponent_username, first_to)
     websocket = await manager.get_user(opponent_username)
     if websocket:
         await manager.send_personal_message({"type": "invite", "from": user.username}, websocket)

@@ -21,6 +21,6 @@ async def get_current_game(username: str) -> Match:
 
 
 async def create_started_match(player1: str, player2: str):
-    new_match = Match(player1=player1, player2=player2, status="started")
+    new_match = Match(player1=player1, player2=player2, status="started", first_to=1)
     match_data = new_match.dict(by_alias=True)
     await get_db().matches.insert_one(match_data)

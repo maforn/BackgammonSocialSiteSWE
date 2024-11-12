@@ -5,6 +5,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { useGameStore } from '@/stores/gameStore';
 import { BoardConfiguration } from '@/models/BoardConfiguration';
 import { Match } from '@/models/Match';
+import { first } from 'lodash';
 
 // client/src/stores/gameStore.test.ts
 
@@ -29,6 +30,7 @@ describe('game store', () => {
 			now,
 			now,
 			'active',
+			1
 		);
 		gameStore.setMatch({
 			player1: 'Alice',
@@ -40,6 +42,7 @@ describe('game store', () => {
 			created_at: now.toISOString(),
 			updated_at: now.toISOString(),
 			status: 'active',
+			first_to: 1,
 		});
 
 		expect(gameStore.getMatch()).toEqual(match);
@@ -88,6 +91,7 @@ describe('game store', () => {
 			created_at: '2023-01-01T00:00:00Z',
 			updated_at: '2023-01-01T00:00:00Z',
 			status: 'active',
+			first_to: 1,
 		};
 
 		gameStore.setMatch(data);
