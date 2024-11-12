@@ -4,12 +4,6 @@ stages:
   - sonarqube-check
   - sonarqube-vulnerability-report
 
-variables:
-  # Paths for coverage and test directories
-  COVERAGE_PATH: "coverage/server-coverage.xml"
-  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
-  GIT_DEPTH: "0"  # Ensures all branches are fetched
-
 # Services for Docker-in-Docker (dind) and MongoDB
 services:
   - name: docker:dind
@@ -34,49 +28,32 @@ build:
     - docker-compose -f docker-compose.yml build --parallel
     - docker-compose up mongodb -d
 
-# Test stage - runs both Python and JavaScript tests without Docker
+
 test:
   stage: test
-  image: python:3.9  # Using Python 3.9 as base image for this stage
-  services:
-    - docker:dind # MongoDB service for testing
-  before_script:
-    # Set up Python environment
-    - python -m venv venv
-    - source venv/bin/activate
-    - pip install -r server/requirements.txt  # Install Python dependencies
-    - pip install pytest pytest-cov  # Install test dependencies with coverage
-
-    # Set up Node.js environment for frontend tests
-    - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-    - source ~/.nvm/nvm.sh
-    - nvm install 18  # Install Node.js via NVM
-    - nvm use 18
-    - npm install --prefix client  # Install Node.js dependencies in the client directory
-    - npm install -g vitest  # Install Vitest globally for frontend testing
-
+  variables:
+    SECURE_FILES_DOWNLOAD_PATH: './server/'
   script:
-    # Run Python tests with coverage
-    - pytest --cov=server --cov-report=xml:$COVERAGE_PATH server/tests
+    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
+    - docker-compose -f docker-compose.yml up --build test
+  after_script:
+    - docker-compose -f docker-compose.yml down
 
-    # Run frontend tests with Vitest, generating coverage report
-    - npm run test:coverage --prefix client  # Ensure "test:coverage" is set in package.json for vitest
 
-  artifacts:
-    paths:
-      - coverage/  # Store all coverage reports in the coverage folder
-    expire_in: 1 hour
-
-# SonarQube analysis stage
 sonarqube-check:
   stage: sonarqube-check
-  image: sonarsource/sonar-scanner-cli:5.0
+  image: 
+    name: sonarsource/sonar-scanner-cli:5.0
+    entrypoint: [""]
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
   cache:
     key: "${CI_JOB_NAME}"
     paths:
       - .sonar/cache
-  script:
-    - sonar-scanner -Dsonar.projectKey=SWE-team-3-backgammon-social-site -Dsonar.qualitygate.wait=true -Dsonar.tests=server/tests,client/src/components/__tests__ -Dsonar.python.coverage.reportPaths=$COVERAGE_PATH
+  script: 
+    - sonar-scanner
   allow_failure: true
   only:
     - merge_requests
@@ -84,7 +61,6 @@ sonarqube-check:
     - main
     - develop
 
-# Vulnerability report stage
 sonarqube-vulnerability-report:
   stage: sonarqube-vulnerability-report
   script:
