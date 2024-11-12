@@ -45,8 +45,8 @@
           <label for="first_to">Matches to win:</label>
           <select name="first_to" id="first_to" v-model="first_to">
             <option value="1">1</option>
+            <option value="2">2</option>
             <option value="3">3</option>
-            <option value="5">5</option>
           </select>
         </div>
 
