@@ -1,4 +1,5 @@
 import random
+from typing import Dict
 
 from models.board_configuration import Match
 from services.database import get_db
@@ -26,14 +27,14 @@ async def create_started_match(player1: str, player2: str, first_to: int=1):
     await get_db().matches.insert_one(match_data)
 
 
-def check_win_condition(match :Match) -> int:
-    player1_counter = match.board_configuration.bar.player1
-    player2_counter = match.board_configuration.bar.player2
+def check_win_condition(match :Match):
+    player1_counter = match.board_configuration.get("bar").get("player1")
+    player2_counter = match.board_configuration.get("bar").get("player2")
 
-    for point in match.board_configuration.points:
-        player1_counter += point.player1
-        player2_counter += point.player2
+    for point in match.board_configuration.get("points"):
+        player1_counter += point.get("player1")
+        player2_counter += point.get("player2")
         if player1_counter > 0 and player2_counter>0:
-            return 0
+            return {"winner": 0}
 
-    return 1 if player1_counter == 0 else 2
+    return {"winner": 1} if player1_counter == 0 else {"winner": 2}

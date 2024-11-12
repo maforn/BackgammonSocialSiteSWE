@@ -51,7 +51,8 @@ async def move(move_data: dict, token: str = Depends(oauth2_scheme)):
         current_game.available = []
 
     winner = check_win_condition(current_game)
-    if winner != 0:
+    winner = winner.get("winner")
+    if winner!= 0:
         current_game.status = "player_"+str(winner)+"_won"
         await get_db().matches.update_one({"_id": current_game.id}, {"$set": {"status": "player_"+str(winner)+"_won"}})
         websocket_player1 = await manager.get_user(current_game.player1)
@@ -60,6 +61,7 @@ async def move(move_data: dict, token: str = Depends(oauth2_scheme)):
         websocket_player2 = await manager.get_user(current_game.player2)
         if websocket_player2:
             await manager.send_personal_message({"type": "game_over", "winner": winner}, websocket_player2)
+
 
     await get_db().matches.update_one({"_id": current_game.id}, {
         "$set": {"board_configuration": current_game.board_configuration, "available": current_game.available,
