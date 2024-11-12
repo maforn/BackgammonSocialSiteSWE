@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from services.auth import oauth2_scheme, get_user_from_token
 from services.database import get_db
-from services.game import throw_dice, get_current_game
+from services.game import throw_dice, get_current_game, check_win_condition
 from services.websocket import manager
 
 router = APIRouter()
@@ -49,6 +49,17 @@ async def move(move_data: dict, token: str = Depends(oauth2_scheme)):
         current_game.turn += 1
         current_game.dice = []
         current_game.available = []
+
+    winner = check_win_condition(current_game)
+    if winner != 0:
+        current_game.status = "player_"+str(winner)+"_won"
+        await get_db().matches.update_one({"_id": current_game.id}, {"$set": {"status": "player_"+str(winner)+"_won"}})
+        websocket_player1 = await manager.get_user(current_game.player1)
+        if websocket_player1:
+            await manager.send_personal_message({"type": "game_over", "winner": winner}, websocket_player1)
+        websocket_player2 = await manager.get_user(current_game.player2)
+        if websocket_player2:
+            await manager.send_personal_message({"type": "game_over", "winner": winner}, websocket_player2)
 
     await get_db().matches.update_one({"_id": current_game.id}, {
         "$set": {"board_configuration": current_game.board_configuration, "available": current_game.available,
