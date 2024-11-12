@@ -1,10 +1,11 @@
 import pytest
 from httpx import AsyncClient
+from services.game import create_started_match
 from services.database import get_db
 from services.game import create_started_match
-
 from tests.conftest import clear_matches
-
+from models.board_configuration import Match, BoardConfiguration, PointConfiguration
+from services.game import check_win_condition
 
 @pytest.mark.anyio
 async def test_throw_dice(client: AsyncClient, token: str):
@@ -78,3 +79,72 @@ async def test_send_in_game_message(client: AsyncClient, token: str):
     await create_started_match("testuser", "a")
     response = await client.post("/game/message", json=message_data, headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
+
+
+@pytest.mark.anyio
+def test_check_win_condition_no_winner():
+    board_configuration = BoardConfiguration(
+        points=[PointConfiguration(player1=1, player2=1) for _ in range(24)],
+        bar=PointConfiguration(player1=0, player2=0)
+    )
+    match = Match(
+        player1="player1",
+        player2="player2",
+        board_configuration=board_configuration,
+        dice=[],
+        used=[],
+        turn=0,
+        status="started"
+    )
+    assert check_win_condition(match) == 0
+
+@pytest.mark.anyio
+def test_check_win_condition_player1_wins():
+    board_configuration = BoardConfiguration(
+        points=[PointConfiguration(player1=0, player2=1) for _ in range(24)],
+        bar=PointConfiguration(player1=0, player2=0)
+    )
+    match = Match(
+        player1="player1",
+        player2="player2",
+        board_configuration=board_configuration,
+        dice=[],
+        used=[],
+        turn=0,
+        status="started"
+    )
+    assert check_win_condition(match) == 1
+
+@pytest.mark.anyio
+def test_check_win_condition_player2_wins():
+    board_configuration = BoardConfiguration(
+        points=[PointConfiguration(player1=1, player2=0) for _ in range(24)],
+        bar=PointConfiguration(player1=0, player2=0)
+    )
+    match = Match(
+        player1="player1",
+        player2="player2",
+        board_configuration=board_configuration,
+        dice=[],
+        used=[],
+        turn=0,
+        status="started"
+    )
+    assert check_win_condition(match) == 2
+
+@pytest.mark.anyio
+def test_check_win_condition_both_players_have_pieces():
+    board_configuration = BoardConfiguration(
+        points=[PointConfiguration(player1=1, player2=1) for _ in range(24)],
+        bar=PointConfiguration(player1=1, player2=1)
+    )
+    match = Match(
+        player1="player1",
+        player2="player2",
+        board_configuration=board_configuration,
+        dice=[],
+        used=[],
+        turn=0,
+        status="started"
+    )
+    assert check_win_condition(match) == 0
