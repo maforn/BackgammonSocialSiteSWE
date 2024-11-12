@@ -1,5 +1,5 @@
 <template>
-	<div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center p-4">
+	<div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center">
 		<div class="background"></div>
 		<div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
       <div class="flex justify-center w-full gap-4">
@@ -110,7 +110,7 @@ export default defineComponent({
   },
   setup() {
     const gameStore = useGameStore()
-    const { turn, dice, boardConfiguration, player1, player2, first_to, winsP1, winsP2 } = storeToRefs(gameStore)
+    const { turn, dice, boardConfiguration, player1, player2, first_to, winsP1, winsP2, status } = storeToRefs(gameStore)
 
     const wsStore = useWsStore()
     const { messages } = storeToRefs(wsStore)
@@ -137,49 +137,59 @@ export default defineComponent({
       }
     }
 
-    return {
-      configuration: computed(() => boardConfiguration.value),
-      isPlayer1: computed(() => username === player1.value),
-      thrower: computed(() => (turn.value % 2) + 1),
-      diceResult: {
-        die1: computed(() => (dice.value.roll.length > 0 ? dice.value.roll[0] : null)),
-        die2: computed(() => (dice.value.roll.length > 1 ? dice.value.roll[1] : null))
-      },
+		return {
+			configuration: computed(() => boardConfiguration.value),
+			isPlayer1: computed(() => useAuthStore().username === player1.value),
+			thrower: computed(() => (turn.value % 2) + 1),
+			diceResult: {
+				die1: computed(() => (dice.value.roll.length > 0 ? dice.value.roll[0] : null)),
+				die2: computed(() => (dice.value.roll.length > 1 ? dice.value.roll[1] : null)),
+			},
       availableDice: computed(() => dice.value.available),
-      player1,
-      player2,
-      turn,
+			player1,
+			player2,
+			turn,
       first_to,
       winsP1,
       winsP2,
       messages,
       username,
       preformedMessages,
-      sendPreformedMessage
-    }
-  },
-  methods: {
-    async diceThrow() {
-      try {
-        await axiosInstance.get('/throw_dice')
-      } catch (error) {
-        if (isAxiosError(error)) {
-          useWsStore().addError(error?.response?.data?.detail)
+      sendPreformedMessage,
+      status,
+      gameOver: computed(() => status.value === 'player_1_won' || status.value === 'player_2_won'),
+      winnerMessage: computed(() => {
+        if (status.value === 'player_1_won') {
+          return `${player1.value} has won the game!`;
+        } else if (status.value === 'player_2_won') {
+          return `${player2.value} has won the game!`;
         }
-      }
-    },
-    movePiece(board: BoardConfiguration, dice: number) {
-			axiosInstance
-				.post('/move_piece', {
-					board,
-					dice,
-				})
-				.catch(error => {
-					if (isAxiosError(error)) {
-						useWsStore().addError(error?.response?.data?.detail);
-					}
-				});
+        return '';
+      }),
+		};
+	},
+	methods: {
+		async diceThrow() {
+			try {
+				await axiosInstance.get('/throw_dice');
+			} catch (error) {
+				if (isAxiosError(error)) {
+					useWsStore().addError(error?.response?.data?.detail);
+				}
+			}
 		},
+    movePiece(board: BoardConfiguration, dice: number) {
+      axiosInstance
+        .post('/move_piece', {
+          board,
+          dice,
+        })
+        .catch(error => {
+          if (isAxiosError(error)) {
+            useWsStore().addError(error?.response?.data?.detail);
+          }
+        });
+    },
   },
   computed: {
 		isYourTurn(): boolean {
@@ -276,6 +286,15 @@ export default defineComponent({
 
 .player-turn-2 {
   background-color: #5656d3;
+}
+
+.game-over {
+  background-color: #ffcc00;
+  color: #000;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 1.5rem;
 }
 
 .icon-scale {
