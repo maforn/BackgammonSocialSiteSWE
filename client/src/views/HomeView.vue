@@ -15,7 +15,7 @@
           {{hasSuspendedGame ? "RESUME MATCH" : "NEW MATCH"}}
         </div>
       </router-link>
-      <router-link to="/"
+      <router-link to="/ai"
                    class="flex justify-end items-center pl-3 py-2 bg-white text-black rounded-r-full rounded-l-full hover:bg-gray-300 shadow-md">
         <div class="circle flex items-center justify-center rounded-full">
           <v-icon name="fa-robot" class="text-white" scale="1.5" />
