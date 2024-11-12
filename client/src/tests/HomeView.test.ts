@@ -28,7 +28,7 @@ describe('HomeView.vue', () => {
 	it('renders correctly', () => {
 		const wrapper = mount(HomeView);
 		expect(wrapper.exists()).toBe(true);
-		expect(wrapper.find('h1').text()).toBe('SOCIALBACKGAMMON');
+		expect(wrapper.find('h1').text()).toBe('SOCIAL BACKGAMMON');
 	});
 
 	it('shows invites overlay when button is clicked', async () => {
