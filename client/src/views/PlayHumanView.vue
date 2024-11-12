@@ -41,14 +41,18 @@
           </ul>
         </div>
 
-        <div class="flex justify-center items-center pl-3 py-2 gap-x-2">
-          <label for="first_to">Matches to win:</label>
-          <select name="first_to" id="first_to" v-model="first_to">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-          </select>
-        </div>
+        <div class="flex justify-center items-center pl-3 py-2 gap-x-2 self-center">
+          <label for="first_to" class="text-right">Matches to win</label>
+          <div class="container">
+              <div class="select">
+                  <select name="first_to" id="first_to" v-model="first_to">
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                  </select>
+              </div>
+          </div>
+      </div>
 
         <div class="flex justify-center">
           <button id="invite-btn" :disabled="isButtonDisabled" @click="sendInvite"
@@ -194,7 +198,41 @@ hr {
   background-color: #15803d;
 }
 
-option:hover, select:hover {
+select {
+  appearance: none;
+  outline: 10px red;
+  border: 0;
+  box-shadow: none;
+  flex: 1;
+  padding: 0 1em;
+  color: #fff;
+  background-color: #2c3e50;
+  background-image: none;
   cursor: pointer;
+}
+
+.select {
+  position: relative;
+  display: flex;
+  width: 7em;
+  height: 3em;
+  border-radius: .25em;
+  overflow: hidden;
+}
+
+/* Arrow */
+.select::after {
+  content: '\25BC';
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 1em;
+  background-color: #34495e;
+  transition: .25s all ease;
+  pointer-events: none;
+}
+
+.select:hover::after {
+  color: #16a34a;
 }
 </style>

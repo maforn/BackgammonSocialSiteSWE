@@ -74,14 +74,12 @@
         await router.push({ name: 'home' });
       },
       async startGame() {
-        console.log('Starting with difficulty:', this.difficulty, 'and first to:', this.first_to);
-        /*
         try {
-            await sendInviteService("`ai_${this.difficulty}`", this.first_to) //TODO: Implement server-side logic to create match against ai_easy, ai_medium, ai_hard
+            await sendInviteService("ai_"+this.difficulty, this.first_to)
+            await router.push({ name: 'game' });
         } catch (error) {
             console.error('Error sending invite:', error)
         }
-        */
       }
     },
     watch: {

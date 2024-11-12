@@ -12,10 +12,10 @@
           <v-icon v-else name="io-person" class="text-white" scale="1.5" />
         </div>
         <div class="w-full h-full flex justify-center items-center pr-8 uppercase font-medium">
-          {{hasSuspendedGame ? "RESUME MATCH" : "NEW MATCH"}}
+          {{hasSuspendedGame ? "RESUME MATCH" : "PLAY HUMAN"}}
         </div>
       </router-link>
-      <router-link to="/ai"
+      <router-link v-if="!hasSuspendedGame" to="/ai"
                    class="flex justify-end items-center pl-3 py-2 bg-white text-black rounded-r-full rounded-l-full hover:bg-gray-300 shadow-md">
         <div class="circle flex items-center justify-center rounded-full">
           <v-icon name="fa-robot" class="text-white" scale="1.5" />

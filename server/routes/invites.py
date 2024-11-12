@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from models.board_configuration import CreateInviteRequest, AcceptInviteRequest
+from services.ai import is_ai
 from services.auth import oauth2_scheme, get_user_from_token
 from services.database import get_db
+from services.game import create_started_match
 from services.invite import create_invite, get_pending_invites, accept_invite
 from services.websocket import manager
 
@@ -27,12 +29,18 @@ async def create_invite_endpoint(request: CreateInviteRequest, token: str = Depe
     user = await get_user_from_token(token)
     opponent_username = request.opponent_username
     first_to = request.first_to
+
     if user.username == opponent_username:
         raise HTTPException(status_code=400, detail="You cannot invite yourself")
-    await create_invite(user.username, opponent_username, first_to)
-    websocket = await manager.get_user(opponent_username)
-    if websocket:
-        await manager.send_personal_message({"type": "invite", "from": user.username}, websocket)
+    
+    if is_ai(opponent_username):
+        await create_started_match(user.username, opponent_username, first_to)
+    
+    else:
+        await create_invite(user.username, opponent_username, first_to)
+        websocket = await manager.get_user(opponent_username)
+        if websocket:
+            await manager.send_personal_message({"type": "invite", "from": user.username}, websocket)
     return JSONResponse(status_code=200, content={"message": "Invite created successfully"})
 
 
