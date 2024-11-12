@@ -1,18 +1,20 @@
 <template>
 	<div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 p-4 justify-center">
 		<div class="background"></div>
-		<div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
-			<div class="flex items-center px-8 py-3 bg-gray-600 text-white rounded-r-full rounded-l-full shadow- font-medium">
+		<div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4">
+			<div
+				class="flex items-center px-8 py-3 bg-gray-600 text-white rounded-r-full rounded-l-full shadow-md font-medium"
+			>
 				{{ player1 }} vs {{ player2 }}
 			</div>
 			<div class="relative">
 				<GameBoard
-					style="box-shadow: 0px 0px 3px black"
 					:configuration="configuration"
 					:player1="isPlayer1"
 					:dices="availableDices"
 					:your-turn="isYourTurn"
 					:used="usedDice"
+					@movePiece="movePiece"
 				/>
 				<button v-if="!diceThrown && isYourTurn" class="dice-button p-2 w-10 sm:w-16 lg:w-20" @click.stop="diceThrow">
 					<v-icon name="gi-rolling-dices" width="100%" height="100%" />
@@ -69,6 +71,7 @@ import { useGameStore } from '@/stores/gameStore';
 import { useWsStore } from '@/stores/wsStore';
 import { useAuthStore } from '@/stores/authStore';
 import { isAxiosError } from 'axios';
+import type { BoardConfiguration } from '@/models/BoardConfiguration';
 
 export default defineComponent({
 	name: 'GameView',
@@ -111,6 +114,18 @@ export default defineComponent({
 					useWsStore().addError(error?.response?.data?.detail);
 				}
 			}
+		},
+		movePiece(board: BoardConfiguration, dice: number) {
+			axiosInstance
+				.post('/move_piece', {
+					board,
+					dice,
+				})
+				.catch(error => {
+					if (isAxiosError(error)) {
+						useWsStore().addError(error?.response?.data?.detail);
+					}
+				});
 		},
 	},
 	computed: {
