@@ -1,13 +1,14 @@
 import pytest
 from httpx import AsyncClient
-
+from services.database import get_db
 from services.game import create_started_match
 
-from services.database import get_db
+from tests.conftest import clear_matches
 
 
 @pytest.mark.anyio
 async def test_throw_dice(client: AsyncClient, token: str):
+    await clear_matches()
     await create_started_match("testuser", "a")
     old_match = await get_db().matches.find_one({"player1": "testuser"})
     response = await client.get("/throw_dice", headers={"Authorization": f"Bearer {token}"})
@@ -19,6 +20,7 @@ async def test_throw_dice(client: AsyncClient, token: str):
 
 @pytest.mark.anyio
 async def test_move_piece(client: AsyncClient, token: str):
+    await clear_matches()
     await create_started_match("testuser", "a")
     await get_db().matches.update_one({"player1": "testuser"}, {"$set": {"dice": [3, 5], "used": []}})
     move_data = {
@@ -37,6 +39,7 @@ async def test_move_piece(client: AsyncClient, token: str):
 
 @pytest.mark.anyio
 async def test_game(client: AsyncClient, token: str):
+    await clear_matches()
     await create_started_match("testuser", "a")
     response = await client.get("/game", headers={"Authorization": f"Bearer {token}"})
     assert "dice" in response.json()
@@ -45,6 +48,7 @@ async def test_game(client: AsyncClient, token: str):
 
 @pytest.mark.anyio
 async def test_move_piece(client: AsyncClient, token: str):
+    await clear_matches()
     await create_started_match("testuser", "a")
     await get_db().matches.update_one({"player1": "testuser"}, {"$set": {"dice": [3, 5], "used": []}})
     move_data = {
@@ -60,3 +64,17 @@ async def test_move_piece(client: AsyncClient, token: str):
     assert updated_game is not None
     assert updated_game["board_configuration"]["points"][3]["player1"] == 1
     assert updated_game["used"] == [3]
+
+
+@pytest.mark.anyio
+async def test_send_in_game_message(client: AsyncClient, token: str):
+    await clear_matches()
+    message_data = {
+        "message": "Test message",
+    }
+    response = await client.post("/game/message", json=message_data, headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 400
+
+    await create_started_match("testuser", "a")
+    response = await client.post("/game/message", json=message_data, headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200

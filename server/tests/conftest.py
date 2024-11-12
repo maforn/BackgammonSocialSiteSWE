@@ -37,6 +37,10 @@ async def clear_db():
     await db.matches.delete_one({"player1": "testuser"})
     await db.matches.delete_many({"$or": [{"player1": "testuser"}, {"player2": "testuser"}]})
 
+async def clear_matches():
+    db = get_db()
+    await db.matches.delete_many({})
+
 
 @pytest.fixture(scope="session")
 def token():
