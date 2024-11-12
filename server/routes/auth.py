@@ -4,6 +4,7 @@ from core.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from fastapi import APIRouter, HTTPException, status
 from models.user import UserCreate, LoginRequest
 from pymongo.errors import DuplicateKeyError
+from services.ai import is_ai
 from services.auth import get_password_hash, authenticate_user, create_access_token
 from services.database import default_id
 from services.database import get_db
@@ -16,6 +17,13 @@ async def register_user(user: UserCreate):
     user_dict = user.dict(by_alias=True)
     user_dict["password"] = get_password_hash(user_dict.pop("password"))
     user_dict["_id"] = default_id()
+    
+    if is_ai(user_dict["username"]):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username cannot be 'ai_easy', 'ai_medium', or 'ai_hard'.",
+        )
+    
     try:
         await get_db().users.insert_one(user_dict)
     except DuplicateKeyError:
