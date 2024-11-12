@@ -1,8 +1,9 @@
 <template>
-  <div class="w-screen h-screen flex flex-col pt-20 content-center items-center lg:pl-5 lg:items-start">
+  <div class="w-screen h-screen flex flex-col pt-20 content-center items-center lg:pl-5">
     <div class="bg"></div>
-    <div class="flex justify-center lg:justify-start"><h1 class="text-center mt-3 text-5xl sm:text-6xl lg:text-left text-white font-black">SOCIAL<br>BACKGAMMON</h1></div>
-    <div class="flex flex-col mt-10 w-4/5 sm:w-3/5 lg:w-1/5 gap-4 text-lg content-center">
+    <div class="flex justify-center">
+      <h1 class="text-center mt-3 text-5xl sm:text-6xl lg:text-left text-white font-black">SOCIAL BACKGAMMON</h1></div>
+    <div class="flex flex-col mt-20 w-4/5 sm:w-3/5 lg:w-2/5 gap-4 text-lg content-center">
 
       <router-link :to="hasSuspendedGame ? '/game' : '/human'"
                    class="flex justify-end items-center pl-3 py-2 bg-white text-black rounded-r-full rounded-l-full hover:bg-gray-300 shadow-md">
