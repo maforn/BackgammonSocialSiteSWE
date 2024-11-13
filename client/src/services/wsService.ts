@@ -52,7 +52,9 @@ class WebSocketService {
 			case 'move_piece':
 				useGameStore().setMatch(data.match);
 				break;
-			// Add more cases as needed
+      case 'in_game_msg':
+				this.showInGameMessage(data.msg, data.user);
+				break;
 			default:
 				console.warn('Unknown event:', data.type);
 		}
@@ -64,6 +66,10 @@ class WebSocketService {
 
 	private showMessage(msg: string) {
 		useWsStore().addNotification(msg);
+	}
+
+	private showInGameMessage(msg: string, user: string) {
+		useWsStore().addMessage(msg, user);
 	}
 }
 
