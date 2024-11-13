@@ -39,7 +39,7 @@
 
             <div class="flex justify-center">
                 <button id="start-btn" @click="startGame"
-                    class="mt-2 px-4 py-2 w-full rounded-xl">START
+                    class="mt-2 px-4 py-2 w-full rounded-xl" :disabled="hasSuspendedGame">START
                 </button>
             </div>
         </div>
@@ -52,19 +52,31 @@
   </template>
   
   <script lang="ts">
-  import { defineComponent } from 'vue'
+  import { defineComponent, ref } from 'vue'
   import { sendInviteService } from '@/services/invitesService';
+  import { useGameStore } from '@/stores/gameStore';
   import router from '@/router';
   
   export default defineComponent({
     name: 'PlayHumanView',
+    setup() {
+      const hasSuspendedGame = ref(true)
+
+      useGameStore()
+			.checkSuspendedGameExists()
+			.then((exists) => {
+        hasSuspendedGame.value = exists
+			});
+    },
     data(): {
       first_to: number,
-      difficulty: string
+      difficulty: string,
+      hasSuspendedGame: boolean
     } {
       return {
         first_to: 1,
-        difficulty: 'easy'
+        difficulty: 'easy',
+        hasSuspendedGame: true
       }
     },
     computed: {
@@ -107,13 +119,19 @@
     background-size: cover;
   }
   
+  #start-btn:hover {
+    background-color: #15803d;
+  }
+
+  #start-btn:disabled {
+    background-color: #14532d;
+    color: gray;
+    cursor: not-allowed;
+  }
+  
   #start-btn {
     background-color: #16a34a;
     color: white;
-  }
-  
-  #start-btn:hover {
-    background-color: #15803d;
   }
 
   select {

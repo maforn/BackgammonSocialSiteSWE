@@ -33,14 +33,22 @@ async def create_invite_endpoint(request: CreateInviteRequest, token: str = Depe
     if user.username == opponent_username:
         raise HTTPException(status_code=400, detail="You cannot invite yourself")
     
-    if is_ai(opponent_username):
-        await create_started_match(user.username, opponent_username, first_to)
-    
     else:
-        await create_invite(user.username, opponent_username, first_to)
-        websocket = await manager.get_user(opponent_username)
-        if websocket:
-            await manager.send_personal_message({"type": "invite", "from": user.username}, websocket)
+        already_started_matches = await get_db().matches.find(
+            {"$or": [{"player1": user.username}, {"player2": user.username}], "status": "started"}).to_list(length=None)
+        
+        if len(already_started_matches) > 0:
+            raise HTTPException(status_code=400, detail="You are already playing a match")
+        
+        elif is_ai(opponent_username):
+            await create_started_match(user.username, opponent_username, first_to)
+
+        else: 
+            await create_invite(user.username, opponent_username, first_to)
+            websocket = await manager.get_user(opponent_username)
+            if websocket:
+                await manager.send_personal_message({"type": "invite", "from": user.username}, websocket)
+                
     return JSONResponse(status_code=200, content={"message": "Invite created successfully"})
 
 

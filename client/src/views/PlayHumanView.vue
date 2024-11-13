@@ -55,7 +55,7 @@
       </div>
 
         <div class="flex justify-center">
-          <button id="invite-btn" :disabled="isButtonDisabled" @click="sendInvite"
+          <button id="invite-btn" :disabled="hasSelectedOpponent || hasSuspendedGame" @click="sendInvite"
                   class="mt-2 px-4 py-2 w-2/3 rounded-xl">Invite
           </button>
         </div>
@@ -69,27 +69,39 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { debounce } from 'lodash'
 import { sendInviteService } from '@/services/invitesService';
+import { useGameStore } from '@/stores/gameStore';
 import axiosInstance from '@/axios'
 import router from '@/router';
 
 export default defineComponent({
   name: 'PlayHumanView',
+  setup() {
+      const hasSuspendedGame = ref(true)
+
+      useGameStore()
+			.checkSuspendedGameExists()
+			.then((exists) => {
+        hasSuspendedGame.value = exists
+			});
+    },
   data(): {
     searchQuery: string;
     users: Array<{ id: number; username: string }>;
     showDropdown: boolean;
-    isButtonDisabled: boolean,
-    first_to: number
+    hasSelectedOpponent: boolean,
+    first_to: number,
+    hasSuspendedGame: boolean,
   } {
     return {
       searchQuery: '',
       users: [] as Array<{ id: number; username: string }>,
       showDropdown: false,
-      isButtonDisabled: true,
-      first_to: 1
+      hasSelectedOpponent: true,
+      first_to: 1,
+      hasSuspendedGame: true
     }
   },
   computed: {
@@ -104,9 +116,9 @@ export default defineComponent({
       searchQuery: string;
       fetchUsers: () => void;
       showDropdown: boolean;
-      isButtonDisabled: boolean
+      hasSelectedOpponent: boolean
     }) {
-      this.isButtonDisabled = true
+      this.hasSelectedOpponent = true
       if (this.searchQuery.length >= 2) {
         this.fetchUsers()
       } else {
@@ -135,13 +147,13 @@ export default defineComponent({
     selectUser(user: { username: string }) {
       this.searchQuery = user.username
       this.showDropdown = false
-      this.isButtonDisabled = false
+      this.hasSelectedOpponent = false
     },
     async sendInvite() {
       try {
         await sendInviteService(this.searchQuery, this.first_to)
         this.searchQuery = ''
-        this.isButtonDisabled = true
+        this.hasSelectedOpponent = true
       } catch (error) {
         console.error('Error sending invite:', error)
       }
