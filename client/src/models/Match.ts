@@ -6,7 +6,7 @@ export class Match {
 	boardConfiguration: BoardConfiguration;
 	dice: {
 		roll: number[];
-		used: number[];
+		available: number[];
 	};
 	turn: number;
 	created_at: Date;
@@ -20,12 +20,12 @@ export class Match {
 		player1: string,
 		player2: string,
 		boardConfiguration: BoardConfiguration,
-		dice: { roll: number[]; used: number[] },
+		dice: { roll: number[]; available: number[] },
 		turn: number,
 		created_at: Date,
 		updated_at: Date,
 		status: string,
-		first_to: number
+		first_to: number,
 	) {
 		this.player1 = player1;
 		this.player2 = player2;

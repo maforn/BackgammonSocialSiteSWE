@@ -9,9 +9,8 @@
 				<GameBoard
 					:configuration="configuration"
 					:player1="isPlayer1"
-					:dices="availableDices"
+					:dice="availableDice"
 					:your-turn="isYourTurn"
-					:used="usedDice"
 					@movePiece="movePiece"
 				/>
 				<button v-if="!diceThrown && isYourTurn" class="dice-button p-2 w-10 sm:w-16 lg:w-20" @click.stop="diceThrow">
@@ -51,8 +50,7 @@
 						isYourTurn ? 'player-turn-1' : 'player-turn-2',
 					]"
 				>
-					<DieFace v-if="diceResult.die1.value !== null" :value="diceResult.die1.value" />
-					<DieFace v-if="diceResult.die2.value !== null" :value="diceResult.die2.value" />
+					<DieFace v-for="(die, index) in availableDice" :key="index" :value="die" />
 				</div>
 			</div>
 		</div>
@@ -97,13 +95,13 @@ export default defineComponent({
 				die1: computed(() => (dice.value.roll.length > 0 ? dice.value.roll[0] : null)),
 				die2: computed(() => (dice.value.roll.length > 1 ? dice.value.roll[1] : null)),
 			},
-			usedDice: computed(() => dice.value.used),
+			availableDice: computed(() => dice.value.available),
 			player1,
 			player2,
 			turn,
 			first_to,
 			winsP1,
-			winsP2
+			winsP2,
 		};
 	},
 	methods: {
@@ -140,31 +138,24 @@ export default defineComponent({
 		diceThrown(): boolean {
 			return this.diceResult.die1.value !== null && this.diceResult.die2.value !== null;
 		},
-		availableDices(): number[] {
-			return this.diceResult.die1.value === this.diceResult.die2.value
-				? [this.diceResult.die1.value!, this.diceResult.die2.value!]
-				: [this.diceResult.die1.value!, this.diceResult.die2.value!].filter(
-						dice => dice && !this.usedDice.includes(dice),
-					);
-		},
 	},
 });
 </script>
 
 <style>
-.background{
+.background {
 	position: fixed;
-    width: 100vw;
-    height: 100vh;
-    top: 0;
-    left: 0;
-    margin: 0;
-    padding: 0;
-    background-color: #7f5353;
-    background-image: url("../assets/wood-pattern.png");
+	width: 100vw;
+	height: 100vh;
+	top: 0;
+	left: 0;
+	margin: 0;
+	padding: 0;
+	background-color: #7f5353;
+	background-image: url('../assets/wood-pattern.png');
 	filter: brightness(70%);
-    overflow: hidden;
-    z-index: -101;
+	overflow: hidden;
+	z-index: -101;
 }
 
 .dice-button {
