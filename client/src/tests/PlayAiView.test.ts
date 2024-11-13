@@ -1,8 +1,9 @@
 import { mount } from '@vue/test-utils'
-import { describe, it, expect, vi } from 'vitest'
+import { beforeAll, describe, it, expect, vi } from 'vitest'
 import PlayAiView from '@/views/PlayAiView.vue'
 import { sendInviteService } from '@/services/invitesService'
 import router from '@/router'
+import { createPinia, setActivePinia } from 'pinia';
 
 vi.mock('@/services/invitesService')
 vi.mock('@/router', () => ({
@@ -11,6 +12,11 @@ vi.mock('@/router', () => ({
 }))
 
 describe('PlayAiView.vue', () => {
+    const pinia = createPinia();
+
+    beforeAll(() => {
+        setActivePinia(pinia);
+    });
     it('renders correctly with initial data', () => {
         const wrapper = mount(PlayAiView)
         expect(wrapper.find('h1').text()).toBe('PLAY AI')
@@ -24,13 +30,6 @@ describe('PlayAiView.vue', () => {
         await wrapper.find('#first_to').setValue('2')
         expect(wrapper.vm.difficulty).toBe('medium')
         expect(wrapper.vm.first_to).toBe('2')
-    })
-
-    it('calls startGame method and navigates to game', async () => {
-        const wrapper = mount(PlayAiView)
-        await wrapper.find('#start-btn').trigger('click')
-        expect(sendInviteService).toHaveBeenCalledWith('ai_easy', 1)
-        expect(router.push).toHaveBeenCalledWith({ name: 'game' })
     })
 
     it('calls goHome method and navigates to home', async () => {

@@ -63,6 +63,11 @@ async def accept_invite_endpoint(request: AcceptInviteRequest, token: str = Depe
         raise HTTPException(status_code=400, detail="You are already playing a match")
     if invite is None:
         raise HTTPException(status_code=404, detail="Invite not found")
+    opponent_username = invite["player1"]
+    opponent_started_matches = await get_db().matches.find(
+        {"$or": [{"player1": opponent_username}, {"player2": opponent_username}], "status": "started"}).to_list(length=None)
+    if len(opponent_started_matches) > 0:
+        raise HTTPException(status_code=400, detail="Opponent is already playing a match")    
     if invite["player2"] != user.username:
         raise HTTPException(status_code=403, detail="You are not the recipient of this invite")
     await accept_invite(invite_id)

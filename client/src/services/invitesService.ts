@@ -41,6 +41,7 @@ export const acceptInviteService = async (invite_id: string) => {
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       useWsStore().addError(error.response.data.detail)
+      throw new Error(error.response.data.detail)
     } else {
       console.error('Error accepting invite:', error)
     }
