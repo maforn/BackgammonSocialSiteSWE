@@ -28,10 +28,11 @@ describe('GameView.vue', () => {
 		});
 		await wrapper.vm.diceThrow();
 
-		useGameStore().setDice(3, 5);
+		useGameStore().setDice([3, 5], [4, 6]);
 
 		expect(getSpy).toHaveBeenCalledWith('/throw_dice');
 		expect(wrapper.vm.diceResult.die1.value).toBe(3);
 		expect(wrapper.vm.diceResult.die2.value).toBe(5);
+		expect(wrapper.vm.availableDice).toEqual([4, 6]);
 	});
 });
