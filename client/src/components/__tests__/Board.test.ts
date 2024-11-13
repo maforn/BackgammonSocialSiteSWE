@@ -198,18 +198,26 @@ describe('Board component point selection tests', () => {
 		wrapper = mount(GameBoard, {
 			props: {
 				configuration: new BoardConfiguration(),
-				dices: [],
+				dices: [1],
 				yourTurn: true,
 			},
 		});
 	});
 
 	it('Points call selectPoint method when clicked', async () => {
+		wrapper = mount(GameBoard, {
+			props: {
+				configuration: new BoardConfiguration(
+					Array(24).fill(new PointConfiguration(0, 0)),
+					new PointConfiguration(0, 0),
+				),
+				dices: [1],
+				yourTurn: true,
+			},
+		});
+
 		wrapper.vm.availableDices = [1];
 		wrapper.vm.internalConfig.points[0] = new PointConfiguration(1, 0);
-		for (let i = 1; i < wrapper.vm.internalConfig.points.length; i++) {
-			wrapper.vm.internalConfig.points[i] = new PointConfiguration(0, wrapper.vm.internalConfig.points[i].player2);
-		}
 
 		const selectPointSpy = vi.spyOn(wrapper.vm, 'selectPoint');
 
@@ -327,7 +335,7 @@ describe('Board component movePiece method tests', () => {
 		expect(() => wrapper.vm.movePiece(25, 22)).toThrow('Indices are out of range');
 		expect(() => wrapper.vm.movePiece(23, 24)).toThrow('Indices are out of range');
 		expect(() => wrapper.vm.movePiece(-1, 22)).toThrow('Indices are out of range');
-		expect(() => wrapper.vm.movePiece(23, -1)).toThrow('Indices are out of range');
+		expect(() => wrapper.vm.movePiece(23, -2)).toThrow('Indices are out of range');
 	});
 
 	it('throws an error when pieces should be moved out of the bar first', () => {
@@ -381,5 +389,86 @@ describe('Board swap test', () => {
 		expect(initialPlayer2).toEqual(swappedPlayer1.reverse());
 		expect(initialBar1).toBe(swappedBar2);
 		expect(initialBar2).toBe(swappedBar1);
+	});
+});
+
+describe('Bearing off tests', () => {
+	const wrapper = mount(GameBoard, {
+		props: {
+			configuration: new BoardConfiguration(),
+			dices: [],
+			yourTurn: true,
+		},
+	});
+
+	it('bear off area should not be visible by default', () => {
+		expect(wrapper.vm.showBearOff).toBe(false);
+	});
+
+	it('bear off area should be visible if pieces have already been moved to the bear off area', () => {
+		wrapper.vm.internalConfig = new BoardConfiguration(
+			Array(24).fill(new PointConfiguration(0, 0)),
+			new PointConfiguration(0, 0),
+		);
+		wrapper.vm.srcPointIndex = null;
+
+		expect(wrapper.vm.showBearOff).toBe(true);
+		expect(wrapper.vm.bearOffAllowed).toBe(false);
+	});
+
+	it('bear off area should be visible when bearing off is possible', () => {
+		wrapper.vm.availableDices = [1, 2, 3];
+		wrapper.vm.internalConfig = new BoardConfiguration(
+			Array(24).fill(new PointConfiguration(0, 0)),
+			new PointConfiguration(0, 0),
+		);
+		wrapper.vm.internalConfig.points[0] = new PointConfiguration(5, 0);
+		wrapper.vm.internalConfig.points[1] = new PointConfiguration(5, 0);
+		wrapper.vm.internalConfig.points[2] = new PointConfiguration(5, 0);
+		wrapper.vm.srcPointIndex = 0;
+
+		expect(wrapper.vm.allowedPointIndices.includes(-1)).toBe(true);
+		expect(wrapper.vm.bearOffAllowed).toBe(true);
+		expect(wrapper.vm.showBearOff).toBe(true);
+	});
+
+	it('bear off area should contain the correct number of pieces', async () => {
+		wrapper.vm.internalConfig = new BoardConfiguration(
+			Array(24).fill(new PointConfiguration(0, 0)),
+			new PointConfiguration(0, 0),
+		);
+		expect(wrapper.vm.showBearOff).toBe(true);
+	});
+
+	it('bearing off should remove a piece from the board', () => {
+		wrapper.vm.availableDices = [1];
+		wrapper.vm.internalConfig = new BoardConfiguration(
+			Array(24).fill(new PointConfiguration(0, 0)),
+			new PointConfiguration(0, 0),
+		);
+		wrapper.vm.internalConfig.points[0] = new PointConfiguration(5, 0);
+		wrapper.vm.internalConfig.points[1] = new PointConfiguration(5, 0);
+		wrapper.vm.internalConfig.points[2] = new PointConfiguration(5, 0);
+		wrapper.vm.srcPointIndex = 0;
+
+		wrapper.vm.movePiece(0, -1);
+		expect(wrapper.vm.availableDices.length).toBe(0);
+		expect(wrapper.vm.internalConfig.points[0].player1).toBe(4);
+	});
+
+	it('bearing off should be allowed even if the dice is higher than the highest point with pieces', () => {
+		wrapper.vm.availableDices = [2];
+		wrapper.vm.internalConfig = new BoardConfiguration(
+			Array(24).fill(new PointConfiguration(0, 0)),
+			new PointConfiguration(0, 0),
+		);
+		wrapper.vm.internalConfig.points[0] = new PointConfiguration(5, 0);
+		wrapper.vm.internalConfig.points[1] = new PointConfiguration(5, 0);
+		wrapper.vm.internalConfig.points[2] = new PointConfiguration(5, 0);
+		wrapper.vm.srcPointIndex = 0;
+
+		wrapper.vm.movePiece(0, -1);
+		expect(wrapper.vm.availableDices.length).toBe(0);
+		expect(wrapper.vm.internalConfig.points[0].player1).toBe(4);
 	});
 });
