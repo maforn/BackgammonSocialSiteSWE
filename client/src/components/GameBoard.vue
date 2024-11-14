@@ -95,9 +95,6 @@
 import { defineComponent } from 'vue';
 import { BoardConfiguration } from '@/models/BoardConfiguration';
 import PointComponent from './PointComponent.vue';
-import axiosInstance from '@/axios';
-import { useWsStore } from '@/stores/wsStore';
-import { isAxiosError } from 'axios';
 
 export default defineComponent({
 	name: 'GameBoard',

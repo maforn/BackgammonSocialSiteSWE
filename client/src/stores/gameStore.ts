@@ -5,6 +5,7 @@ import { BoardConfiguration, PointConfiguration } from '@/models/BoardConfigurat
 import { Match } from '@/models/Match'
 import '@/wasm/wasm_exec'
 import { useAuthStore } from '@/stores/authStore'
+import { forEach } from 'lodash'
 
 interface GameData {
   player1: string;
@@ -77,9 +78,9 @@ export const useGameStore = defineStore('game', {
     async checkAITurn() {
       const isPlayer1 = this.player1 === useAuthStore().username
       const isYourTurn = (this.turn % 2 === 0 && isPlayer1) || (this.turn % 2 === 1 && !isPlayer1)
-      console.log('Is your turn:', isYourTurn, 'Is player 1:', isPlayer1, 'Player 1:', this.player1, 'Player 2:', this.player2, !isYourTurn && isPlayer1 ? this.player2.startsWith('ai') : this.player1.startsWith('ai'))
       if (!isYourTurn && isPlayer1 ? this.player2.startsWith('ai') : this.player1.startsWith('ai')) {
         const diceRoll = this.dice.roll.length === 0 ? [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1] : this.dice.roll
+        this.dice.roll = diceRoll
         const input = {
           board: {
             o: this.boardConfiguration.points.reduce((acc, point, index) => {
@@ -98,9 +99,23 @@ export const useGameStore = defineStore('game', {
           'score-moves': true
         }
         const moves = await this.getMovesFromWasm(input)
-        console.log('AI Moves:', moves)
-        // Implement logic to make the AI move
+        switch (isPlayer1 ? this.player2 : this.player1) {
+          case 'ai-hard':
+            this.makeAIMove(moves[0])
+            break
+          case 'ai-medium':
+            this.makeAIMove(moves[Math.floor(Math.random() * moves.length)])
+            break
+          case 'ai-easy':
+            this.makeAIMove(moves[moves.length - 1])
+            break
+        }
       }
+    },
+    makeAIMove(move: any) {
+      move.play.forEach((piece_move, index) => {
+        // TODO: check this and move, then send to server
+      })
     },
     async getMovesFromWasm(input: any) {
       await this.initializeWasm()
