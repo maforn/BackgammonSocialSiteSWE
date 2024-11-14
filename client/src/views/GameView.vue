@@ -2,7 +2,7 @@
 	<div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center p-4">
 		<div class="background"></div>
 		<div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
-			<div class="flex items-center px-8 py-3 bg-gray-600 text-white rounded-r-full rounded-l-full shadow- font-medium">
+			<div class="flex items-center px-8 py-3 bg-gray-600 text-white rounded-r-full rounded-l-full shadow-md font-medium">
 				{{ player1 }} ({{ winsP1 }}/{{ first_to }}) vs {{ player2 }} ({{ winsP2 }}/{{ first_to }})
 			</div>
 			<div class="relative">

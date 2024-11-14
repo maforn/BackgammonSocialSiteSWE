@@ -1,5 +1,4 @@
 import { mount } from '@vue/test-utils';
-import { createRouter, createWebHistory, useRouter } from 'vue-router';
 import HomeView from '@/views/HomeView.vue';
 import axiosInstance from '@/axios';
 import { nextTick } from 'vue';
@@ -10,7 +9,6 @@ import { createPinia, setActivePinia } from 'pinia';
 describe('HomeView.vue', () => {
 	let mock: MockAdapter;
 	const pinia = createPinia();
-	const router = useRouter();
 
 	beforeAll(() => {
 		setActivePinia(pinia);
@@ -57,7 +55,7 @@ describe('HomeView.vue', () => {
 		const wrapper = mount(HomeView);
 		wrapper.vm.hasSuspendedGame = false;
 		await nextTick();
-		expect(wrapper.find('router-link').text()).toContain('NEW MATCH');
+		expect(wrapper.find('router-link').text()).toContain('PLAY HUMAN');
 	});
 
     it('renders play human button when hasSuspendedGame is false', async () => {
