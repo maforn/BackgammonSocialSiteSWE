@@ -80,6 +80,7 @@ import { useGameStore } from '@/stores/gameStore'
 import { useWsStore } from '@/stores/wsStore'
 import { useAuthStore } from '@/stores/authStore'
 import { isAxiosError } from 'axios'
+import type { BoardConfiguration } from '@/models/BoardConfiguration'
 
 export default defineComponent({
   name: 'GameView',
@@ -96,7 +97,7 @@ export default defineComponent({
 
     const username = useAuthStore().username
 
-    useGameStore()
+    gameStore
       .fetchGame()
       .catch(error => {
         if (isAxiosError(error)) {
@@ -109,6 +110,7 @@ export default defineComponent({
     const sendPreformedMessage = async (message: string) =>  {
       try {
         await axiosInstance.post('/game/message', { message })
+        await gameStore.checkAITurn();
       } catch (error) {
         if (isAxiosError(error)) {
           useWsStore().addError(error?.response?.data?.detail)

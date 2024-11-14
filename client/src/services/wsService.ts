@@ -31,7 +31,7 @@ class WebSocketService {
 		}
 	}
 
-	private handleMessage(event: MessageEvent) {
+	private async handleMessage(event: MessageEvent) {
 		const data = JSON.parse(event.data);
 		switch (data.type) {
 			case 'error':
@@ -50,7 +50,7 @@ class WebSocketService {
 				useGameStore().setDice(data.result[0], data.result[1]);
 				break;
 			case 'move_piece':
-				useGameStore().setMatch(data.match);
+				await useGameStore().setMatch(data.match);
 				break;
       case 'in_game_msg':
 				this.showInGameMessage(data.msg, data.user);
