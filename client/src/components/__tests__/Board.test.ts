@@ -293,6 +293,7 @@ describe('Board component movePiece method tests', () => {
 
 		expect(wrapper.vm.internalConfig.bar.player1).toBe(0);
 		expect(wrapper.vm.internalConfig.points[23].player1).toBe(1);
+		expect(wrapper.vm.availableDice).toEqual([]);
 	});
 
 	it('Moves a piece from one point to another', () => {
@@ -300,25 +301,41 @@ describe('Board component movePiece method tests', () => {
 		wrapper.vm.internalConfig.points[22] = new PointConfiguration(0, 0);
 
 		wrapper.vm.srcPointIndex = 23;
-		wrapper.vm.availableDice = [1];
+		wrapper.vm.availableDice = [1, 5];
 
 		wrapper.vm.movePiece(23, 22);
 
 		expect(wrapper.vm.internalConfig.points[23].player1).toBe(0);
 		expect(wrapper.vm.internalConfig.points[22].player1).toBe(1);
+		expect(wrapper.vm.availableDice).toEqual([5]);
 	});
 
 	it("Hits an opponent's piece", () => {
 		wrapper.vm.internalConfig.points[5] = new PointConfiguration(1, 0);
 		wrapper.vm.internalConfig.points[3] = new PointConfiguration(0, 1);
 		wrapper.vm.srcPointIndex = 5;
-		wrapper.vm.availableDice = [2];
+		wrapper.vm.availableDice = [2, 3];
 		wrapper.vm.movePiece(5, 3);
 
 		expect(wrapper.vm.internalConfig.points[3].player2).toBe(0);
 		expect(wrapper.vm.internalConfig.bar.player2).toBe(1);
 		expect(wrapper.vm.internalConfig.points[3].player1).toBe(1);
 		expect(wrapper.vm.internalConfig.points[5].player1).toBe(0);
+		expect(wrapper.vm.availableDice).toEqual([3]);
+	});
+
+	it("Updates double dice correctly", () => {
+		wrapper.vm.internalConfig.points[5] = new PointConfiguration(1, 0);
+		wrapper.vm.internalConfig.points[3] = new PointConfiguration(0, 1);
+		wrapper.vm.srcPointIndex = 5;
+		wrapper.vm.availableDice = [2, 2, 2, 2];
+		wrapper.vm.movePiece(5, 3);
+
+		expect(wrapper.vm.internalConfig.points[3].player2).toBe(0);
+		expect(wrapper.vm.internalConfig.bar.player2).toBe(1);
+		expect(wrapper.vm.internalConfig.points[3].player1).toBe(1);
+		expect(wrapper.vm.internalConfig.points[5].player1).toBe(0);
+		expect(wrapper.vm.availableDice).toEqual([2, 2, 2]);
 	});
 
 	it('Updates available dice and resets selected point', () => {
@@ -361,6 +378,7 @@ describe('Board component movePiece method tests', () => {
 		expect(() => wrapper.vm.movePiece(23, 22)).toThrow('The destination point is not allowed');
 	});
 });
+
 
 describe('Board swap test', () => {
 	it('swaps players correctly', () => {
