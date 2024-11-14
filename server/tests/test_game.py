@@ -22,7 +22,7 @@ async def test_throw_dice(client: AsyncClient, token: str):
 async def test_move_piece(client: AsyncClient, token: str):
     await clear_matches()
     await create_started_match("testuser", "a")
-    await get_db().matches.update_one({"player1": "testuser"}, {"$set": {"dice": [3, 5], "used": []}})
+    await get_db().matches.update_one({"player1": "testuser"}, {"$set": {"dice": [3, 5], "available": [3, 5]}})
     move_data = {
         "board": {
             "points": [{"player1": 1, "player2": 0} for _ in range(24)],
@@ -50,7 +50,7 @@ async def test_game(client: AsyncClient, token: str):
 async def test_move_piece(client: AsyncClient, token: str):
     await clear_matches()
     await create_started_match("testuser", "a")
-    await get_db().matches.update_one({"player1": "testuser"}, {"$set": {"dice": [3, 5], "used": []}})
+    await get_db().matches.update_one({"player1": "testuser"}, {"$set": {"dice": [3, 5], "available": [3, 5]}})
     move_data = {
         "board": {
             "points": [{"player1": 1, "player2": 0} for _ in range(24)],
@@ -63,7 +63,7 @@ async def test_move_piece(client: AsyncClient, token: str):
     updated_game = await get_db().matches.find_one({"player1": "testuser"})
     assert updated_game is not None
     assert updated_game["board_configuration"]["points"][3]["player1"] == 1
-    assert updated_game["used"] == [3]
+    assert updated_game["available"] == [5]
 
 
 @pytest.mark.anyio

@@ -136,10 +136,10 @@ describe('WebSocketService', () => {
 			const setDice = vi.fn();
 			(useGameStore as any).mockReturnValue({ setDice });
 
-			const event = { data: JSON.stringify({ type: 'dice_roll', result: [1, 2] }) };
+			const event = { data: JSON.stringify({ type: 'dice_roll', result: [1, 2], available: [3, 4] }) };
 			wsService['handleMessage'](event as MessageEvent);
 
-			expect(setDice).toHaveBeenCalledWith(1, 2);
+			expect(setDice).toHaveBeenCalledWith([1, 2], [3, 4]);
 		});
 
 		it('should handle move_piece message', () => {
