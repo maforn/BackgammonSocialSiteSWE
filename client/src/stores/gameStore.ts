@@ -18,6 +18,8 @@ interface GameData {
 	updated_at: string;
 	status: string;
 	first_to: number;
+	winsP1: number;
+	winsP2: number;
 }
 
 export const useGameStore = defineStore('game', {
@@ -60,6 +62,8 @@ export const useGameStore = defineStore('game', {
 			this.updated_at = new Date(data.updated_at);
 			this.status = data.status;
 			this.first_to = data.first_to;
+			this.winsP1 = data.winsP1;
+			this.winsP2 = data.winsP2;
 		},
 		getMatch(): Match {
 			return new Match(
