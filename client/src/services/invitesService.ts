@@ -36,13 +36,14 @@ export const receiveInviteService = async () => {
 };
 
 export const acceptInviteService = async (invite_id: string) => {
-	try {
-		await axiosInstance.post('/invites/accept', { invite_id: invite_id });
-	} catch (error) {
-		if (axios.isAxiosError(error) && error.response) {
-			useWsStore().addError(error.response.data.detail);
-		} else {
-			console.error('Error accepting invite:', error);
-		}
-	}
-};
+  try {
+    await axiosInstance.post('/invites/accept', { invite_id: invite_id })
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      useWsStore().addError(error.response.data.detail)
+      throw new Error(error.response.data.detail)
+    } else {
+      console.error('Error accepting invite:', error)
+    }
+  }
+}

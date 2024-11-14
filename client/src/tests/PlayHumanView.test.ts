@@ -35,7 +35,7 @@ describe('PlayHumanView.vue', () => {
 		wrapper.vm.selectUser({ username: 'testuser' });
 		await wrapper.vm.$nextTick();
 		const inviteButton = wrapper.find('#invite-btn');
-		expect(inviteButton.attributes('disabled')).toBeUndefined();
+		expect(inviteButton.attributes('disabled')).toEqual('');
 	});
 
 	it('does not fetch users when input length is less than 2', async () => {

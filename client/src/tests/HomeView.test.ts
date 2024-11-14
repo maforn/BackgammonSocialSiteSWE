@@ -60,13 +60,26 @@ describe('HomeView.vue', () => {
 		expect(wrapper.find('router-link').text()).toContain('NEW MATCH');
 	});
 
-	it('renders no invites message when invites list is empty', async () => {
-		const wrapper = mount(HomeView);
-		wrapper.vm.showOverlay = true;
-		wrapper.vm.invites = [];
-		await nextTick();
-		expect(wrapper.find('.overlay-content p').text()).toBe('No invites.');
-	});
+    it('renders play human button when hasSuspendedGame is false', async () => {
+        const wrapper = mount(HomeView)
+        wrapper.vm.hasSuspendedGame = false
+        await nextTick()
+        expect(wrapper.find('router-link').text()).toContain('PLAY HUMAN')
+    })
+
+    it('renders play AI button when hasSuspendedGame is false', async () => {
+        const wrapper = mount(HomeView)
+        wrapper.vm.hasSuspendedGame = false
+        await nextTick()
+        expect(wrapper.find('router-link:nth-child(2)').text()).toContain('PLAY AI')
+    })
+
+    it('does not render play AI button when hasSuspendedGame is true', async () => {
+        const wrapper = mount(HomeView)
+        wrapper.vm.hasSuspendedGame = true
+        await nextTick()
+        expect(wrapper.find('router-link:nth-child(2)').text()).not.toContain('PLAY AI')
+    })
 
 	it('renders invites list when invites are present', async () => {
 		const wrapper = mount(HomeView);

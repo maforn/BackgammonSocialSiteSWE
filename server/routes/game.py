@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from models.board_configuration import Match
+from pydantic import BaseModel
 from services.auth import oauth2_scheme, get_user_from_token
 from services.database import get_db
 from services.game import throw_dice, get_current_game
@@ -15,6 +15,7 @@ async def game(token: str = Depends(oauth2_scheme)):
     if not current_game:
         raise HTTPException(status_code=400, detail="No started game found")
     return current_game.dict(by_alias=True)
+
 
 @router.get("/game/exists")
 async def game_exists(token: str = Depends(oauth2_scheme)):
@@ -86,8 +87,6 @@ async def dice_endpoint(token: str = Depends(oauth2_scheme)):
     else:
         current_game.available = result
 
-    print(current_game.available)
-
     await get_db().matches.update_one({"_id": current_game.id}, {"$set": {"dice": result, "available": current_game.available}})
     websocket_player1 = await manager.get_user(current_game.player1)
     if websocket_player1:
@@ -95,3 +94,25 @@ async def dice_endpoint(token: str = Depends(oauth2_scheme)):
     websocket_player2 = await manager.get_user(current_game.player2)
     if websocket_player2:
         await manager.send_personal_message({"type": "dice_roll", "result": result, "available": current_game.available}, websocket_player2)
+
+
+class InGameMessageRequest(BaseModel):
+    message: str
+
+
+@router.post("/game/message")
+async def send_in_game_message(request: InGameMessageRequest, token: str = Depends(oauth2_scheme)):
+    user = await get_user_from_token(token)
+    current_game = await get_current_game(user.username)
+
+    if not current_game or current_game.status != "started":
+        raise HTTPException(status_code=400, detail="No ongoing game found")
+
+    websocket_player1 = await manager.get_user(current_game.player1)
+    if websocket_player1:
+        await manager.send_personal_message({"type": "in_game_msg", "msg": request.message, "user": user.username},
+                                            websocket_player1)
+    websocket_player2 = await manager.get_user(current_game.player2)
+    if websocket_player2:
+        await manager.send_personal_message({"type": "in_game_msg", "msg": request.message, "user": user.username},
+                                            websocket_player2)
