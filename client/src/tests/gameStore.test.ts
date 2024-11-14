@@ -5,7 +5,6 @@ import { createPinia, setActivePinia } from 'pinia';
 import { useGameStore } from '@/stores/gameStore';
 import { BoardConfiguration } from '@/models/BoardConfiguration';
 import { Match } from '@/models/Match';
-import { first } from 'lodash';
 
 // client/src/stores/gameStore.test.ts
 
@@ -25,19 +24,19 @@ describe('game store', () => {
 			'Alice',
 			'Bob',
 			new BoardConfiguration(),
-			{ roll: [1, 2], used: [3, 4] },
+			{ roll: [1, 2], available: [3, 4] },
 			1,
 			now,
 			now,
 			'active',
-			1
+			1,
 		);
 		gameStore.setMatch({
 			player1: 'Alice',
 			player2: 'Bob',
 			board_configuration: new BoardConfiguration(),
 			dice: [1, 2],
-			used: [3, 4],
+			available: [3, 4],
 			turn: 1,
 			created_at: now.toISOString(),
 			updated_at: now.toISOString(),
@@ -54,7 +53,7 @@ describe('game store', () => {
 			player2: 'Bob',
 			board_configuration: new BoardConfiguration(),
 			dice: [1, 2],
-			used: [3, 4],
+			available: [3, 4],
 			turn: 1,
 			created_at: '2023-01-01T00:00:00Z',
 			updated_at: '2023-01-01T00:00:00Z',
@@ -69,7 +68,7 @@ describe('game store', () => {
 		expect(gameStore.player2).toBe('Bob');
 		expect(gameStore.boardConfiguration).toEqual(new BoardConfiguration());
 		expect(gameStore.dice.roll).toEqual([1, 2]);
-		expect(gameStore.dice.used).toEqual([3, 4]);
+		expect(gameStore.dice.available).toEqual([3, 4]);
 		expect(gameStore.turn).toBe(1);
 		expect(gameStore.created_at.toISOString()).toBe('2023-01-01T00:00:00.000Z');
 		expect(gameStore.updated_at.toISOString()).toBe('2023-01-01T00:00:00.000Z');
@@ -86,7 +85,7 @@ describe('game store', () => {
 				bar: { player1: 0, player2: 0 },
 			},
 			dice: [1, 2],
-			used: [3, 4],
+			available: [3, 4],
 			turn: 1,
 			created_at: '2023-01-01T00:00:00Z',
 			updated_at: '2023-01-01T00:00:00Z',
@@ -101,7 +100,7 @@ describe('game store', () => {
 		expect(gameStore.boardConfiguration.points[0].player1).toBe(1);
 		expect(gameStore.boardConfiguration.points[0].player2).toBe(2);
 		expect(gameStore.dice.roll).toEqual([1, 2]);
-		expect(gameStore.dice.used).toEqual([3, 4]);
+		expect(gameStore.dice.available).toEqual([3, 4]);
 		expect(gameStore.turn).toBe(1);
 		expect(gameStore.created_at.toISOString()).toBe('2023-01-01T00:00:00.000Z');
 		expect(gameStore.updated_at.toISOString()).toBe('2023-01-01T00:00:00.000Z');
@@ -110,7 +109,8 @@ describe('game store', () => {
 
 	it('should set dice correctly', () => {
 		const gameStore = useGameStore();
-		gameStore.setDice(3, 4);
+		gameStore.setDice([3, 4], [5, 6]);
 		expect(gameStore.dice.roll).toEqual([3, 4]);
+		expect(gameStore.dice.available).toEqual([5, 6]);
 	});
 });

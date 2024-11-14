@@ -15,7 +15,7 @@ interface GameData {
     bar: PointConfiguration;
   };
   dice: number[];
-  used: number[];
+  available: number[];
   turn: number;
   created_at: string;
   updated_at: string;
@@ -28,7 +28,7 @@ export const useGameStore = defineStore('game', {
     player1: '',
     player2: '',
     boardConfiguration: new BoardConfiguration(),
-    dice: { roll: [], used: [] },
+    dice: { roll: [], available: [] },
     turn: 0,
     created_at: new Date(),
     updated_at: new Date(),
@@ -60,19 +60,19 @@ export const useGameStore = defineStore('game', {
       })
     },
     async setMatch(data: GameData) {
-      this.player1 = data.player1
-      this.player2 = data.player2
-      this.boardConfiguration = new BoardConfiguration(
-        data.board_configuration.points.map((p: PointConfiguration) => new PointConfiguration(p.player1, p.player2)),
-        new PointConfiguration(data.board_configuration.bar.player1, data.board_configuration.bar.player2)
-      )
-      this.dice.roll = data.dice
-      this.dice.used = data.used
-      this.turn = data.turn
-      this.created_at = new Date(data.created_at)
-      this.updated_at = new Date(data.updated_at)
-      this.status = data.status
-      this.first_to = data.first_to
+      this.player1 = data.player1;
+			this.player2 = data.player2;
+			this.boardConfiguration = new BoardConfiguration(
+				data.board_configuration.points.map((p: PointConfiguration) => new PointConfiguration(p.player1, p.player2)),
+				new PointConfiguration(data.board_configuration.bar.player1, data.board_configuration.bar.player2),
+			);
+			this.dice.roll = data.dice;
+			this.dice.available = data.available;
+			this.turn = data.turn;
+			this.created_at = new Date(data.created_at);
+			this.updated_at = new Date(data.updated_at);
+			this.status = data.status;
+			this.first_to = data.first_to;
       await this.checkAITurn()
     },
     async checkAITurn() {
@@ -81,6 +81,7 @@ export const useGameStore = defineStore('game', {
       if (!isYourTurn && isPlayer1 ? this.player2.startsWith('ai') : this.player1.startsWith('ai')) {
         const diceRoll = this.dice.roll.length === 0 ? [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1] : this.dice.roll
         this.dice.roll = diceRoll
+        this.dice.available = diceRoll
         const input = {
           board: {
             o: this.boardConfiguration.points.reduce((acc, point, index) => {
@@ -124,20 +125,21 @@ export const useGameStore = defineStore('game', {
       return JSON.parse(output)
     },
     getMatch(): Match {
-      return new Match(
-        this.player1,
-        this.player2,
-        this.boardConfiguration,
-        this.dice,
-        this.turn,
-        new Date(this.created_at),
-        new Date(this.updated_at),
-        this.status,
-        this.first_to
-      )
-    },
-    setDice(die1: number, die2: number) {
-      this.dice.roll = [die1, die2]
-    }
+			return new Match(
+				this.player1,
+				this.player2,
+				this.boardConfiguration,
+				this.dice,
+				this.turn,
+				new Date(this.created_at),
+				new Date(this.updated_at),
+				this.status,
+				this.first_to,
+			);
+		},
+    setDice(result: number[], available: number[]) {
+			this.dice.roll = result;
+			this.dice.available = available;
+		},
   }
 })

@@ -25,7 +25,7 @@ describe('Empty Board component tests', () => {
 		wrapper = mount(GameBoard, {
 			props: {
 				configuration: new BoardConfiguration(Array(24).fill({ player1: 0, player2: 0 }), { player1: 0, player2: 0 }),
-				dices: [],
+				dice: [],
 				yourTurn: false,
 			},
 		});
@@ -59,7 +59,7 @@ describe('Default board configuration tests', () => {
 		wrapper = mount(GameBoard, {
 			props: {
 				configuration: new BoardConfiguration(),
-				dices: [],
+				dice: [],
 				yourTurn: false,
 			},
 		});
@@ -113,7 +113,7 @@ describe('Custom board configuration tests', () => {
 		wrapper = mount(GameBoard, {
 			props: {
 				configuration: configuration,
-				dices: [],
+				dice: [],
 				yourTurn: false,
 			},
 		});
@@ -152,7 +152,7 @@ describe('Custom board configuration tests', () => {
 		wrapper = mount(GameBoard, {
 			props: {
 				configuration: configuration,
-				dices: [],
+				dice: [],
 				yourTurn: false,
 			},
 		});
@@ -166,7 +166,7 @@ describe('Custom board configuration tests', () => {
 		wrapper = mount(GameBoard, {
 			props: {
 				configuration: configuration,
-				dices: [],
+				dice: [],
 				yourTurn: false,
 			},
 		});
@@ -180,7 +180,7 @@ describe('Custom board configuration tests', () => {
 		wrapper = mount(GameBoard, {
 			props: {
 				configuration: configuration,
-				dices: [],
+				dice: [],
 				yourTurn: false,
 			},
 		});
@@ -198,7 +198,7 @@ describe('Board component point selection tests', () => {
 		wrapper = mount(GameBoard, {
 			props: {
 				configuration: new BoardConfiguration(),
-				dices: [1],
+				dice: [1],
 				yourTurn: true,
 			},
 		});
@@ -211,12 +211,12 @@ describe('Board component point selection tests', () => {
 					Array(24).fill(new PointConfiguration(0, 0)),
 					new PointConfiguration(0, 0),
 				),
-				dices: [1],
+				dice: [1],
 				yourTurn: true,
 			},
 		});
 
-		wrapper.vm.availableDices = [1];
+		wrapper.vm.availableDice = [1];
 		wrapper.vm.internalConfig.points[0] = new PointConfiguration(1, 0);
 
 		const selectPointSpy = vi.spyOn(wrapper.vm, 'selectPoint');
@@ -231,7 +231,7 @@ describe('Board component point selection tests', () => {
 
 	it('Calls movePiece with correct parameters when there are pieces in the bar', () => {
 		wrapper.vm.internalConfig.bar.player1 = 1;
-		wrapper.vm.availableDices = [1];
+		wrapper.vm.availableDice = [1];
 
 		const movePieceSpy = vi.spyOn(wrapper.vm, 'movePiece');
 
@@ -253,7 +253,7 @@ describe('Board component point selection tests', () => {
 		wrapper.vm.internalConfig.bar.player1 = 0;
 		wrapper.vm.srcPointIndex = 5;
 		wrapper.vm.internalConfig.points[5].player1 = 1;
-		wrapper.vm.availableDices = [2];
+		wrapper.vm.availableDice = [2];
 		wrapper.vm.internalConfig.points[3].player2 = 0;
 
 		const movePieceSpy = vi.spyOn(wrapper.vm, 'movePiece');
@@ -278,7 +278,7 @@ describe('Board component movePiece method tests', () => {
 		wrapper = mount(GameBoard, {
 			props: {
 				configuration: new BoardConfiguration(),
-				dices: [],
+				dice: [],
 				yourTurn: true,
 			},
 		});
@@ -288,11 +288,12 @@ describe('Board component movePiece method tests', () => {
 		wrapper.vm.internalConfig.bar.player1 = 1;
 		wrapper.vm.internalConfig.points[23] = new PointConfiguration(0, 0);
 
-		wrapper.vm.availableDices = [1];
+		wrapper.vm.availableDice = [1];
 		wrapper.vm.movePiece(24, 23);
 
 		expect(wrapper.vm.internalConfig.bar.player1).toBe(0);
 		expect(wrapper.vm.internalConfig.points[23].player1).toBe(1);
+		expect(wrapper.vm.availableDice).toEqual([]);
 	});
 
 	it('Moves a piece from one point to another', () => {
@@ -300,34 +301,50 @@ describe('Board component movePiece method tests', () => {
 		wrapper.vm.internalConfig.points[22] = new PointConfiguration(0, 0);
 
 		wrapper.vm.srcPointIndex = 23;
-		wrapper.vm.availableDices = [1];
+		wrapper.vm.availableDice = [1, 5];
 
 		wrapper.vm.movePiece(23, 22);
 
 		expect(wrapper.vm.internalConfig.points[23].player1).toBe(0);
 		expect(wrapper.vm.internalConfig.points[22].player1).toBe(1);
+		expect(wrapper.vm.availableDice).toEqual([5]);
 	});
 
 	it("Hits an opponent's piece", () => {
 		wrapper.vm.internalConfig.points[5] = new PointConfiguration(1, 0);
 		wrapper.vm.internalConfig.points[3] = new PointConfiguration(0, 1);
 		wrapper.vm.srcPointIndex = 5;
-		wrapper.vm.availableDices = [2];
+		wrapper.vm.availableDice = [2, 3];
 		wrapper.vm.movePiece(5, 3);
 
 		expect(wrapper.vm.internalConfig.points[3].player2).toBe(0);
 		expect(wrapper.vm.internalConfig.bar.player2).toBe(1);
 		expect(wrapper.vm.internalConfig.points[3].player1).toBe(1);
 		expect(wrapper.vm.internalConfig.points[5].player1).toBe(0);
+		expect(wrapper.vm.availableDice).toEqual([3]);
 	});
 
-	it('Updates available dices and resets selected point', () => {
+	it("Updates double dice correctly", () => {
+		wrapper.vm.internalConfig.points[5] = new PointConfiguration(1, 0);
+		wrapper.vm.internalConfig.points[3] = new PointConfiguration(0, 1);
+		wrapper.vm.srcPointIndex = 5;
+		wrapper.vm.availableDice = [2, 2, 2, 2];
+		wrapper.vm.movePiece(5, 3);
+
+		expect(wrapper.vm.internalConfig.points[3].player2).toBe(0);
+		expect(wrapper.vm.internalConfig.bar.player2).toBe(1);
+		expect(wrapper.vm.internalConfig.points[3].player1).toBe(1);
+		expect(wrapper.vm.internalConfig.points[5].player1).toBe(0);
+		expect(wrapper.vm.availableDice).toEqual([2, 2, 2]);
+	});
+
+	it('Updates available dice and resets selected point', () => {
 		wrapper.vm.internalConfig.points[3].player1 = 1;
-		wrapper.vm.availableDices = [2];
+		wrapper.vm.availableDice = [2];
 		wrapper.vm.srcPointIndex = 3;
 		wrapper.vm.movePiece(3, 1);
 
-		expect(wrapper.vm.availableDices).toEqual([]);
+		expect(wrapper.vm.availableDice).toEqual([]);
 		expect(wrapper.vm.srcPointIndex).toBe(null);
 	});
 
@@ -355,12 +372,13 @@ describe('Board component movePiece method tests', () => {
 	});
 
 	it('throws an error when the destination point is not allowed', () => {
-		wrapper.vm.availableDices = [2];
+		wrapper.vm.availableDice = [2];
 		wrapper.vm.internalConfig.points[23] = new PointConfiguration(1, 0);
 		wrapper.vm.internalConfig.points[22] = new PointConfiguration(0, 0);
 		expect(() => wrapper.vm.movePiece(23, 22)).toThrow('The destination point is not allowed');
 	});
 });
+
 
 describe('Board swap test', () => {
 	it('swaps players correctly', () => {
@@ -368,7 +386,7 @@ describe('Board swap test', () => {
 		const wrapper = mount(GameBoard, {
 			props: {
 				configuration: initialBoard,
-				dices: [],
+				dice: [],
 				yourTurn: true,
 			},
 		});
@@ -396,7 +414,7 @@ describe('Bearing off tests', () => {
 	const wrapper = mount(GameBoard, {
 		props: {
 			configuration: new BoardConfiguration(),
-			dices: [],
+			dice: [],
 			yourTurn: true,
 		},
 	});
@@ -417,7 +435,7 @@ describe('Bearing off tests', () => {
 	});
 
 	it('bear off area should be visible when bearing off is possible', () => {
-		wrapper.vm.availableDices = [1, 2, 3];
+		wrapper.vm.availableDice = [1, 2, 3];
 		wrapper.vm.internalConfig = new BoardConfiguration(
 			Array(24).fill(new PointConfiguration(0, 0)),
 			new PointConfiguration(0, 0),
@@ -441,7 +459,7 @@ describe('Bearing off tests', () => {
 	});
 
 	it('bearing off should remove a piece from the board', () => {
-		wrapper.vm.availableDices = [1];
+		wrapper.vm.availableDice = [1];
 		wrapper.vm.internalConfig = new BoardConfiguration(
 			Array(24).fill(new PointConfiguration(0, 0)),
 			new PointConfiguration(0, 0),
@@ -452,12 +470,12 @@ describe('Bearing off tests', () => {
 		wrapper.vm.srcPointIndex = 0;
 
 		wrapper.vm.movePiece(0, -1);
-		expect(wrapper.vm.availableDices.length).toBe(0);
+		expect(wrapper.vm.availableDice.length).toBe(0);
 		expect(wrapper.vm.internalConfig.points[0].player1).toBe(4);
 	});
 
 	it('bearing off should be allowed even if the dice is higher than the highest point with pieces', () => {
-		wrapper.vm.availableDices = [2];
+		wrapper.vm.availableDice = [2];
 		wrapper.vm.internalConfig = new BoardConfiguration(
 			Array(24).fill(new PointConfiguration(0, 0)),
 			new PointConfiguration(0, 0),
@@ -468,7 +486,7 @@ describe('Bearing off tests', () => {
 		wrapper.vm.srcPointIndex = 0;
 
 		wrapper.vm.movePiece(0, -1);
-		expect(wrapper.vm.availableDices.length).toBe(0);
+		expect(wrapper.vm.availableDice.length).toBe(0);
 		expect(wrapper.vm.internalConfig.points[0].player1).toBe(4);
 	});
 });

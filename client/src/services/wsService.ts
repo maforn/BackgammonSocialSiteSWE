@@ -47,7 +47,7 @@ class WebSocketService {
 				this.showMessage(data.msg);
 				break;
 			case 'dice_roll':
-				useGameStore().setDice(data.result[0], data.result[1]);
+				useGameStore().setDice(data.result, data.available);
 				break;
 			case 'move_piece':
 				await useGameStore().setMatch(data.match);
