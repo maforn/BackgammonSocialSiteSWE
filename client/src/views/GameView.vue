@@ -3,7 +3,7 @@
 		<div class="background"></div>
 		<div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
       <div class="flex justify-center w-full gap-4">
-        <div id="p1-display" class="flex flex-col justify-center items-center px-8 py-3 bg-gray-600 text-white rounded-r-full rounded-l-full shadow- font-medium relative">
+        <div id="p1-display" class="flex flex-col justify-center items-center px-8 py-3 bg-gray-600 text-white rounded-r-full rounded-l-full shadow-md font-medium">
           {{ player1 }}
           <div class="flex justify-evenly">
             <div v-for="i in first_to">
@@ -16,7 +16,7 @@
           VS
         </div>
 
-        <div id="p2-display" class="flex flex-col justify-center items-center px-8 py-3 bg-gray-600 text-white rounded-r-full rounded-l-full shadow- font-medium relative">
+        <div id="p2-display" class="flex flex-col justify-center items-center px-8 py-3 bg-gray-600 text-white rounded-r-full rounded-l-full shadow-md font-medium">
           {{ player2 }}
           <div class="flex justify-evenly">
             <div v-for="i in first_to">
