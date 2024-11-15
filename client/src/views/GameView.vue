@@ -3,7 +3,9 @@
 		<div class="background"></div>
 		<div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
 			<div class="flex items-center px-8 py-3 bg-gray-600 text-white rounded-r-full rounded-l-full shadow-md font-medium">
-				{{ player1 }} ({{ winsP1 }}/{{ first_to }}) vs {{ player2 }} ({{ winsP2 }}/{{ first_to }})
+        <v-icon :name="[ai_names.includes(player1) ? 'fa-robot' : 'io-person']" class="text-white mr-2" /> {{ player1 }} ({{ winsP1 }}
+        /
+        {{ first_to }}) vs {{ player2 }} ({{ winsP2 }}/{{ first_to }}) <v-icon :name="[ai_names.includes(player2) ? 'fa-robot' : 'io-person']" class="text-white ml-2" />
 			</div>
 			<div class="relative">
 				<GameBoard
@@ -116,6 +118,8 @@ export default defineComponent({
       }
     }
 
+    const ai_names = ["ai_easy", "ai_normal", "ai_hard"];
+
     return {
       configuration: computed(() => boardConfiguration.value),
       isPlayer1: computed(() => username === player1.value),
@@ -134,7 +138,8 @@ export default defineComponent({
       messages,
       username,
       preformedMessages,
-      sendPreformedMessage
+      sendPreformedMessage,
+      ai_names
     }
   },
   methods: {
@@ -149,7 +154,7 @@ export default defineComponent({
     },
     movePiece(board: BoardConfiguration, dice: number) {
 			axiosInstance
-				.post('/move_piece', {
+				.post('/move/piece', {
 					board,
 					dice,
 				})

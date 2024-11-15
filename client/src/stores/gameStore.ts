@@ -5,7 +5,6 @@ import { BoardConfiguration, PointConfiguration } from '@/models/BoardConfigurat
 import { Match } from '@/models/Match'
 import '@/wasm/wasm_exec'
 import { useAuthStore } from '@/stores/authStore'
-import { forEach } from 'lodash'
 
 interface GameData {
   player1: string;
@@ -22,6 +21,8 @@ interface GameData {
   status: string;
   first_to: number;
 }
+
+const ai_players = ['ai_hard', 'ai_medium', 'ai_easy'];
 
 export const useGameStore = defineStore('game', {
   state: (): Match & { goInstance: Go | null } => ({
@@ -78,7 +79,7 @@ export const useGameStore = defineStore('game', {
     async checkAITurn() {
       const isPlayer1 = this.player1 === useAuthStore().username
       const isYourTurn = (this.turn % 2 === 0 && isPlayer1) || (this.turn % 2 === 1 && !isPlayer1)
-      if (!isYourTurn && isPlayer1 ? this.player2.startsWith('ai') : this.player1.startsWith('ai')) {
+      if (!isYourTurn && isPlayer1 ? ai_players.includes(this.player2) : ai_players.includes(this.player1)) {
         const diceRoll = this.dice.roll.length === 0 ? [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1] : this.dice.roll
         this.dice.roll = diceRoll
         this.dice.available = diceRoll
@@ -120,8 +121,7 @@ export const useGameStore = defineStore('game', {
       const isPlayer1 = this.player1 === useAuthStore().username;
       let newBoard = !isPlayer1 ? {...this.boardConfiguration} : this.swapPlayers(this.boardConfiguration);
       move.play.forEach((piece_move, index) => {
-  
-        // TODO: check this and move, then send to server
+
         const srcIndex = piece_move.from - 1;
         const dstIndex = piece_move.to - 1;
 
@@ -138,6 +138,10 @@ export const useGameStore = defineStore('game', {
 
         this.boardConfiguration = isPlayer1 ? this.swapPlayers(newBoard) : newBoard;
       })
+
+      axiosInstance.post('/move/ai', {
+        board: this.boardConfiguration
+      });
     },
     moveOnBoard(board: BoardConfiguration, srcPointIndex: number, dstPointIndex: number) : number{
       if (srcPointIndex === 24) {
