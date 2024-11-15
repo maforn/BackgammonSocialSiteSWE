@@ -82,13 +82,16 @@ export const useGameStore = defineStore('game', {
         const diceRoll = this.dice.roll.length === 0 ? [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1] : this.dice.roll
         this.dice.roll = diceRoll
         this.dice.available = diceRoll
+
+        const board = isPlayer1 ? this.swapPlayers(this.boardConfiguration) : this.boardConfiguration
+
         const input = {
           board: {
-            o: this.boardConfiguration.points.reduce((acc, point, index) => {
+            o: board.points.reduce((acc, point, index) => {
               if (point.player2 > 0) acc[index + 1] = point.player2
               return acc
             }, {}),
-            x: this.boardConfiguration.points.reduce((acc, point, index) => {
+            x: board.points.reduce((acc, point, index) => {
               if (point.player1 > 0) acc[index + 1] = point.player1
               return acc
             }, {})
@@ -96,28 +99,98 @@ export const useGameStore = defineStore('game', {
           cubeful: false,
           dice: diceRoll,
           'max-moves': 3,
-          player: isPlayer1 ? 'o' : 'x',
+          player: 'x',
           'score-moves': true
         }
         const moves = await this.getMovesFromWasm(input)
         switch (isPlayer1 ? this.player2 : this.player1) {
-          case 'ai-hard':
+          case 'ai_hard':
             this.makeAIMove(moves[0])
             break
-          case 'ai-medium':
+          case 'ai_medium':
             this.makeAIMove(moves[Math.floor(Math.random() * moves.length)])
             break
-          case 'ai-easy':
+          case 'ai_easy':
             this.makeAIMove(moves[moves.length - 1])
             break
         }
       }
     },
     makeAIMove(move: any) {
+      const isPlayer1 = this.player1 === useAuthStore().username;
+      let newBoard = !isPlayer1 ? {...this.boardConfiguration} : this.swapPlayers(this.boardConfiguration);
       move.play.forEach((piece_move, index) => {
+  
         // TODO: check this and move, then send to server
+        const srcIndex = piece_move.from - 1;
+        const dstIndex = piece_move.to - 1;
+
+        console.log(srcIndex, newBoard.points[srcIndex].player1, dstIndex, newBoard.points[dstIndex].player1);
+
+        const usedDice = this.moveOnBoard(newBoard, srcIndex, dstIndex);
+
+        console.log("Used dice", usedDice);
+
+        const diceIndex = this.dice.available.indexOf(usedDice);
+				if (diceIndex !== -1 && diceIndex !== undefined) {
+					this.dice.available?.splice(diceIndex, 1);
+				}
+
+        this.boardConfiguration = isPlayer1 ? this.swapPlayers(newBoard) : newBoard;
       })
     },
+    moveOnBoard(board: BoardConfiguration, srcPointIndex: number, dstPointIndex: number) : number{
+      if (srcPointIndex === 24) {
+				board.bar.player1--;
+			} else {
+				board.points[srcPointIndex].player1--;
+			}
+
+			if (dstPointIndex >= 0) {
+				board.points[dstPointIndex].player1++;
+
+				// Hit the opponent's piece if there is only one
+				if (board.points[dstPointIndex].player2 === 1) {
+					board.points[dstPointIndex].player2 = 0;
+					board.bar.player2++;
+				}
+			}
+
+			// Update the available dice and reset the source point index
+			let usedDice = this.dice.available?.reduce((min, dice) => {
+				if (srcPointIndex - dice <= dstPointIndex && dice < min) {
+					return dice;
+				}
+				return min;
+			}, Infinity);
+
+			if (usedDice === Infinity || usedDice === undefined) {
+				throw new Error('No valid dice');
+      }
+      else{
+        return usedDice;
+      }
+    },
+    swapPlayers(board: BoardConfiguration): BoardConfiguration {
+			const newBoard = JSON.parse(JSON.stringify(board));
+
+			// Swap pieces on each point
+			for (const point of newBoard.points) {
+				const tmp = point.player1;
+				point.player1 = point.player2;
+				point.player2 = tmp;
+			}
+
+			// Invert point order
+			newBoard.points = newBoard.points.reverse();
+
+			// Swap pieces in the bar
+			const tmpBar = newBoard.bar.player1;
+			newBoard.bar.player1 = newBoard.bar.player2;
+			newBoard.bar.player2 = tmpBar;
+
+			return newBoard;
+		},
     async getMovesFromWasm(input: any) {
       await this.initializeWasm()
       console.log(JSON.stringify(input))
