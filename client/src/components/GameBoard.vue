@@ -95,9 +95,6 @@
 import { defineComponent } from 'vue';
 import { BoardConfiguration } from '@/models/BoardConfiguration';
 import PointComponent from './PointComponent.vue';
-import axiosInstance from '@/axios';
-import { useWsStore } from '@/stores/wsStore';
-import { isAxiosError } from 'axios';
 
 export default defineComponent({
 	name: 'GameBoard',
@@ -114,7 +111,7 @@ export default defineComponent({
 			type: Boolean,
 			default: true,
 		},
-		dices: {
+		dice: {
 			type: Array as () => number[],
 			required: true,
 		},
@@ -129,7 +126,7 @@ export default defineComponent({
 			internalConfig: {} as BoardConfiguration,
 
 			/* Dices available to the player */
-			availableDices: null as number[] | null,
+			availableDice: null as number[] | null,
 
 			/* Index of the point the player wants to move pieces from */
 			srcPointIndex: null as number | null,
@@ -142,8 +139,8 @@ export default defineComponent({
 		this.internalConfig = this.player1 ? { ...this.configuration } : this.swapPlayers(this.configuration);
 	},
 	watch: {
-		dices(newDices) {
-			this.availableDices = [...newDices];
+		dice(newDice) {
+			this.availableDice = [...newDice];
 		},
 		configuration(newConfig) {
 			this.internalConfig = this.player1 ? { ...newConfig } : this.swapPlayers(newConfig);
@@ -196,30 +193,30 @@ export default defineComponent({
 				}
 			}
 
-			let usedDice: number | undefined;
 			// Update the available dice and reset the source point index
-			if (this.availableDices && this.availableDices.length > 1 && this.availableDices[0] === this.availableDices[1]) {
-				usedDice = this.availableDices.pop();
-			} else {
-				usedDice = this.availableDices?.reduce((min, dice) => {
-					if (srcPointIndex - dice <= dstPointIndex && dice < min) {
-						return dice;
-					}
-					return min;
-				}, Infinity);
+			let usedDice = this.availableDice?.reduce((min, dice) => {
+				if (srcPointIndex - dice <= dstPointIndex && dice < min) {
+					return dice;
+				}
+				return min;
+			}, Infinity);
 
-				if (usedDice === Infinity) {
-					throw new Error('No valid dice');
-				} else {
-					this.availableDices = this.availableDices?.filter(dice => dice !== usedDice) || null;
+			if (usedDice === Infinity || usedDice === undefined) {
+				throw new Error('No valid dice');
+			} else {
+				const diceIndex = this.availableDice?.indexOf(usedDice);
+				if (diceIndex !== -1 && diceIndex !== undefined) {
+					this.availableDice?.splice(diceIndex, 1);
 				}
 			}
+
 			this.srcPointIndex = null;
 
+			// Emit the move to the parent component
 			this.$emit('movePiece', this.player1 ? this.internalConfig : this.swapPlayers(this.internalConfig), usedDice);
 
 			// Check if the player can still move pieces
-			if (!this.availableDices || this.availableDices.length === 0 || this.allowedPointIndices.length === 0) {
+			if (!this.availableDice || this.availableDice.length === 0 || this.allowedPointIndices.length === 0) {
 				console.log('Dices have been used, switch players');
 			}
 		},
@@ -273,12 +270,12 @@ export default defineComponent({
 		 * to move pieces from or to.
 		 */
 		allowedPointIndices() {
-			if (!this.availableDices || this.availableDices.length === 0 || !this.yourTurn) {
+			if (!this.availableDice || this.availableDice.length === 0 || !this.yourTurn) {
 				// No selection can be done if the dices have not been rolled or it is not you turn
 				return [];
 			} else if (this.internalConfig.bar.player1 > 0) {
 				// There are pieces in the bar, return the points where the pieces can be moved to
-				return this.availableDices
+				return this.availableDice
 					.map(dice => 24 - dice)
 					.filter(index => index <= 23 && index >= 0 && this.internalConfig.points[index].player2 <= 1);
 			} else if (this.srcPointIndex === null) {
@@ -288,14 +285,14 @@ export default defineComponent({
 					.filter(index => index !== -1);
 			} else {
 				// Find the points reachable from the selected point, with at most one opponent's piece
-				const allowedIndices = this.availableDices
+				const allowedIndices = this.availableDice
 					.map(dice => (this.srcPointIndex ?? 24) - dice)
 					.filter(index => index <= 23 && index >= 0 && this.internalConfig.points[index].player2 <= 1);
 
 				// If the player has all pieces in base, allow moving pieces to the bear-off area
 				if (
 					this.internalConfig.points.slice(6, 24).every(point => point.player1 === 0) &&
-					this.availableDices.some(dice => dice > (this.srcPointIndex ?? 0))
+					this.availableDice.some(dice => dice > (this.srcPointIndex ?? 0))
 				) {
 					allowedIndices.push(-1);
 				}

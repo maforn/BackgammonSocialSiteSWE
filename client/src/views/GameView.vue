@@ -29,9 +29,8 @@
 				<GameBoard
 					:configuration="configuration"
 					:player1="isPlayer1"
-					:dices="availableDices"
+					:dice="availableDice"
 					:your-turn="isYourTurn"
-					:used="usedDice"
 					@movePiece="movePiece"
 				/>
 				<button v-if="!diceThrown && isYourTurn" class="dice-button p-2 w-10 sm:w-16 lg:w-20" @click.stop="diceThrow">
@@ -70,11 +69,10 @@
 						'shadow-md',
 						isYourTurn ? 'player-turn-1' : 'player-turn-2',
 					]"
-        >
-          <DieFace v-if="diceResult.die1.value !== null" :value="diceResult.die1.value" />
-          <DieFace v-if="diceResult.die2.value !== null" :value="diceResult.die2.value" />
-        </div>
-      </div>
+				>
+					<DieFace v-for="(die, index) in availableDice" :key="index" :value="die" />
+				</div>
+			</div>
       <div class="messages absolute p-8 flex flex-col-reverse">
         <div v-for="message in messages" :key="message.id"
              :class="['message', message.user === username ? 'your-message' : 'opponent-message']">
@@ -86,8 +84,8 @@
           {{ msg }}
         </button>
       </div>
-    </div>
-  </div>
+		</div>
+	</div>
 </template>
 
 <script lang="ts">
@@ -101,6 +99,7 @@ import { useGameStore } from '@/stores/gameStore'
 import { useWsStore } from '@/stores/wsStore'
 import { useAuthStore } from '@/stores/authStore'
 import { isAxiosError } from 'axios'
+import type { BoardConfiguration } from '@/models/BoardConfiguration'
 
 export default defineComponent({
   name: 'GameView',
@@ -145,7 +144,7 @@ export default defineComponent({
         die1: computed(() => (dice.value.roll.length > 0 ? dice.value.roll[0] : null)),
         die2: computed(() => (dice.value.roll.length > 1 ? dice.value.roll[1] : null))
       },
-      usedDice: computed(() => dice.value.used),
+      availableDice: computed(() => dice.value.available),
       player1,
       player2,
       turn,
@@ -182,24 +181,17 @@ export default defineComponent({
 		},
   },
   computed: {
-    isYourTurn(): boolean {
-      if ((this.turn % 2 === 0 && this.isPlayer1) || (this.turn % 2 === 1 && !this.isPlayer1)) {
-        return true
-      } else {
-        return false
-      }
-    },
-    diceThrown(): boolean {
-      return this.diceResult.die1.value !== null && this.diceResult.die2.value !== null
-    },
-    availableDices(): number[] {
-      return this.diceResult.die1.value === this.diceResult.die2.value
-        ? [this.diceResult.die1.value!, this.diceResult.die2.value!]
-        : [this.diceResult.die1.value!, this.diceResult.die2.value!].filter(
-          dice => dice && !this.usedDice.includes(dice)
-        )
-    }
-  }
+		isYourTurn(): boolean {
+			if ((this.turn % 2 === 0 && this.isPlayer1) || (this.turn % 2 === 1 && !this.isPlayer1)) {
+				return true;
+			} else {
+				return false;
+			}
+		},
+		diceThrown(): boolean {
+			return this.diceResult.die1.value !== null && this.diceResult.die2.value !== null;
+		},
+	},
 })
 </script>
 

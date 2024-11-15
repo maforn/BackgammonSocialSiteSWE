@@ -58,7 +58,7 @@ class Match(BaseModel):
     player2: str
     board_configuration: BoardConfiguration = BoardConfiguration()
     dice: List[int] = []
-    used: List[int] = []
+    available: List[int] = []
     turn: int = 0
     status: str = "pending"
     first_to: int

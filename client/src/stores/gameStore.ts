@@ -12,7 +12,7 @@ interface GameData {
 		bar: PointConfiguration;
 	};
 	dice: number[];
-	used: number[];
+	available: number[];
 	turn: number;
 	created_at: string;
 	updated_at: string;
@@ -27,7 +27,7 @@ export const useGameStore = defineStore('game', {
 		player1: '',
 		player2: '',
 		boardConfiguration: new BoardConfiguration(),
-		dice: { roll: [], used: [] },
+		dice: { roll: [], available: [] },
 		turn: 0,
 		created_at: new Date(),
 		updated_at: new Date(),
@@ -56,7 +56,7 @@ export const useGameStore = defineStore('game', {
 				new PointConfiguration(data.board_configuration.bar.player1, data.board_configuration.bar.player2),
 			);
 			this.dice.roll = data.dice;
-			this.dice.used = data.used;
+			this.dice.available = data.available;
 			this.turn = data.turn;
 			this.created_at = new Date(data.created_at);
 			this.updated_at = new Date(data.updated_at);
@@ -78,8 +78,9 @@ export const useGameStore = defineStore('game', {
 				this.first_to,
 			);
 		},
-		setDice(die1: number, die2: number) {
-			this.dice.roll = [die1, die2];
+		setDice(result: number[], available: number[]) {
+			this.dice.roll = result;
+			this.dice.available = available;
 		},
 	},
 });

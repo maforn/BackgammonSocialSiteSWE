@@ -91,13 +91,12 @@ import { logout as authLogout } from '@/services/authService'
 import { acceptInviteService, receiveInviteService } from '@/services/invitesService'
 import { useRouter } from 'vue-router'
 import { useGameStore } from '@/stores/gameStore';
-import { isAxiosError } from 'axios';
 import axiosInstance from '@/axios';
 
 interface Invite {
-  _id: string;
-  player1: string;
-  first_to: number;
+	_id: string;
+	player1: string;
+	first_to: number;
 }
 
 export default defineComponent({
@@ -120,10 +119,10 @@ export default defineComponent({
         hasSuspendedGame.value = exists
       });
 
-    const logout = () => {
-      authLogout()
-      router?.push('register')
-    }
+		const logout = () => {
+			authLogout();
+			router?.push('register');
+		};
 
     const receiveInvites = async () => {
       try {
@@ -151,9 +150,9 @@ export default defineComponent({
       }
     }
 
-    const closeOverlay = () => {
-      showOverlay.value = false
-    }
+		const closeOverlay = () => {
+			showOverlay.value = false;
+		};
 
     return { logout, receiveInvites, showInvites, closeOverlay, showOverlay, invites, acceptInvite, username, hasSuspendedGame }
   }
@@ -162,22 +161,22 @@ export default defineComponent({
 
 <style scoped>
 .bg {
-  /* Photo credit: FIGIST CO on Unsplash */
-  background-image: url("../assets/bg.jpg");
-  position: fixed;
-  width: 100vw;
-  height: 100vh;
-  top: 0;
-  left: 0;
-  margin: 0;
-  padding: 0;
-  z-index: -1;
-  overflow: hidden;
-  filter: brightness(50%);
-  transform: scaleX(-1);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
+	/* Photo credit: FIGIST CO on Unsplash */
+	background-image: url('../assets/bg.jpg');
+	position: fixed;
+	width: 100vw;
+	height: 100vh;
+	top: 0;
+	left: 0;
+	margin: 0;
+	padding: 0;
+	z-index: -1;
+	overflow: hidden;
+	filter: brightness(50%);
+	transform: scaleX(-1);
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
 }
 
 .circle {
@@ -189,29 +188,29 @@ export default defineComponent({
 }
 
 .overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.8);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
 }
 
 .overlay-content {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  width: 80%;
-  max-width: 600px;
-  text-align: center;
-  position: relative;
+	background: white;
+	padding: 20px;
+	border-radius: 10px;
+	width: 80%;
+	max-width: 600px;
+	text-align: center;
+	position: relative;
 }
 
 .x-receive-invites:hover {
-  transform: scale(1.3);
+	transform: scale(1.3);
 }
 </style>
