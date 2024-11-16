@@ -5,6 +5,7 @@ import { BoardConfiguration, PointConfiguration } from '@/models/BoardConfigurat
 import { Match } from '@/models/Match'
 import '@/wasm/wasm_exec'
 import { useAuthStore } from '@/stores/authStore'
+import { doRandomMove, findUsedDie, moveOnBoard, swapPlayers } from '@/services/gameService'
 
 interface GameData {
   player1: string;
@@ -85,7 +86,7 @@ export const useGameStore = defineStore('game', {
         this.dice.roll = diceRoll
         this.dice.available = diceRoll
 
-        const board = isPlayer1 ? this.swapPlayers(this.boardConfiguration) : this.boardConfiguration
+				const board = isPlayer1 ? swapPlayers(this.boardConfiguration) : this.boardConfiguration;
 
         const input = {
           board: {
@@ -105,6 +106,7 @@ export const useGameStore = defineStore('game', {
           'score-moves': true
         }
         const moves = await this.getMovesFromWasm(input)
+        console.log(moves)
         switch (isPlayer1 ? this.player2 : this.player1) {
           case 'ai_hard':
             setTimeout(() => this.makeAIMove(moves[0]), 1000)
@@ -120,87 +122,47 @@ export const useGameStore = defineStore('game', {
     },
     makeAIMove(move: any) {
       const isPlayer1 = this.player1 === useAuthStore().username;
-      let newBoard = !isPlayer1 ? {...this.boardConfiguration} : this.swapPlayers(this.boardConfiguration);
+      let newBoard = !isPlayer1 ? {...this.boardConfiguration} : swapPlayers(this.boardConfiguration);
       move.play.forEach((piece_move, index) => {
 
-        const srcIndex = piece_move.from - 1;
-        const dstIndex = piece_move.to - 1;
+        console.log(piece_move);
 
-        console.log(srcIndex, newBoard.points[srcIndex].player1, dstIndex, newBoard.points[dstIndex].player1);
+				const srcIndex = piece_move.from - 1;
+				const dstIndex = piece_move.to - 1;
+				let usedDice = null;
 
-        const usedDice = this.moveOnBoard(newBoard, srcIndex, dstIndex);
-
-        console.log("Used dice", usedDice);
-
-        const diceIndex = this.dice.available.indexOf(usedDice);
-				if (diceIndex !== -1 && diceIndex !== undefined) {
-					this.dice.available?.splice(diceIndex, 1);
+				try {
+          console.log("moving")
+					moveOnBoard(newBoard, this.dice.available, srcIndex, dstIndex);
+          console.log("moved");
+					usedDice = findUsedDie(this.dice.available, srcIndex, dstIndex);
+          console.log("moved", usedDice);
+				} catch {
+					const randomMove = doRandomMove(newBoard, this.dice.available);
+          console.log("random", randomMove);
+					if (randomMove) {
+						usedDice = findUsedDie(this.dice.available, randomMove.src, randomMove.dst);
+					}
+          console.log("random", usedDice);
 				}
 
-        this.boardConfiguration = isPlayer1 ? this.swapPlayers(newBoard) : newBoard;
-      })
-
-      axiosInstance.post('/move/ai', {
-        board: this.boardConfiguration
-      });
-    },
-    moveOnBoard(board: BoardConfiguration, srcPointIndex: number, dstPointIndex: number) : number{
-      if (srcPointIndex === 24) {
-				board.bar.player1--;
-			} else {
-				board.points[srcPointIndex].player1--;
-			}
-
-			if (dstPointIndex >= 0) {
-				board.points[dstPointIndex].player1++;
-
-				// Hit the opponent's piece if there is only one
-				if (board.points[dstPointIndex].player2 === 1) {
-					board.points[dstPointIndex].player2 = 0;
-					board.bar.player2++;
+				if (usedDice) {
+					const diceIndex = this.dice.available.indexOf(usedDice);
+					if (diceIndex !== -1 && diceIndex !== undefined) {
+						this.dice.available?.splice(diceIndex, 1);
+					}
 				}
-			}
 
-			// Update the available dice and reset the source point index
-			let usedDice = this.dice.available?.reduce((min, dice) => {
-				if (srcPointIndex - dice <= dstPointIndex && dice < min) {
-					return dice;
-				}
-				return min;
-			}, Infinity);
+				this.boardConfiguration = isPlayer1 ? swapPlayers(newBoard) : newBoard;
+			});
 
-			if (usedDice === Infinity || usedDice === undefined) {
-				throw new Error('No valid dice');
-      }
-      else{
-        return usedDice;
-      }
-    },
-    swapPlayers(board: BoardConfiguration): BoardConfiguration {
-			const newBoard = JSON.parse(JSON.stringify(board));
-
-			// Swap pieces on each point
-			for (const point of newBoard.points) {
-				const tmp = point.player1;
-				point.player1 = point.player2;
-				point.player2 = tmp;
-			}
-
-			// Invert point order
-			newBoard.points = newBoard.points.reverse();
-
-			// Swap pieces in the bar
-			const tmpBar = newBoard.bar.player1;
-			newBoard.bar.player1 = newBoard.bar.player2;
-			newBoard.bar.player2 = tmpBar;
-
-			return newBoard;
+			axiosInstance.post('/move/ai', {
+				board: this.boardConfiguration,
+			});
 		},
     async getMovesFromWasm(input: any) {
       await this.initializeWasm()
-      while (!this.loaded) {
-        await new Promise(resolve => setTimeout(resolve, 1000))
-      }
+      console.log(JSON.stringify(input))
       const output = globalThis.wasm_get_moves(JSON.stringify(input))
       return JSON.parse(output)
     },
