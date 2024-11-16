@@ -25,7 +25,7 @@ interface GameData {
 const ai_players = ['ai_hard', 'ai_medium', 'ai_easy'];
 
 export const useGameStore = defineStore('game', {
-  state: (): Match & { goInstance: Go | null } => ({
+  state: (): Match & { goInstance: Go | null, loaded: boolean } => ({
     player1: '',
     player2: '',
     boardConfiguration: new BoardConfiguration(),
@@ -37,15 +37,16 @@ export const useGameStore = defineStore('game', {
     first_to: 0,
     winsP1: 0,
     winsP2: 0,
-    goInstance: null
+    goInstance: null,
+    loaded : false
   }),
   actions: {
     async initializeWasm() {
       if (!this.goInstance) {
         this.goInstance = new Go()
         const result = await WebAssembly.instantiateStreaming(fetch('lib.wasm'), this.goInstance.importObject)
+        this.loaded = true;
         await this.goInstance.run(result.instance)
-        await this.fetchGame()
       }
     },
     fetchGame() {
@@ -74,7 +75,7 @@ export const useGameStore = defineStore('game', {
 			this.updated_at = new Date(data.updated_at);
 			this.status = data.status;
 			this.first_to = data.first_to;
-      await this.checkAITurn()
+      setTimeout(async () => await this.checkAITurn(), 1000)
     },
     async checkAITurn() {
       const isPlayer1 = this.player1 === useAuthStore().username
@@ -106,13 +107,13 @@ export const useGameStore = defineStore('game', {
         const moves = await this.getMovesFromWasm(input)
         switch (isPlayer1 ? this.player2 : this.player1) {
           case 'ai_hard':
-            this.makeAIMove(moves[0])
+            setTimeout(() => this.makeAIMove(moves[0]), 1000)
             break
           case 'ai_medium':
-            this.makeAIMove(moves[Math.floor(Math.random() * moves.length)])
+            setTimeout(() => this.makeAIMove(moves[Math.floor(Math.random() * moves.length - 1)]), 1000)
             break
           case 'ai_easy':
-            this.makeAIMove(moves[moves.length - 1])
+            setTimeout(() => this.makeAIMove(moves[Math.floor(Math.random() * moves.length)]), 1000)
             break
         }
       }
@@ -197,7 +198,9 @@ export const useGameStore = defineStore('game', {
 		},
     async getMovesFromWasm(input: any) {
       await this.initializeWasm()
-      console.log(JSON.stringify(input))
+      while (!this.loaded) {
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      }
       const output = globalThis.wasm_get_moves(JSON.stringify(input))
       return JSON.parse(output)
     },
