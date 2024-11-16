@@ -99,7 +99,6 @@ import { useGameStore } from '@/stores/gameStore'
 import { useWsStore } from '@/stores/wsStore'
 import { useAuthStore } from '@/stores/authStore'
 import { isAxiosError } from 'axios'
-import type { BoardConfiguration } from '@/models/BoardConfiguration'
 
 export default defineComponent({
   name: 'GameView',
