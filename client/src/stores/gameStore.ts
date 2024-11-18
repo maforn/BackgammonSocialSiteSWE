@@ -23,7 +23,7 @@ interface GameData {
   first_to: number;
 }
 
-const ai_players = ['ai_hard', 'ai_medium', 'ai_easy'];
+const ai_players = ['ai_hard', 'ai_medium', 'ai_easy']
 
 export const useGameStore = defineStore('game', {
   state: (): Match & { goInstance: Go | null, loaded: boolean } => ({
@@ -39,14 +39,14 @@ export const useGameStore = defineStore('game', {
     winsP1: 0,
     winsP2: 0,
     goInstance: null,
-    loaded : false
+    loaded: false
   }),
   actions: {
     async initializeWasm() {
       if (!this.goInstance) {
         this.goInstance = new Go()
         const result = await WebAssembly.instantiateStreaming(fetch('lib.wasm'), this.goInstance.importObject)
-        this.loaded = true;
+        this.loaded = true
         await this.goInstance.run(result.instance)
       }
     },
@@ -63,19 +63,19 @@ export const useGameStore = defineStore('game', {
       })
     },
     async setMatch(data: GameData) {
-      this.player1 = data.player1;
-			this.player2 = data.player2;
-			this.boardConfiguration = new BoardConfiguration(
-				data.board_configuration.points.map((p: PointConfiguration) => new PointConfiguration(p.player1, p.player2)),
-				new PointConfiguration(data.board_configuration.bar.player1, data.board_configuration.bar.player2),
-			);
-			this.dice.roll = data.dice;
-			this.dice.available = data.available;
-			this.turn = data.turn;
-			this.created_at = new Date(data.created_at);
-			this.updated_at = new Date(data.updated_at);
-			this.status = data.status;
-			this.first_to = data.first_to;
+      this.player1 = data.player1
+      this.player2 = data.player2
+      this.boardConfiguration = new BoardConfiguration(
+        data.board_configuration.points.map((p: PointConfiguration) => new PointConfiguration(p.player1, p.player2)),
+        new PointConfiguration(data.board_configuration.bar.player1, data.board_configuration.bar.player2)
+      )
+      this.dice.roll = data.dice
+      this.dice.available = data.available
+      this.turn = data.turn
+      this.created_at = new Date(data.created_at)
+      this.updated_at = new Date(data.updated_at)
+      this.status = data.status
+      this.first_to = data.first_to
       setTimeout(async () => await this.checkAITurn(), 1000)
     },
     async checkAITurn() {
@@ -86,27 +86,35 @@ export const useGameStore = defineStore('game', {
         this.dice.roll = diceRoll
         this.dice.available = diceRoll
 
-				const board = isPlayer1 ? swapPlayers(this.boardConfiguration) : this.boardConfiguration;
+        const board = isPlayer1 ? swapPlayers(this.boardConfiguration) : this.boardConfiguration
 
         const input = {
           board: {
-            o: board.points.reduce((acc, point, index) => {
-              if (point.player2 > 0) acc[index + 1] = point.player2
-              return acc
-            }, {}),
-            x: board.points.reduce((acc, point, index) => {
-              if (point.player1 > 0) acc[index + 1] = point.player1
-              return acc
-            }, {})
+            o: {
+              ...board.points.reduce((acc, point, index) => {
+                if (point.player2 > 0) acc[index + 1] = point.player2
+                return acc
+              }, {}),
+              bar: board.bar.player2
+            },
+            x: {
+              ...board.points.reduce((acc, point, index) => {
+                if (point.player1 > 0) acc[index + 1] = point.player1
+                return acc
+              }, {}),
+              bar: board.bar.player1
+            }
           },
           cubeful: false,
           dice: diceRoll,
-          'max-moves': 3,
-          player: 'x',
-          'score-moves': true
+          'max-moves':
+            3,
+          player:
+            'x',
+          'score-moves':
+            true
         }
         const moves = await this.getMovesFromWasm(input)
-        console.log(moves)
         switch (isPlayer1 ? this.player2 : this.player1) {
           case 'ai_hard':
             setTimeout(() => this.makeAIMove(moves[0]), 1000)
@@ -121,45 +129,46 @@ export const useGameStore = defineStore('game', {
       }
     },
     makeAIMove(move: any) {
-      const isPlayer1 = this.player1 === useAuthStore().username;
-      let newBoard = !isPlayer1 ? {...this.boardConfiguration} : swapPlayers(this.boardConfiguration);
+      const isPlayer1 = this.player1 === useAuthStore().username
+      let newBoard = !isPlayer1 ? { ...this.boardConfiguration } : swapPlayers(this.boardConfiguration)
       move.play.forEach((piece_move, index) => {
 
-        console.log(piece_move);
+        console.log(piece_move)
 
-				const srcIndex = piece_move.from - 1;
-				const dstIndex = piece_move.to - 1;
-				let usedDice = null;
+        const srcIndex = piece_move.from === 'bar' ? 24 : piece_move.from - 1;
+        const dstIndex = piece_move.to === 'off' ? -1 : piece_move.to - 1;
 
-				try {
-          console.log("moving")
-					moveOnBoard(newBoard, this.dice.available, srcIndex, dstIndex);
-          console.log("moved");
-					usedDice = findUsedDie(this.dice.available, srcIndex, dstIndex);
-          console.log("moved", usedDice);
-				} catch {
-					const randomMove = doRandomMove(newBoard, this.dice.available);
-          console.log("random", randomMove);
-					if (randomMove) {
-						usedDice = findUsedDie(this.dice.available, randomMove.src, randomMove.dst);
-					}
-          console.log("random", usedDice);
-				}
+        let usedDice = null
 
-				if (usedDice) {
-					const diceIndex = this.dice.available.indexOf(usedDice);
-					if (diceIndex !== -1 && diceIndex !== undefined) {
-						this.dice.available?.splice(diceIndex, 1);
-					}
-				}
+        try {
+          console.log('moving')
+          moveOnBoard(newBoard, this.dice.available, srcIndex, dstIndex)
+          console.log('moved')
+          usedDice = findUsedDie(this.dice.available, srcIndex, dstIndex)
+          console.log('moved', usedDice)
+        } catch {
+          const randomMove = doRandomMove(newBoard, this.dice.available)
+          console.log('random', randomMove)
+          if (randomMove) {
+            usedDice = findUsedDie(this.dice.available, randomMove.src, randomMove.dst)
+          }
+          console.log('random', usedDice)
+        }
 
-				this.boardConfiguration = isPlayer1 ? swapPlayers(newBoard) : newBoard;
-			});
+        if (usedDice) {
+          const diceIndex = this.dice.available.indexOf(usedDice)
+          if (diceIndex !== -1 && diceIndex !== undefined) {
+            this.dice.available?.splice(diceIndex, 1)
+          }
+        }
 
-			axiosInstance.post('/move/ai', {
-				board: this.boardConfiguration,
-			});
-		},
+        this.boardConfiguration = isPlayer1 ? swapPlayers(newBoard) : newBoard
+      })
+
+      axiosInstance.post('/move/ai', {
+        board: this.boardConfiguration
+      })
+    },
     async getMovesFromWasm(input: any) {
       await this.initializeWasm()
       console.log(JSON.stringify(input))
@@ -167,21 +176,21 @@ export const useGameStore = defineStore('game', {
       return JSON.parse(output)
     },
     getMatch(): Match {
-			return new Match(
-				this.player1,
-				this.player2,
-				this.boardConfiguration,
-				this.dice,
-				this.turn,
-				new Date(this.created_at),
-				new Date(this.updated_at),
-				this.status,
-				this.first_to,
-			);
-		},
+      return new Match(
+        this.player1,
+        this.player2,
+        this.boardConfiguration,
+        this.dice,
+        this.turn,
+        new Date(this.created_at),
+        new Date(this.updated_at),
+        this.status,
+        this.first_to
+      )
+    },
     setDice(result: number[], available: number[]) {
-			this.dice.roll = result;
-			this.dice.available = available;
-		},
+      this.dice.roll = result
+      this.dice.available = available
+    }
   }
 })
