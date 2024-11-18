@@ -27,10 +27,7 @@ export const moveOnBoard = (
 	srcPointIndex: number,
 	dstPointIndex: number,
 ) => {
-
-    console.log("checking");
 	checkMoveValidity(board, dice, srcPointIndex, dstPointIndex);
-    console.log("checked");
 
 	if (srcPointIndex === 24) {
 		board.bar.player1--;
@@ -107,13 +104,9 @@ export const getAllowedPointIndices = (
 	} else {
 		// Find the points reachable from the selected point, with at most one opponent's piece
 
-        console.log("checking2");
-
 		const allowedIndices = availableDice
 			.map(dice => (srcPointIndex ?? 24) - dice)
 			.filter(index => index <= 23 && index >= 0 && boardConfig.points[index].player2 <= 1);
-
-        console.log("checked2");
 
 		// If the player has all pieces in base, allow moving pieces to the bear-off area
 		if (
@@ -128,7 +121,8 @@ export const getAllowedPointIndices = (
 };
 
 export const doRandomMove = (board: BoardConfiguration, dice: number[]) => {
-	const availableSrcs = getAllowedPointIndices(board, dice).sort(() => Math.random() - 0.5);
+
+	const availableSrcs = board.bar.player1 > 0 ? [24] : getAllowedPointIndices(board, dice).sort(() => Math.random() - 0.5);
 
 	for (const src of availableSrcs) {
 		const allowedDsts = getAllowedPointIndices(board, dice, src);
