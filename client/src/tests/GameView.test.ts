@@ -20,6 +20,24 @@ describe('GameView.vue', () => {
     mock.reset();
   });
 
+  it('renders players names and scores correctly', async () => {
+    const wrapper = mount(GameView, {
+      pinia,
+    });
+
+    wrapper.vm.player1 = 'Player 1';
+    wrapper.vm.player2 = 'Player 2';
+    wrapper.vm.first_to = 3;
+    wrapper.vm.winsP1 = 1;
+    wrapper.vm.winsP2 = 2;
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.find('#p1-display').text()).toBe('Player 1');
+    expect(wrapper.find('#p2-display').text()).toBe('Player 2');
+    expect(wrapper.findAll('v-icon[name="bi-circle-fill"]').length).toBe(3)
+    expect(wrapper.findAll('v-icon[name="bi-circle"]').length).toBe(3)
+  })
+
   it('should fetch dice throw result and update diceResult on diceThrow method call', async () => {
     const getSpy = vi.spyOn(axiosInstance, 'get');
     mock.onGet('/throw_dice').reply(200);

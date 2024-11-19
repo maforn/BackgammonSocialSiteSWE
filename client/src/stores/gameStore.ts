@@ -8,19 +8,21 @@ import { useAuthStore } from '@/stores/authStore'
 import { doRandomMove, findUsedDie, moveOnBoard, swapPlayers } from '@/services/gameService'
 
 interface GameData {
-  player1: string;
-  player2: string;
-  board_configuration: {
-    points: PointConfiguration[];
-    bar: PointConfiguration;
-  };
-  dice: number[];
-  available: number[];
-  turn: number;
-  created_at: string;
-  updated_at: string;
-  status: string;
-  first_to: number;
+	player1: string;
+	player2: string;
+	board_configuration: {
+		points: PointConfiguration[];
+		bar: PointConfiguration;
+	};
+	dice: number[];
+	available: number[];
+	turn: number;
+	created_at: string;
+	updated_at: string;
+	status: string;
+	first_to: number;
+	winsP1: number;
+	winsP2: number;
 }
 
 const ai_players = ['ai_hard', 'ai_medium', 'ai_easy']
@@ -76,6 +78,8 @@ export const useGameStore = defineStore('game', {
       this.updated_at = new Date(data.updated_at)
       this.status = data.status
       this.first_to = data.first_to
+			this.winsP1 = data.winsP1;
+			this.winsP2 = data.winsP2;
       setTimeout(async () => await this.checkAITurn(), 1000)
     },
     async checkAITurn() {
