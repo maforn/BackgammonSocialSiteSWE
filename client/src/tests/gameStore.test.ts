@@ -42,6 +42,8 @@ describe('game store', () => {
 			updated_at: now.toISOString(),
 			status: 'active',
 			first_to: 1,
+			winsP1: 0,
+			winsP2: 0,
 		});
 
 		expect(gameStore.getMatch()).toEqual(match);
@@ -91,6 +93,8 @@ describe('game store', () => {
 			updated_at: '2023-01-01T00:00:00Z',
 			status: 'active',
 			first_to: 1,
+			winsP1: 0,
+			winsP2: 0
 		};
 
 		gameStore.setMatch(data);

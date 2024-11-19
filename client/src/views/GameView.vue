@@ -2,9 +2,31 @@
 	<div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center p-4">
 		<div class="background"></div>
 		<div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
-			<div class="flex items-center px-8 py-3 bg-gray-600 text-white rounded-r-full rounded-l-full shadow-md font-medium">
-				{{ player1 }} ({{ winsP1 }}/{{ first_to }}) vs {{ player2 }} ({{ winsP2 }}/{{ first_to }})
-			</div>
+      <div class="flex justify-center w-full gap-4">
+        <div id="p1-display" class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
+        :class="username == player1 ? 'player-turn-1' : 'player-turn-2'">
+          {{ player1 }}
+          <div class="flex justify-evenly absolute bottom-1">
+            <div v-for="i in first_to">
+              <v-icon :name="i <= winsP1 ? 'bi-circle-fill' : 'bi-circle'" width="0.4em" height="0.4em"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center text-white font-bold">
+          VS
+        </div>
+
+        <div id="p2-display" class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
+        :class="username == player2 ? 'player-turn-1' : 'player-turn-2'">
+          {{ player2 }}
+          <div class="flex justify-evenly absolute bottom-1">
+            <div v-for="i in first_to">
+              <v-icon :name="i <= winsP2 ? 'bi-circle-fill' : 'bi-circle'" width="0.4em" height="0.4em"/>
+            </div>
+          </div>
+        </div>
+      </div>
 			<div class="relative">
 				<GameBoard
 					:configuration="configuration"
@@ -73,12 +95,12 @@ import DieFace from '@/components/DieFace.vue'
 import { computed, defineComponent } from 'vue'
 import axiosInstance from '@/axios'
 import GameBoard from '@/components/GameBoard.vue'
+import { BoardConfiguration } from '@/models/BoardConfiguration';
 import { storeToRefs } from 'pinia'
 import { useGameStore } from '@/stores/gameStore'
 import { useWsStore } from '@/stores/wsStore'
 import { useAuthStore } from '@/stores/authStore'
 import { isAxiosError } from 'axios'
-import type { BoardConfiguration } from '@/models/BoardConfiguration'
 
 export default defineComponent({
   name: 'GameView',
