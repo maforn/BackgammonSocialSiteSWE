@@ -55,6 +55,9 @@ class WebSocketService {
       case 'in_game_msg':
 				this.showInGameMessage(data.msg, data.user);
 				break;
+      case 'pass_turn':
+        useGameStore().setMatch(data.match);
+        break;
 			default:
 				console.warn('Unknown event:', data.type);
 		}
