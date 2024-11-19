@@ -12,6 +12,7 @@
 					:dice="availableDice"
 					:your-turn="isYourTurn"
 					@movePiece="movePiece"
+          @noAvailableMoves="buttonShower"
 				/>
 				<button v-if="!diceThrown && isYourTurn" class="dice-button p-2 w-10 sm:w-16 lg:w-20" @click.stop="diceThrow">
 					<v-icon name="gi-rolling-dices" width="100%" height="100%" />
@@ -64,13 +65,18 @@
           {{ msg }}
         </button>
       </div>
+      <div>
+        <button id="btn-pass-turn" v-if="showPassButton&&isYourTurn&&diceThrown" class="btn-preformed p-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">
+          Pass the turn
+        </button>
+      </div>
 		</div>
 	</div>
 </template>
 
 <script lang="ts">
 import DieFace from '@/components/DieFace.vue'
-import { computed, defineComponent } from 'vue'
+import {computed, defineComponent, ref} from 'vue'
 import axiosInstance from '@/axios'
 import GameBoard from '@/components/GameBoard.vue'
 import { storeToRefs } from 'pinia'
@@ -115,6 +121,22 @@ export default defineComponent({
       }
     }
 
+    const passTheTurn = async () => {
+      showPassButton.value = false;
+      try {
+        await axiosInstance.post('/game/pass_turn')
+      } catch (error) {
+        if (isAxiosError(error)) {
+          useWsStore().addError(error?.response?.data?.detail)
+        }
+      }
+    }
+
+    const showPassButton = ref()
+    const buttonShower = () =>{
+      showPassButton.value = true;
+    }
+
     return {
       configuration: computed(() => boardConfiguration.value),
       isPlayer1: computed(() => username === player1.value),
@@ -133,11 +155,15 @@ export default defineComponent({
       messages,
       username,
       preformedMessages,
-      sendPreformedMessage
+      sendPreformedMessage,
+      showPassButton,
+      buttonShower,
+      passTheTurn
     }
   },
   methods: {
     async diceThrow() {
+      this.showPassButton = false;
       try {
         await axiosInstance.get('/throw_dice')
       } catch (error) {
@@ -169,7 +195,7 @@ export default defineComponent({
 		},
 		diceThrown(): boolean {
 			return this.diceResult.die1.value !== null && this.diceResult.die2.value !== null;
-		},
+		}
 	},
 })
 </script>
