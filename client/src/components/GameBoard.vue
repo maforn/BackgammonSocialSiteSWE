@@ -98,7 +98,7 @@ import PointComponent from './PointComponent.vue';
 
 export default defineComponent({
 	name: 'GameBoard',
-	emits: ['movePiece'],
+	emits: ['movePiece', 'noAvailableMoves'],
 	components: {
 		PointComponent,
 	},
@@ -137,10 +137,12 @@ export default defineComponent({
 	},
 	created() {
 		this.internalConfig = this.player1 ? { ...this.configuration } : this.swapPlayers(this.configuration);
+    if (!this.isMoveAvailable) this.$emit('noAvailableMoves');
 	},
 	watch: {
 		dice(newDice) {
 			this.availableDice = [...newDice];
+      if (!this.isMoveAvailable) this.$emit('noAvailableMoves');
 		},
 		configuration(newConfig) {
 			this.internalConfig = this.player1 ? { ...newConfig } : this.swapPlayers(newConfig);
@@ -194,7 +196,7 @@ export default defineComponent({
 			}
 
 			// Update the available dice and reset the source point index
-			let usedDice = this.availableDice?.reduce((min, dice) => {
+			const usedDice = this.availableDice?.reduce((min, dice) => {
 				if (srcPointIndex - dice <= dstPointIndex && dice < min) {
 					return dice;
 				}
