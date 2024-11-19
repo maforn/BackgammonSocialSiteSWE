@@ -5,7 +5,7 @@
       <div class="flex justify-center w-full gap-4">
         <div id="p1-display" class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
         :class="username == player1 ? 'player-turn-1' : 'player-turn-2'">
-          {{ player1 }}
+          <v-icon :name="[ai_names.includes(player1) ? 'fa-robot' : 'io-person']" class="text-white" />{{ player1 }}
           <div class="flex justify-evenly absolute bottom-1">
             <div v-for="i in first_to">
               <v-icon :name="i <= winsP1 ? 'bi-circle-fill' : 'bi-circle'" width="0.4em" height="0.4em"/>
@@ -19,6 +19,7 @@
 
         <div id="p2-display" class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
         :class="username == player2 ? 'player-turn-1' : 'player-turn-2'">
+          <v-icon :name="[ai_names.includes(player2) ? 'fa-robot' : 'io-person']" class="text-white" />
           {{ player2 }}
           <div class="flex justify-evenly absolute bottom-1">
             <div v-for="i in first_to">
@@ -95,12 +96,12 @@ import DieFace from '@/components/DieFace.vue'
 import { computed, defineComponent } from 'vue'
 import axiosInstance from '@/axios'
 import GameBoard from '@/components/GameBoard.vue'
-import { BoardConfiguration } from '@/models/BoardConfiguration';
 import { storeToRefs } from 'pinia'
 import { useGameStore } from '@/stores/gameStore'
 import { useWsStore } from '@/stores/wsStore'
 import { useAuthStore } from '@/stores/authStore'
 import { isAxiosError } from 'axios'
+import type { BoardConfiguration } from '@/models/BoardConfiguration'
 
 export default defineComponent({
   name: 'GameView',
@@ -137,6 +138,8 @@ export default defineComponent({
       }
     }
 
+    const ai_names = ["ai_easy", "ai_normal", "ai_hard"];
+
     return {
       configuration: computed(() => boardConfiguration.value),
       isPlayer1: computed(() => username === player1.value),
@@ -155,7 +158,8 @@ export default defineComponent({
       messages,
       username,
       preformedMessages,
-      sendPreformedMessage
+      sendPreformedMessage,
+      ai_names
     }
   },
   methods: {
@@ -170,7 +174,7 @@ export default defineComponent({
     },
     movePiece(board: BoardConfiguration, dice: number) {
 			axiosInstance
-				.post('/move_piece', {
+				.post('/move/piece', {
 					board,
 					dice,
 				})
