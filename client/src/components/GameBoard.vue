@@ -137,6 +137,7 @@ export default defineComponent({
 	},
 	created() {
 		this.internalConfig = this.player1 ? { ...this.configuration } : this.swapPlayers(this.configuration);
+    if (!this.isMoveAvailable) this.$emit('noAvailableMoves');
 	},
 	watch: {
 		dice(newDice) {
