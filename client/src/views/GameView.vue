@@ -30,7 +30,7 @@
         </div>
       </div>
 
-      <div id="game-over" class="game-over font-medium relative" v-if="gameOver">{{winnerMessage}}</div>
+      <div id="game-over" class="bg-yellow-500 font-medium relative p-2 rounded" v-if="gameOver">{{winnerMessage}}</div>
 
 			<div class="relative">
 				<GameBoard
