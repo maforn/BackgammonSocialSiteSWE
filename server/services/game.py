@@ -61,10 +61,10 @@ async def check_winner(current_game: Match, manager):
             #Message for match end, US #103
             websocket_player1 = await manager.get_user(current_game.player1)
             if websocket_player1:
-                await manager.send_personal_message({"type": "game_over", "winner": winner}, websocket_player1)
+                await manager.send_personal_message({"type": "match_over", "winner": winner}, websocket_player1)
             websocket_player2 = await manager.get_user(current_game.player2)
             if websocket_player2:
-                await manager.send_personal_message({"type": "game_over", "winner": winner}, websocket_player2)
+                await manager.send_personal_message({"type": "match_over", "winner": winner}, websocket_player2)
 
         
         else:
