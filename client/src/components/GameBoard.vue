@@ -165,7 +165,7 @@ export default defineComponent({
       }
 			if (this.internalConfig.bar.player1 > 0) {
 				this.movePiece(24, index); // Move piece from bar to point
-			} else if (!this.srcPointIndex) {
+			} else if (this.srcPointIndex === null) {
 				this.srcPointIndex = index;
 			} else {
 				this.movePiece(this.srcPointIndex, index); // Move piece from one point to another

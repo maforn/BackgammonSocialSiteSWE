@@ -105,8 +105,6 @@ describe('GameView.vue', () => {
     expect(winner.exists()).toBe(false);
   });
 
-});
-
   it('should render messages correctly', () => {
     const wsStore = useWsStore();
     wsStore.messages = [

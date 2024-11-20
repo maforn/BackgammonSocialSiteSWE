@@ -5,6 +5,7 @@
       <div class="flex justify-center w-full gap-4">
         <div id="p1-display" class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
         :class="username == player1 ? 'player-turn-1' : 'player-turn-2'">
+          <v-icon :name="[ai_names.includes(player1) ? 'fa-robot' : 'io-person']" class="text-white" />
           {{ player1 }}
           <div class="flex justify-evenly absolute bottom-1">
             <div v-for="i in first_to">
@@ -19,6 +20,7 @@
 
         <div id="p2-display" class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
         :class="username == player2 ? 'player-turn-1' : 'player-turn-2'">
+          <v-icon :name="[ai_names.includes(player2) ? 'fa-robot' : 'io-person']" class="text-white" />
           {{ player2 }}
           <div class="flex justify-evenly absolute bottom-1">
             <div v-for="i in first_to">
@@ -27,6 +29,9 @@
           </div>
         </div>
       </div>
+
+      <div id="game-over" class="game-over font-medium relative" v-if="gameOver">{{winnerMessage}}</div>
+
 			<div class="relative">
 				<GameBoard
 					:configuration="configuration"
@@ -137,18 +142,20 @@ export default defineComponent({
       }
     }
 
-		return {
-			configuration: computed(() => boardConfiguration.value),
-			isPlayer1: computed(() => useAuthStore().username === player1.value),
-			thrower: computed(() => (turn.value % 2) + 1),
-			diceResult: {
-				die1: computed(() => (dice.value.roll.length > 0 ? dice.value.roll[0] : null)),
-				die2: computed(() => (dice.value.roll.length > 1 ? dice.value.roll[1] : null)),
-			},
+    const ai_names = ["ai_easy", "ai_normal", "ai_hard"];
+
+    return {
+      configuration: computed(() => boardConfiguration.value),
+      isPlayer1: computed(() => username === player1.value),
+      thrower: computed(() => (turn.value % 2) + 1),
+      diceResult: {
+        die1: computed(() => (dice.value.roll.length > 0 ? dice.value.roll[0] : null)),
+        die2: computed(() => (dice.value.roll.length > 1 ? dice.value.roll[1] : null))
+      },
       availableDice: computed(() => dice.value.available),
-			player1,
-			player2,
-			turn,
+      player1,
+      player2,
+      turn,
       first_to,
       winsP1,
       winsP2,
@@ -157,6 +164,7 @@ export default defineComponent({
       preformedMessages,
       sendPreformedMessage,
       status,
+      ai_names,
       gameOver: computed(() => status.value === 'player_1_won' || status.value === 'player_2_won'),
       winnerMessage: computed(() => {
         if (status.value === 'player_1_won') {
@@ -168,28 +176,28 @@ export default defineComponent({
       }),
 		};
 	},
-	methods: {
-		async diceThrow() {
-			try {
-				await axiosInstance.get('/throw_dice');
-			} catch (error) {
-				if (isAxiosError(error)) {
-					useWsStore().addError(error?.response?.data?.detail);
-				}
-			}
-		},
-    movePiece(board: BoardConfiguration, dice: number) {
-      axiosInstance
-        .post('/move_piece', {
-          board,
-          dice,
-        })
-        .catch(error => {
-          if (isAxiosError(error)) {
-            useWsStore().addError(error?.response?.data?.detail);
-          }
-        });
+  methods: {
+    async diceThrow() {
+      try {
+        await axiosInstance.get('/throw_dice')
+      } catch (error) {
+        if (isAxiosError(error)) {
+          useWsStore().addError(error?.response?.data?.detail)
+        }
+      }
     },
+    movePiece(board: BoardConfiguration, dice: number) {
+			axiosInstance
+				.post('/move/piece', {
+					board,
+					dice,
+				})
+				.catch(error => {
+					if (isAxiosError(error)) {
+						useWsStore().addError(error?.response?.data?.detail);
+					}
+				});
+		},
   },
   computed: {
 		isYourTurn(): boolean {
@@ -286,15 +294,6 @@ export default defineComponent({
 
 .player-turn-2 {
   background-color: #5656d3;
-}
-
-.game-over {
-  background-color: #ffcc00;
-  color: #000;
-  padding: 10px;
-  border-radius: 5px;
-  text-align: center;
-  font-size: 1.5rem;
 }
 
 .icon-scale {
