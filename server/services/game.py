@@ -1,6 +1,6 @@
 import random
 
-from models.board_configuration import Match
+from models.board_configuration import Match, BoardConfiguration
 from services.database import get_db
 
 
@@ -41,13 +41,55 @@ def check_win_condition(match :Match):
 async def check_winner(current_game: Match, manager):
     winner = check_win_condition(current_game)
     winner = winner.get("winner")
+
+    #Check if someone won the current round
     if winner != 0:
-        current_game.status = "player_" + str(winner) + "_won"
+
+        if(winner == 1):
+            #Player 1 won the current round
+            current_game.winsP1 += 1
+        else:
+            #Player 2 won the current round
+            current_game.winsP2 += 1
+            
+        #Check if someone won the entire match (won first_to rounds)
+        if(current_game.winsP1 == current_game.first_to or current_game.winsP2 == current_game.first_to):
+            current_game.status = "player_" + str(winner) + "_won" 
+
+            #TODO: logic for match end (US #103)
+
+            #Message for match end, US #103
+            websocket_player1 = await manager.get_user(current_game.player1)
+            if websocket_player1:
+                await manager.send_personal_message({"type": "game_over", "winner": winner}, websocket_player1)
+            websocket_player2 = await manager.get_user(current_game.player2)
+            if websocket_player2:
+                await manager.send_personal_message({"type": "game_over", "winner": winner}, websocket_player2)
+
+        
+        else:
+            #Must proceed to next round
+            #Reset the board configuration, turn, dice and available
+            current_game.board_configuration = BoardConfiguration().dict(by_alias=True)
+            current_game.available = []
+            current_game.dice = []
+            current_game.turn = 0
+
+            #Message for round end
+            websocket_player1 = await manager.get_user(current_game.player1)
+            if websocket_player1:
+                await manager.send_personal_message({"type": "round_over", "winner": winner}, websocket_player1)
+            websocket_player2 = await manager.get_user(current_game.player2)
+            if websocket_player2:
+                await manager.send_personal_message({"type": "round_over", "winner": winner}, websocket_player2)
+        
         await get_db().matches.update_one({"_id": current_game.id},
-                                          {"$set": {"status": "player_" + str(winner) + "_won"}})
-        websocket_player1 = await manager.get_user(current_game.player1)
-        if websocket_player1:
-            await manager.send_personal_message({"type": "game_over", "winner": winner}, websocket_player1)
-        websocket_player2 = await manager.get_user(current_game.player2)
-        if websocket_player2:
-            await manager.send_personal_message({"type": "game_over", "winner": winner}, websocket_player2)
+                                          {"$set": {"board_configuration": current_game.board_configuration,
+                                                    "status": current_game.status,
+                                                    "available": current_game.available,
+                                                    "dice": current_game.dice,
+                                                    "turn": current_game.turn,
+                                                    "winsP1": current_game.winsP1,
+                                                    "winsP2": current_game.winsP2}}) 
+
+        

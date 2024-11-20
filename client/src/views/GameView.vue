@@ -168,9 +168,9 @@ export default defineComponent({
       gameOver: computed(() => status.value === 'player_1_won' || status.value === 'player_2_won'),
       winnerMessage: computed(() => {
         if (status.value === 'player_1_won') {
-          return `${player1.value} has won the game!`;
+          return `${player1.value} has won the match!`;
         } else if (status.value === 'player_2_won') {
-          return `${player2.value} has won the game!`;
+          return `${player2.value} has won the match!`;
         }
         return '';
       }),
