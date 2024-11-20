@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from services.ai import ai_names
 from services.auth import oauth2_scheme, get_user_from_token
 from services.database import get_db
-from services.game import throw_dice, get_current_game
+from services.game import throw_dice, get_current_game, check_winner
 from services.websocket import manager
 
 router = APIRouter()
@@ -51,6 +51,8 @@ async def move(move_data: dict, token: str = Depends(oauth2_scheme)):
         current_game.dice = []
         current_game.available = []
 
+    await check_winner(current_game, manager)
+
     await get_db().matches.update_one({"_id": current_game.id}, {
         "$set": {"board_configuration": current_game.board_configuration, "available": current_game.available,
                  "dice": current_game.dice,
@@ -84,6 +86,8 @@ async def move(move_data: dict, token: str = Depends(oauth2_scheme)):
     current_game.turn += 1
     current_game.dice = []
     current_game.available = []
+
+    await check_winner(current_game, manager)
 
     await get_db().matches.update_one({"_id": current_game.id}, {
         "$set": {"board_configuration": current_game.board_configuration, "available": current_game.available,

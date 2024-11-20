@@ -147,11 +147,22 @@ export default defineComponent({
 		},
 	},
 	methods: {
+    /**
+     * Checks if there is a winner in the game.
+     */
+    isThereAWinner() {
+      return (this.internalConfig.points.every(point => point.player1 === 0) && this.internalConfig.bar.player1 === 0)
+        || (this.internalConfig.points.every(point => point.player2 === 0) && this.internalConfig.bar.player2 === 0);
+    },
 		/**
 		 * Selects a point to move pieces from or to.
 		 * @param index Index of the selected point.
 		 */
 		selectPoint(index: number) {
+      // If the game is over, do not allow any more moves
+      if (this.isThereAWinner()) {
+        return;
+      }
 			if (this.internalConfig.bar.player1 > 0) {
 				this.movePiece(24, index); // Move piece from bar to point
 			} else if (this.srcPointIndex === null) {

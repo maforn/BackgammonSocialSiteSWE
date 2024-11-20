@@ -79,6 +79,32 @@ describe('GameView.vue', () => {
     expect(postSpy).toHaveBeenCalledWith('/game/message', { message: 'Ottima mossa!' });
   });
 
+  it('shows the winner when the game is over', async () => {
+    const gameStore = useGameStore();
+    gameStore.status = 'player_1_won';
+    const wrapper = mount(GameView, {
+      global: {
+        plugins: [pinia],
+      },
+    });
+    await wrapper.vm.$nextTick();
+    const winner = wrapper.find('#game-over');
+    expect(winner.exists()).toBe(true);
+  });
+
+  it('does not shows the winner when the the game is not over', async () => {
+    const gameStore = useGameStore();
+    gameStore.status = 'started';
+    const wrapper = mount(GameView, {
+      global: {
+        plugins: [pinia],
+      },
+    });
+    await wrapper.vm.$nextTick();
+    const winner = wrapper.find('#game-over');
+    expect(winner.exists()).toBe(false);
+  });
+
   it('should render messages correctly', () => {
     const wsStore = useWsStore();
     wsStore.messages = [

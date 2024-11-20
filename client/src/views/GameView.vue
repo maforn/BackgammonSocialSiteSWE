@@ -1,11 +1,12 @@
 <template>
-	<div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center p-4">
+	<div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center">
 		<div class="background"></div>
 		<div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
       <div class="flex justify-center w-full gap-4">
         <div id="p1-display" class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
         :class="username == player1 ? 'player-turn-1' : 'player-turn-2'">
-          <v-icon :name="[ai_names.includes(player1) ? 'fa-robot' : 'io-person']" class="text-white" />{{ player1 }}
+          <v-icon :name="[ai_names.includes(player1) ? 'fa-robot' : 'io-person']" class="text-white" />
+          {{ player1 }}
           <div class="flex justify-evenly absolute bottom-1">
             <div v-for="i in first_to">
               <v-icon :name="i <= winsP1 ? 'bi-circle-fill' : 'bi-circle'" width="0.4em" height="0.4em"/>
@@ -28,6 +29,9 @@
           </div>
         </div>
       </div>
+
+      <div id="game-over" class="game-over font-medium relative" v-if="gameOver">{{winnerMessage}}</div>
+
 			<div class="relative">
 				<GameBoard
 					:configuration="configuration"
@@ -96,12 +100,12 @@ import DieFace from '@/components/DieFace.vue'
 import { computed, defineComponent } from 'vue'
 import axiosInstance from '@/axios'
 import GameBoard from '@/components/GameBoard.vue'
+import { BoardConfiguration } from '@/models/BoardConfiguration';
 import { storeToRefs } from 'pinia'
 import { useGameStore } from '@/stores/gameStore'
 import { useWsStore } from '@/stores/wsStore'
 import { useAuthStore } from '@/stores/authStore'
 import { isAxiosError } from 'axios'
-import type { BoardConfiguration } from '@/models/BoardConfiguration'
 
 export default defineComponent({
   name: 'GameView',
@@ -111,7 +115,7 @@ export default defineComponent({
   },
   setup() {
     const gameStore = useGameStore()
-    const { turn, dice, boardConfiguration, player1, player2, first_to, winsP1, winsP2 } = storeToRefs(gameStore)
+    const { turn, dice, boardConfiguration, player1, player2, first_to, winsP1, winsP2, status } = storeToRefs(gameStore)
 
     const wsStore = useWsStore()
     const { messages } = storeToRefs(wsStore)
@@ -159,9 +163,19 @@ export default defineComponent({
       username,
       preformedMessages,
       sendPreformedMessage,
-      ai_names
-    }
-  },
+      status,
+      ai_names,
+      gameOver: computed(() => status.value === 'player_1_won' || status.value === 'player_2_won'),
+      winnerMessage: computed(() => {
+        if (status.value === 'player_1_won') {
+          return `${player1.value} has won the game!`;
+        } else if (status.value === 'player_2_won') {
+          return `${player2.value} has won the game!`;
+        }
+        return '';
+      }),
+		};
+	},
   methods: {
     async diceThrow() {
       try {
