@@ -58,34 +58,39 @@ async def check_winner(current_game: Match, manager):
             current_game.winsP1 += 1
             winner_username = p1_data["username"]
             loser_username = p2_data["username"]
-            winner_rating = p1_data["rating"]
-            loser_rating = p2_data["rating"]
+            old_winner_rating = p1_data["rating"]
+            old_loser_rating = p2_data["rating"]
         else:
             #Player 2 won the current round
             current_game.winsP2 += 1
             winner_username = p2_data["username"]
             loser_username = p1_data["username"]
-            winner_rating = p2_data["rating"]
-            loser_rating = p1_data["rating"]
+            old_winner_rating = p2_data["rating"]
+            old_loser_rating = p1_data["rating"]
             
         #Check if someone won the entire match (won rounds_to_win rounds)
         if(current_game.winsP1 == current_game.rounds_to_win or current_game.winsP2 == current_game.rounds_to_win):
             current_game.status = "player_" + str(winner) + "_won"                 
 
             #Logic for player ratings update and match end
-            (winner_rating, loser_rating) = new_ratings_after_match(winner_rating, loser_rating)
+            (new_winner_rating, new_loser_rating) = new_ratings_after_match(old_winner_rating, old_loser_rating)
             await get_db().users.update_one({"username": winner_username},
-                                            {"$set": {"rating": winner_rating}})
+                                            {"$set": {"rating": new_winner_rating}})
             await get_db().users.update_one({"username": loser_username},
-                                            {"$set": {"rating": loser_rating}})
+                                            {"$set": {"rating": new_loser_rating}})
 
             #Message for match end, US #103
             websocket_player1 = await manager.get_user(current_game.player1)
             if websocket_player1:
-                await manager.send_personal_message({"type": "match_over", "winner": winner}, websocket_player1)
+                await manager.send_personal_message({"type": "match_over", "winner": winner_username, "loser": loser_username,
+                                                     "old_winner_rating": old_winner_rating, "new_winner_rating": new_winner_rating,
+                                                     "old_loser_rating": old_loser_rating, "new_loser_rating": new_loser_rating}, 
+                                                     websocket_player1)
             websocket_player2 = await manager.get_user(current_game.player2)
             if websocket_player2:
-                await manager.send_personal_message({"type": "match_over", "winner": winner}, websocket_player2)
+                await manager.send_personal_message({"type": "match_over", "winner": winner_username, "loser": loser_username,
+                                                     "old_winner_rating": old_winner_rating, "new_winner_rating": new_winner_rating,
+                                                     "old_loser_rating": old_loser_rating, "new_loser_rating": new_loser_rating}, websocket_player2)
 
         
         else:
@@ -99,10 +104,10 @@ async def check_winner(current_game: Match, manager):
             #Message for round end
             websocket_player1 = await manager.get_user(current_game.player1)
             if websocket_player1:
-                await manager.send_personal_message({"type": "round_over", "winner": winner}, websocket_player1)
+                await manager.send_personal_message({"type": "round_over", "winner": winner_username}, websocket_player1)
             websocket_player2 = await manager.get_user(current_game.player2)
             if websocket_player2:
-                await manager.send_personal_message({"type": "round_over", "winner": winner}, websocket_player2)
+                await manager.send_personal_message({"type": "round_over", "winner": winner_username}, websocket_player2)
         
         await get_db().matches.update_one({"_id": current_game.id},
                                           {"$set": {"board_configuration": current_game.board_configuration,

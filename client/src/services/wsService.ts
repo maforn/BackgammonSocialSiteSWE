@@ -56,10 +56,12 @@ class WebSocketService {
 				this.showInGameMessage(data.msg, data.user);
 				break;
 			case 'match_over':
-				this.showMessage("Player " + data.winner + " won the match")
+				this.showMessage(data.winner + " won the match!")
+				this.showMessage(data.winner + "'s rating: " + data.old_winner_rating + " -> " + data.new_winner_rating)
+				this.showMessage(data.loser + "'s rating: " + data.old_loser_rating + " -> " + data.new_loser_rating);
 				break;
 			case 'round_over':
-				this.showMessage("Player " + data.winner + " won the round")
+				this.showMessage(data.winner + " won the round!")
 				break;
 			default:
 				console.warn('Unknown event:', data.type);
