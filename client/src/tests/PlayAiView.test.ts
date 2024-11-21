@@ -21,15 +21,15 @@ describe('PlayAiView.vue', () => {
         const wrapper = mount(PlayAiView)
         expect(wrapper.find('h1').text()).toBe('PLAY AI')
         expect((wrapper.find('#difficulty').element as HTMLInputElement).value).toBe('easy')
-        expect((wrapper.find('#first_to').element as HTMLInputElement).value).toBe('1')
+        expect((wrapper.find('#rounds_to_win').element as HTMLInputElement).value).toBe('1')
     })
 
-    it('changes difficulty and first_to values', async () => {
+    it('changes difficulty and rounds_to_win values', async () => {
         const wrapper = mount(PlayAiView)
         await wrapper.find('#difficulty').setValue('medium')
-        await wrapper.find('#first_to').setValue('2')
+        await wrapper.find('#rounds_to_win').setValue('2')
         expect(wrapper.vm.difficulty).toBe('medium')
-        expect(wrapper.vm.first_to).toBe('2')
+        expect(wrapper.vm.rounds_to_win).toBe('2')
     })
 
     it('calls goHome method and navigates to home', async () => {

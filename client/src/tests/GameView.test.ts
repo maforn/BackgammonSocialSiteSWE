@@ -28,7 +28,7 @@ describe('GameView.vue', () => {
     wrapper.vm.started = true;
     wrapper.vm.player1 = 'Player 1';
     wrapper.vm.player2 = 'Player 2';
-    wrapper.vm.first_to = 3;
+    wrapper.vm.rounds_to_win = 3;
     wrapper.vm.winsP1 = 1;
     wrapper.vm.winsP2 = 2;
     await wrapper.vm.$nextTick();
@@ -84,6 +84,32 @@ describe('GameView.vue', () => {
     await button.trigger('click');
 
     expect(postSpy).toHaveBeenCalledWith('/game/message', { message: 'Ottima mossa!' });
+  });
+
+  it('shows the winner when the game is over', async () => {
+    const gameStore = useGameStore();
+    gameStore.status = 'player_1_won';
+    const wrapper = mount(GameView, {
+      global: {
+        plugins: [pinia],
+      },
+    });
+    await wrapper.vm.$nextTick();
+    const winner = wrapper.find('#game-over');
+    expect(winner.exists()).toBe(true);
+  });
+
+  it('does not shows the winner when the the game is not over', async () => {
+    const gameStore = useGameStore();
+    gameStore.status = 'started';
+    const wrapper = mount(GameView, {
+      global: {
+        plugins: [pinia],
+      },
+    });
+    await wrapper.vm.$nextTick();
+    const winner = wrapper.find('#game-over');
+    expect(winner.exists()).toBe(false);
   });
 
   it('should render messages correctly', async () => {

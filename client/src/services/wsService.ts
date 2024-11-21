@@ -31,7 +31,7 @@ class WebSocketService {
 		}
 	}
 
-	private handleMessage(event: MessageEvent) {
+	private async handleMessage(event: MessageEvent) {
 		const data = JSON.parse(event.data);
 		switch (data.type) {
 			case 'error':
@@ -54,10 +54,16 @@ class WebSocketService {
 				useGameStore().setDice(data.result, data.available);
 				break;
 			case 'move_piece':
-				useGameStore().setMatch(data.match);
+				await useGameStore().setMatch(data.match);
 				break;
-      case 'in_game_msg':
+			case 'in_game_msg':
 				this.showInGameMessage(data.msg, data.user);
+				break;
+			case 'match_over':
+				this.showMessage("Player " + data.winner + " won the match")
+				break;
+			case 'round_over':
+				this.showMessage("Player " + data.winner + " won the round")
 				break;
 			default:
 				console.warn('Unknown event:', data.type);

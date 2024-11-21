@@ -3,11 +3,11 @@ import { useAuthStore } from '@/stores/authStore';
 import axios from 'axios';
 import { useWsStore } from '@/stores/wsStore';
 
-export const sendInviteService = async (opponent_username: string, first_to: number) => {
+export const sendInviteService = async (opponent_username: string, rounds_to_win: number) => {
 	try {
 		await axiosInstance.post('/invites', {
 			opponent_username: opponent_username,
-			first_to: first_to,
+			rounds_to_win: rounds_to_win,
 		});
 	} catch (error) {
 		if (axios.isAxiosError(error) && error.response) {
