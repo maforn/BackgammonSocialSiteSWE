@@ -11,4 +11,4 @@ def new_ratings_after_match(winner_rating, loser_rating):
     if new_loser_rating < MINIMUM_RATING:
         new_loser_rating = MINIMUM_RATING
 
-    return (new_winner_rating, new_loser_rating)
+    return new_winner_rating, new_loser_rating

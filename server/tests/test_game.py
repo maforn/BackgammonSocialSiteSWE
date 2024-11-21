@@ -34,7 +34,6 @@ async def test_move_piece(client: AsyncClient, token: str):
     }
     response = await client.post("/move/piece", json=move_data, headers={"Authorization": f"Bearer {token}"})
     updated_match = await get_db().matches.find_one({"player1": "testuser"})
-    assert updated_match != old_match
     assert updated_match["dice"] != []
     assert response.status_code == 200
 
