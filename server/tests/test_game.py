@@ -99,3 +99,20 @@ async def test_move_ai(client: AsyncClient, token: str):
     assert updated_game is not None
     assert updated_game["board_configuration"]["points"][3]["player1"] == 1
     assert updated_game["turn"] == 1
+
+@pytest.mark.anyio
+async def test_round_progression(client: AsyncClient, token: str):
+    await clear_matches()
+    await create_started_match("testuser", "a")
+    await get_db().matches.update_one({"player1": "testuser"}, {"$set": {"turn": 20, "dice": [3, 5], "available": [3, 5], "rounds_to_win": 3, "winsP1": 0, "winsP2": 0}})
+    move_data = {
+        "board": {
+            "points": [{"player1": 1, "player2": 0}] + [{"player1": 0, "player2": 0} for _ in range(23)],
+            "bar": {"player1": 0, "player2": 0}
+        }
+    }
+    await client.post("/move/piece", json=move_data, headers={"Authorization": f"Bearer {token}"})
+    updated_game = await get_db().matches.find_one({"player1": "testuser"})
+    assert updated_game is not None
+    assert updated_game["turn"] == 0
+    assert updated_game["winsP2"] == 1

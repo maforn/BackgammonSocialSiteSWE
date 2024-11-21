@@ -28,7 +28,7 @@ async def receive_invite_endpoint(token: str = Depends(oauth2_scheme)):
 async def create_invite_endpoint(request: CreateInviteRequest, token: str = Depends(oauth2_scheme)):
     user = await get_user_from_token(token)
     opponent_username = request.opponent_username
-    first_to = request.first_to
+    rounds_to_win = request.rounds_to_win
 
     if user.username == opponent_username:
         raise HTTPException(status_code=400, detail="You cannot invite yourself")
@@ -41,10 +41,10 @@ async def create_invite_endpoint(request: CreateInviteRequest, token: str = Depe
             raise HTTPException(status_code=400, detail="You are already playing a match")
         
         elif is_ai(opponent_username):
-            await create_started_match(user.username, opponent_username, first_to)
+            await create_started_match(user.username, opponent_username, rounds_to_win)
 
         else: 
-            await create_invite(user.username, opponent_username, first_to)
+            await create_invite(user.username, opponent_username, rounds_to_win)
             websocket = await manager.get_user(opponent_username)
             if websocket:
                 await manager.send_personal_message({"type": "invite", "from": user.username}, websocket)

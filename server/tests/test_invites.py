@@ -13,7 +13,7 @@ async def test_receive_invite_endpoint(client: AsyncClient, token: str):
 
 @pytest.mark.anyio
 async def test_create_invite_endpoint(client: AsyncClient, token: str):
-    response = await client.post("/invites", json={"opponent_username": "opponent", "first_to": 1},
+    response = await client.post("/invites", json={"opponent_username": "opponent", "rounds_to_win": 1},
                                  headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     assert response.json() == {"message": "Invite created successfully"}
@@ -22,7 +22,7 @@ async def test_create_invite_endpoint(client: AsyncClient, token: str):
 @pytest.mark.anyio
 async def test_create_invite_endpoint(client: AsyncClient, token: str):
     await get_db().matches.delete_many({"$or": [{"player1": "testuser"}, {"player2": "testuser"}]})
-    response = await client.post("/invites", json={"opponent_username": "opponent", "first_to": 1},
+    response = await client.post("/invites", json={"opponent_username": "opponent", "rounds_to_win": 1},
                                  headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     assert response.json() == {"message": "Invite created successfully"}

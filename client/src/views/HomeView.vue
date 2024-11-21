@@ -68,7 +68,7 @@
               Invite from&nbsp;<p class="font-black">{{ invite.player1 }}</p>
               <span
                 class="bg-indigo-100 ms-2 text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-300">First
-                to {{ invite.first_to }} </span>
+                to {{ invite.rounds_to_win }} </span>
             </button>
           </li>
         </ul>
@@ -96,7 +96,7 @@ import axiosInstance from '@/axios';
 interface Invite {
 	_id: string;
 	player1: string;
-	first_to: number;
+	rounds_to_win: number;
 }
 
 export default defineComponent({

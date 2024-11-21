@@ -20,7 +20,7 @@ interface GameData {
 	created_at: string;
 	updated_at: string;
 	status: string;
-	first_to: number;
+	rounds_to_win: number;
 	winsP1: number;
 	winsP2: number;
 }
@@ -37,7 +37,7 @@ export const useGameStore = defineStore('game', {
     created_at: new Date(),
     updated_at: new Date(),
     status: 'pending',
-    first_to: 0,
+    rounds_to_win: 0,
     winsP1: 0,
     winsP2: 0,
     goInstance: null,
@@ -77,7 +77,7 @@ export const useGameStore = defineStore('game', {
       this.created_at = new Date(data.created_at)
       this.updated_at = new Date(data.updated_at)
       this.status = data.status
-      this.first_to = data.first_to
+      this.rounds_to_win = data.rounds_to_win
 			this.winsP1 = data.winsP1;
 			this.winsP2 = data.winsP2;
       setTimeout(async () => await this.checkAITurn(), 1000)
@@ -189,7 +189,7 @@ export const useGameStore = defineStore('game', {
         new Date(this.created_at),
         new Date(this.updated_at),
         this.status,
-        this.first_to
+        this.rounds_to_win
       )
     },
     setDice(result: number[], available: number[]) {

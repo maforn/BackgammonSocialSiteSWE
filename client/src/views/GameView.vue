@@ -8,7 +8,7 @@
           <v-icon :name="[ai_names.includes(player1) ? 'fa-robot' : 'io-person']" class="text-white" />
           {{ player1 }}
           <div class="flex justify-evenly absolute bottom-1">
-            <div v-for="i in first_to">
+            <div v-for="i in rounds_to_win">
               <v-icon :name="i <= winsP1 ? 'bi-circle-fill' : 'bi-circle'" width="0.4em" height="0.4em"/>
             </div>
           </div>
@@ -23,7 +23,7 @@
           <v-icon :name="[ai_names.includes(player2) ? 'fa-robot' : 'io-person']" class="text-white" />
           {{ player2 }}
           <div class="flex justify-evenly absolute bottom-1">
-            <div v-for="i in first_to">
+            <div v-for="i in rounds_to_win">
               <v-icon :name="i <= winsP2 ? 'bi-circle-fill' : 'bi-circle'" width="0.4em" height="0.4em"/>
             </div>
           </div>
@@ -115,7 +115,7 @@ export default defineComponent({
   },
   setup() {
     const gameStore = useGameStore()
-    const { turn, dice, boardConfiguration, player1, player2, first_to, winsP1, winsP2, status } = storeToRefs(gameStore)
+    const { turn, dice, boardConfiguration, player1, player2, rounds_to_win, winsP1, winsP2, status } = storeToRefs(gameStore)
 
     const wsStore = useWsStore()
     const { messages } = storeToRefs(wsStore)
@@ -156,7 +156,7 @@ export default defineComponent({
       player1,
       player2,
       turn,
-      first_to,
+      rounds_to_win,
       winsP1,
       winsP2,
       messages,
@@ -168,9 +168,9 @@ export default defineComponent({
       gameOver: computed(() => status.value === 'player_1_won' || status.value === 'player_2_won'),
       winnerMessage: computed(() => {
         if (status.value === 'player_1_won') {
-          return `${player1.value} has won the game!`;
+          return `${player1.value} has won the match!`;
         } else if (status.value === 'player_2_won') {
-          return `${player2.value} has won the game!`;
+          return `${player2.value} has won the match!`;
         }
         return '';
       }),

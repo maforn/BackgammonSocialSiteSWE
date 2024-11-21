@@ -39,7 +39,7 @@ describe('game store', () => {
       created_at: now.toISOString(),
       updated_at: now.toISOString(),
       status: 'active',
-      first_to: 1,
+      rounds_to_win: 1,
       winsP1: 0,
       winsP2: 0,
     });
@@ -90,7 +90,7 @@ describe('game store', () => {
       created_at: '2023-01-01T00:00:00Z',
       updated_at: '2023-01-01T00:00:00Z',
       status: 'active',
-      first_to: 1,
+      rounds_to_win: 1,
       winsP1: 0,
       winsP2: 0,
     };

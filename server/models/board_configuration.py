@@ -61,14 +61,14 @@ class Match(BaseModel):
     available: List[int] = []
     turn: int = 0
     status: str = "pending"
-    first_to: int
+    rounds_to_win: int
     winsP1: int = 0
     winsP2: int = 0
 
 
 class CreateInviteRequest(BaseModel):
     opponent_username: str
-    first_to: int
+    rounds_to_win: int
 
 
 class AcceptInviteRequest(BaseModel):
