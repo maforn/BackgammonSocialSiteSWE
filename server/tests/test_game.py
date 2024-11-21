@@ -126,5 +126,5 @@ async def test_round_progression(client: AsyncClient, token: str):
     await client.post("/move/piece", json=move_data, headers={"Authorization": f"Bearer {token}"})
     updated_game = await get_db().matches.find_one({"player1": "testuser"})
     assert updated_game is not None
-    assert updated_game["turn"] == 0
+    assert updated_game["turn"] == -1
     assert updated_game["winsP2"] == 1

@@ -41,23 +41,23 @@ async def check_winner(current_game: Match, manager):
     winner = check_win_condition(current_game)
     winner = winner.get("winner")
 
-    #Check if someone won the current round
+    # Check if someone won the current round
     if winner != 0:
 
-        if(winner == 1):
-            #Player 1 won the current round
+        if winner == 1:
+            # Player 1 won the current round
             current_game.winsP1 += 1
         else:
-            #Player 2 won the current round
+            # Player 2 won the current round
             current_game.winsP2 += 1
             
-        #Check if someone won the entire match (won rounds_to_win rounds)
-        if(current_game.winsP1 == current_game.rounds_to_win or current_game.winsP2 == current_game.rounds_to_win):
+        # Check if someone won the entire match (won rounds_to_win rounds)
+        if current_game.winsP1 == current_game.rounds_to_win or current_game.winsP2 == current_game.rounds_to_win:
             current_game.status = "player_" + str(winner) + "_won" 
 
-            #TODO: logic for match end (US #103)
+            # TODO: logic for match end (US #103)
 
-            #Message for match end, US #103
+            # Message for match end, US #103
             websocket_player1 = await manager.get_user(current_game.player1)
             if websocket_player1:
                 await manager.send_personal_message({"type": "match_over", "winner": winner}, websocket_player1)
