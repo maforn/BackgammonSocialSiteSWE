@@ -104,7 +104,7 @@ async def test_move_ai(client: AsyncClient, token: str):
 async def test_round_progression(client: AsyncClient, token: str):
     await clear_matches()
     await create_started_match("testuser", "a")
-    await get_db().matches.update_one({"player1": "testuser"}, {"$set": {"turn": 20, "dice": [3, 5], "available": [3, 5], "first_to": 3, "winsP1": 0, "winsP2": 0}})
+    await get_db().matches.update_one({"player1": "testuser"}, {"$set": {"turn": 20, "dice": [3, 5], "available": [3, 5], "rounds_to_win": 3, "winsP1": 0, "winsP2": 0}})
     move_data = {
         "board": {
             "points": [{"player1": 1, "player2": 0}] + [{"player1": 0, "player2": 0} for _ in range(23)],

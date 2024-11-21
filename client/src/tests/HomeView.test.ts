@@ -82,7 +82,7 @@ describe('HomeView.vue', () => {
 	it('renders invites list when invites are present', async () => {
 		const wrapper = mount(HomeView);
 		wrapper.vm.showOverlay = true;
-		wrapper.vm.invites = [{ _id: '1', player1: 'player1', first_to: 1 }];
+		wrapper.vm.invites = [{ _id: '1', player1: 'player1', rounds_to_win: 1 }];
 		await nextTick();
 		expect(wrapper.findAll('.overlay-content ul li').length).toBe(1);
 	});

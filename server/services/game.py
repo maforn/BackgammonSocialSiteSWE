@@ -20,8 +20,8 @@ async def get_current_game(username: str) -> Match:
     return None
 
 
-async def create_started_match(player1: str, player2: str, first_to: int=1):
-    new_match = Match(player1=player1, player2=player2, status="started", first_to=first_to)
+async def create_started_match(player1: str, player2: str, rounds_to_win: int=1):
+    new_match = Match(player1=player1, player2=player2, status="started", rounds_to_win=rounds_to_win)
     match_data = new_match.dict(by_alias=True)
     await get_db().matches.insert_one(match_data)
 
@@ -52,8 +52,8 @@ async def check_winner(current_game: Match, manager):
             #Player 2 won the current round
             current_game.winsP2 += 1
             
-        #Check if someone won the entire match (won first_to rounds)
-        if(current_game.winsP1 == current_game.first_to or current_game.winsP2 == current_game.first_to):
+        #Check if someone won the entire match (won rounds_to_win rounds)
+        if(current_game.winsP1 == current_game.rounds_to_win or current_game.winsP2 == current_game.rounds_to_win):
             current_game.status = "player_" + str(winner) + "_won" 
 
             #TODO: logic for match end (US #103)

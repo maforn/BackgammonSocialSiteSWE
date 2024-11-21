@@ -12,7 +12,7 @@ export class Match {
 	created_at: Date;
 	updated_at: Date;
 	status: string;
-	first_to: number;
+	rounds_to_win: number;
 	winsP1: number;
 	winsP2: number;
 
@@ -25,7 +25,7 @@ export class Match {
 		created_at: Date,
 		updated_at: Date,
 		status: string,
-		first_to: number,
+		rounds_to_win: number,
 	) {
 		this.player1 = player1;
 		this.player2 = player2;
@@ -35,7 +35,7 @@ export class Match {
 		this.created_at = created_at;
 		this.updated_at = updated_at;
 		this.status = status;
-		this.first_to = first_to;
+		this.rounds_to_win = rounds_to_win;
 		this.winsP1 = 0;
 		this.winsP2 = 0;
 	}

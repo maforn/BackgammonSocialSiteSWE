@@ -27,7 +27,7 @@ describe('GameView.vue', () => {
 
     wrapper.vm.player1 = 'Player 1';
     wrapper.vm.player2 = 'Player 2';
-    wrapper.vm.first_to = 3;
+    wrapper.vm.rounds_to_win = 3;
     wrapper.vm.winsP1 = 1;
     wrapper.vm.winsP2 = 2;
     await wrapper.vm.$nextTick();

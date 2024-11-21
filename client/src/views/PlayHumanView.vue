@@ -35,10 +35,10 @@
 		  </div>
   
 		  <div class="flex justify-center items-center pl-3 py-2 gap-x-2 self-center">
-			<label for="first_to" class="text-right">Matches to win</label>
+			<label for="rounds_to_win" class="text-right">Rounds to win</label>
 			<div class="container">
 			  <div class="select">
-				<select name="first_to" id="first_to" v-model="first_to">
+				<select name="rounds_to_win" id="rounds_to_win" v-model="rounds_to_win">
 				  <option value="1">1</option>
 				  <option value="2">2</option>
 				  <option value="3">3</option>
@@ -90,7 +90,7 @@ export default defineComponent({
 		users: Array<{ id: number; username: string }>;
 		showDropdown: boolean;
 		hasSelectedOpponent: boolean,
-		first_to: number,
+		rounds_to_win: number,
 		hasSuspendedGame: boolean,
 	} {
 		return {
@@ -98,7 +98,7 @@ export default defineComponent({
 			users: [] as Array<{ id: number; username: string }>,
 			showDropdown: false,
 			hasSelectedOpponent: false,
-			first_to: 1,
+			rounds_to_win: 1,
 			hasSuspendedGame: true
 		}
 	},
@@ -149,7 +149,7 @@ export default defineComponent({
 		},
 		async sendInvite() {
 			try {
-				await sendInviteService(this.searchQuery, this.first_to)
+				await sendInviteService(this.searchQuery, this.rounds_to_win)
 				this.searchQuery = ''
 				this.hasSelectedOpponent = false
 			} catch (error) {
