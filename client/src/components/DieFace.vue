@@ -45,8 +45,8 @@ export default defineComponent({
 }
 
 .dot {
-	width: 8px;
-	height: 8px;
+	width: 20%;
+	height: 20%;
 	background-color: black;
 	border-radius: 50%;
 	position: absolute;

@@ -23,6 +23,8 @@ interface GameData {
 	rounds_to_win: number;
 	winsP1: number;
 	winsP2: number;
+	starter: number;
+	startDice: { roll1: number; count1: number; roll2: number; count2: number };
 }
 
 const ai_players = ['ai_hard', 'ai_medium', 'ai_easy']
@@ -41,7 +43,9 @@ export const useGameStore = defineStore('game', {
     winsP1: 0,
     winsP2: 0,
     goInstance: null,
-    loaded: false
+    loaded: false,
+    starter: -1,
+		startDice: { roll1: 0, count1: 0, roll2: 0, count2: 0 },
   }),
   actions: {
     async initializeWasm() {
@@ -80,6 +84,8 @@ export const useGameStore = defineStore('game', {
       this.rounds_to_win = data.rounds_to_win
 			this.winsP1 = data.winsP1;
 			this.winsP2 = data.winsP2;
+      this.starter = data.starter;
+      this.startDice = data.startDice;
       setTimeout(async () => await this.checkAITurn(), 1000)
     },
     async checkAITurn() {
@@ -189,12 +195,21 @@ export const useGameStore = defineStore('game', {
         new Date(this.created_at),
         new Date(this.updated_at),
         this.status,
-        this.rounds_to_win
+        this.rounds_to_win,
+        this.starter
       )
     },
     setDice(result: number[], available: number[]) {
       this.dice.roll = result
       this.dice.available = available
-    }
+    },
+    setStartDice(roll1: number, count1: number, roll2: number, count2: number) {
+			this.startDice = { roll1, count1, roll2, count2 };
+
+		},
+		setStarter(starter: number, turn: number) {
+			this.starter = starter;
+			this.turn = turn;
+		}
   }
 })
