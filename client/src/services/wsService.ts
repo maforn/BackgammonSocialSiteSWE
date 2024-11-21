@@ -46,6 +46,10 @@ class WebSocketService {
 			case 'msg':
 				this.showMessage(data.msg);
 				break;
+			case 'start_dice_roll':
+				useGameStore().setStartDice(data.result.roll1, data.result.count1, data.result.roll2, data.result.count2);
+				useGameStore().setStarter(data.starter, data.turn);
+				break;
 			case 'dice_roll':
 				useGameStore().setDice(data.result, data.available);
 				break;

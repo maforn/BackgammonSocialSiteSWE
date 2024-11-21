@@ -2,7 +2,7 @@
 	<div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center">
 		<div class="background"></div>
 		<div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
-      <div class="flex justify-center w-full gap-4">
+      <div class="flex justify-center w-full gap-4 mt-6" v-if="started">
         <div id="p1-display" class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
         :class="username == player1 ? 'player-turn-1' : 'player-turn-2'">
           <v-icon :name="[ai_names.includes(player1) ? 'fa-robot' : 'io-person']" class="text-white" />
@@ -29,75 +29,95 @@
           </div>
         </div>
       </div>
-
       <div id="game-over" class="bg-yellow-500 font-medium relative p-2 rounded" v-if="gameOver">{{winnerMessage}}</div>
-
-			<div class="relative">
-				<GameBoard
-					:configuration="configuration"
-					:player1="isPlayer1"
-					:dice="availableDice"
-					:your-turn="isYourTurn"
-					@movePiece="movePiece"
-				/>
-				<button v-if="!diceThrown && isYourTurn" class="dice-button p-2 w-10 sm:w-16 lg:w-20" @click.stop="diceThrow">
-					<v-icon name="gi-rolling-dices" width="100%" height="100%" />
-				</button>
-			</div>
-			<div class="flex gap-2">
-				<div
-					:class="[
-						'flex',
-						'items-center',
-						'px-8',
-						'h-12',
-						'py-3',
-						'text-white',
-						'rounded-r-full',
-						'rounded-l-full',
-						'shadow-md',
-						isYourTurn ? 'player-turn-1' : 'player-turn-2',
-					]"
-        >
+      <div class="relative" v-if="started">
+        <GameBoard :configuration="configuration" :player1="isPlayer1" :dice="availableDice" :your-turn="isYourTurn"
+          @movePiece="movePiece" />
+        <button v-if="!diceThrown && isYourTurn" class="dice-button p-2 w-10 sm:w-16 lg:w-20" @click.stop="diceThrow">
+          <v-icon name="gi-rolling-dices" width="100%" height="100%" />
+        </button>
+      </div>
+      <div v-else class="flex flex-col items-center justify-center gap-4 mt-20 text-center">
+        <h3 class="text-4xl font-black text-white text-shadow">{{ initialText }}</h3>
+        <div class="grid grid-cols-2 gap-x-8 gap-y-4 mt-10">
+          <p class="text-white text-lg font-bold">
+            Throw #{{ startDice.count1 }}
+          </p>
+          <p class="text-white text-lg font-bold">
+            Throw #{{ startDice.count2 }}
+          </p>
+          <div class="size-32">
+            <DieFace :value="startDice.roll1" />
+          </div>
+          <div class="size-32">
+            <DieFace :value="startDice.roll2" />
+          </div>
+          <div class="text-center px-4 py-2 text-white rounded-r-full rounded-l-full shadow-md font-medium"
+            :class="username == player1 ? 'player-turn-1' : 'player-turn-2'">
+            {{ player1 }}
+          </div>
+          <div class="text-center px-4 py-2 text-white rounded-r-full rounded-l-full shadow-md font-medium"
+            :class="username == player2 ? 'player-turn-1' : 'player-turn-2'">
+            {{ player2 }}
+          </div>
+        </div>
+        <button class="start-button start-pulse p-2 w-10 sm:w-16 lg:w-20 mt-12" @click.stop="throwStartDice" v-if="startDiceThrowAllowed">
+          <v-icon name="gi-rolling-dices" width="100%" height="100%" />
+        </button>
+        <button v-if="starter > 0" class="px-6 py-2 mt-12 text-white font-bold text-lg shadow-md rounded-r-full rounded-l-full bg-slate-500 start-pulse" @click.stop="startPlaying">
+          Start playing!
+        </button>
+      </div>
+      <div class="flex gap-2" v-if="started">
+        <div :class="[
+          'flex',
+          'items-center',
+          'px-8',
+          'h-12',
+          'py-3',
+          'text-white',
+          'rounded-r-full',
+          'rounded-l-full',
+          'shadow-md',
+          isYourTurn ? 'player-turn-1' : 'player-turn-2',
+        ]">
           {{ isYourTurn ? 'Your turn' : 'Opponent\'s turn' }}
         </div>
-        <div
-          v-if="diceThrown"
-          :class="[
-						'dice-container',
-						'flex',
-						'items-center',
-						'px-8',
-						'h-12',
-						'py-1.5',
-						'text-white',
-						'rounded-r-full',
-						'rounded-l-full',
-						'shadow-md',
-						isYourTurn ? 'player-turn-1' : 'player-turn-2',
-					]"
-				>
-					<DieFace v-for="(die, index) in availableDice" :key="index" :value="die" />
-				</div>
-			</div>
-      <div class="messages absolute p-8 flex flex-col-reverse">
+        <div v-if="diceThrown" :class="[
+          'dice-container',
+          'flex',
+          'items-center',
+          'px-8',
+          'h-12',
+          'py-1.5',
+          'text-white',
+          'rounded-r-full',
+          'rounded-l-full',
+          'shadow-md',
+          isYourTurn ? 'player-turn-1' : 'player-turn-2',
+        ]">
+          <DieFace v-for="(die, index) in availableDice" :key="index" :value="die" />
+        </div>
+      </div>
+      <div class="messages absolute p-8 flex flex-col-reverse" v-if="started">
         <div v-for="message in messages" :key="message.id"
-             :class="['message', message.user === username ? 'your-message' : 'opponent-message']">
+          :class="['message', message.user === username ? 'your-message' : 'opponent-message']">
           {{ message.message }}
         </div>
       </div>
-      <div class="flex gap-2 mt-4 flex-wrap" v-if="configuration">
-        <button v-for="msg in preformedMessages" :key="msg" class="btn-preformed p-2 rounded bg-blue-500 text-white cursor-pointer" @click="sendPreformedMessage(msg)">
+      <div class="flex gap-2 mt-4 flex-wrap" v-if="configuration && started">
+        <button v-for="msg in preformedMessages" :key="msg"
+          class="btn-preformed p-2 rounded bg-blue-500 text-white cursor-pointer" @click="sendPreformedMessage(msg)">
           {{ msg }}
         </button>
       </div>
-		</div>
-	</div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
 import DieFace from '@/components/DieFace.vue'
-import { computed, defineComponent } from 'vue'
+import { computed, defineComponent, ref } from 'vue'
 import axiosInstance from '@/axios'
 import GameBoard from '@/components/GameBoard.vue'
 import { BoardConfiguration } from '@/models/BoardConfiguration';
@@ -115,7 +135,7 @@ export default defineComponent({
   },
   setup() {
     const gameStore = useGameStore()
-    const { turn, dice, boardConfiguration, player1, player2, rounds_to_win, winsP1, winsP2, status } = storeToRefs(gameStore)
+    const { turn, dice, boardConfiguration, player1, player2, rounds_to_win, winsP1, winsP2, status, starter, startDice } = storeToRefs(gameStore)
 
     const wsStore = useWsStore()
     const { messages } = storeToRefs(wsStore)
@@ -132,7 +152,7 @@ export default defineComponent({
 
     const preformedMessages = ['Ottima mossa!', 'Per poco!', 'Buona fortuna!', 'Oops', 'È il tuo turno!', 'Che peccato!']
 
-    const sendPreformedMessage = async (message: string) =>  {
+    const sendPreformedMessage = async (message: string) => {
       try {
         await axiosInstance.post('/game/message', { message })
       } catch (error) {
@@ -142,7 +162,13 @@ export default defineComponent({
       }
     }
 
+    const started = starter.value > 0
     const ai_names = ["ai_easy", "ai_normal", "ai_hard"];
+
+    console.log('started', started);
+    console.log('starter', starter.value);
+
+    console.log(startDice.value)
 
     return {
       configuration: computed(() => boardConfiguration.value),
@@ -153,6 +179,8 @@ export default defineComponent({
         die2: computed(() => (dice.value.roll.length > 1 ? dice.value.roll[1] : null))
       },
       availableDice: computed(() => dice.value.available),
+      startDice: computed(() => startDice.value),
+      starter,
       player1,
       player2,
       turn,
@@ -163,6 +191,8 @@ export default defineComponent({
       username,
       preformedMessages,
       sendPreformedMessage,
+      started: ref(started),
+      initialText: 'Throw the die to pick the starter!',
       status,
       ai_names,
       gameOver: computed(() => status.value === 'player_1_won' || status.value === 'player_2_won'),
@@ -187,34 +217,72 @@ export default defineComponent({
       }
     },
     movePiece(board: BoardConfiguration, dice: number) {
-			axiosInstance
-				.post('/move/piece', {
-					board,
-					dice,
-				})
-				.catch(error => {
-					if (isAxiosError(error)) {
-						useWsStore().addError(error?.response?.data?.detail);
-					}
-				});
-		},
+      axiosInstance
+        .post('/move_piece', {
+          board,
+          dice,
+        })
+        .catch(error => {
+          if (isAxiosError(error)) {
+            useWsStore().addError(error?.response?.data?.detail);
+          }
+        });
+    },
+    startPlaying(){
+      this.started = true;
+    },
+    throwStartDice() {
+
+      console.log(this.startDice)
+
+      axiosInstance
+        .get('/throw_start_dice')
+        .catch(error => {
+          if (isAxiosError(error)) {
+            useWsStore().addError(error?.response?.data?.detail);
+          }
+        });
+    },
   },
   computed: {
-		isYourTurn(): boolean {
-			if ((this.turn % 2 === 0 && this.isPlayer1) || (this.turn % 2 === 1 && !this.isPlayer1)) {
-				return true;
-			} else {
-				return false;
-			}
-		},
-		diceThrown(): boolean {
-			return this.diceResult.die1.value !== null && this.diceResult.die2.value !== null;
-		},
-	},
+    isYourTurn(): boolean {
+      if ((this.turn % 2 === 0 && this.isPlayer1) || (this.turn % 2 === 1 && !this.isPlayer1)) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    diceThrown(): boolean {
+      return this.diceResult.die1.value !== null && this.diceResult.die2.value !== null;
+    },
+    isPlayer1(): boolean {
+      return this.username === this.player1;
+    },
+    startDiceThrowAllowed(): boolean {
+      return this.starter <= 0 && this.isPlayer1 && this.startDice.count1 <= this.startDice.count2
+      || this.starter <= 0 && !this.isPlayer1 && this.startDice.count2 <= this.startDice.count1;
+    },
+  },
+  watch: {
+        starter(newVal, oldVal) {
+          console.log('started', newVal, oldVal);
+
+          if(oldVal === -1 && newVal > 0)
+            this.started = true;
+          else if(newVal === 1 && this.isPlayer1 || newVal === 2 && !this.isPlayer1)
+            this.initialText = 'You start!';
+          else if(newVal === 1 && !this.isPlayer1 || newVal === 2 && this.isPlayer1)
+            this.initialText = `${this.player2} starts!`;
+        }
+  },
 })
 </script>
 
 <style>
+.text-shadow {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
 .messages {
   display: flex;
   flex-direction: column;
@@ -271,16 +339,42 @@ export default defineComponent({
   background-color: #d55;
 }
 
+.start-button {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #d55;
+}
+
+.start-pulse {
+  animation: start-pulse 2s infinite;
+}
+
 @keyframes dice-pulse {
+
   0%,
   100% {
-    opacity: 1;
     transform: translateX(-50%) scale(1);
   }
+
   50% {
-    opacity: 1;
     transform: translateX(-50%) scale(1.25);
   }
+}
+
+@keyframes start-pulse {
+
+0%,
+100% {
+  transform: scale(1);
+}
+
+50% {
+  transform: scale(1.25);
+}
 }
 
 .dice-container {

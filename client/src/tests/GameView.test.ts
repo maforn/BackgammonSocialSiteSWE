@@ -25,6 +25,7 @@ describe('GameView.vue', () => {
       pinia,
     });
 
+    wrapper.vm.started = true;
     wrapper.vm.player1 = 'Player 1';
     wrapper.vm.player2 = 'Player 2';
     wrapper.vm.rounds_to_win = 3;
@@ -55,10 +56,13 @@ describe('GameView.vue', () => {
 		expect(wrapper.vm.availableDice).toEqual([4, 6]);
 	});
 
-  it('should render preformed message buttons', () => {
+  it('should render preformed message buttons', async () => {
     const wrapper = mount(GameView, {
       pinia,
     });
+
+    wrapper.vm.started = true;
+    await wrapper.vm.$nextTick();
 
     const buttons = wrapper.findAll('.btn-preformed');
     expect(buttons.length).toBe(6); // Assuming there are 6 preformed messages
@@ -72,6 +76,9 @@ describe('GameView.vue', () => {
     const wrapper = mount(GameView, {
       pinia,
     });
+
+    wrapper.vm.started = true;
+    await wrapper.vm.$nextTick();
 
     const button = wrapper.find('.btn-preformed');
     await button.trigger('click');
@@ -105,7 +112,7 @@ describe('GameView.vue', () => {
     expect(winner.exists()).toBe(false);
   });
 
-  it('should render messages correctly', () => {
+  it('should render messages correctly', async () => {
     const wsStore = useWsStore();
     wsStore.messages = [
       { id: 1, user: 'testuser', message: 'Hello' },
@@ -116,9 +123,24 @@ describe('GameView.vue', () => {
       pinia,
     });
 
+    wrapper.vm.started = true;
+    await wrapper.vm.$nextTick();
+
     const messages = wrapper.findAll('.message');
     expect(messages.length).toBe(2);
     expect(messages[0].text()).toBe('Hello');
     expect(messages[1].text()).toBe('Hi');
+  });
+
+  it('Should start game', async () => {
+    const wrapper = mount(GameView, {
+      pinia,
+    });
+
+    wrapper.vm.startPlaying();
+    await wrapper.vm.$nextTick();
+
+    const gameBoards = wrapper.findAllComponents({ name: 'GameBoard' });
+    expect(gameBoards.length).toBeGreaterThan(0);
   });
 });

@@ -1,6 +1,6 @@
 import random
 
-from models.board_configuration import Match, BoardConfiguration
+from models.board_configuration import Match, BoardConfiguration, StartDice
 from services.ai import ai_names, ai_rating
 from services.database import get_db
 from services.rating import new_ratings_after_match
@@ -74,7 +74,9 @@ async def check_winner(current_game: Match, manager):
             current_game.board_configuration = BoardConfiguration().dict(by_alias=True)
             current_game.available = []
             current_game.dice = []
-            current_game.turn = 0
+            current_game.turn = -1
+            current_game.starter = 0
+            current_game.startDice = StartDice()
 
             # Message for round end
             websocket_player1 = await manager.get_user(current_game.player1)
