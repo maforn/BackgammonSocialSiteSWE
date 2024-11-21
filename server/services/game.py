@@ -1,8 +1,7 @@
 import random
-
-from models.board_configuration import Match, BoardConfiguration
+from models.board_configuration import Match, BoardConfiguration, StartDice
 from services.database import get_db
-
+from fastapi.encoders import jsonable_encoder
 
 def throw_dice():
     die1 = random.randint(1, 6)
@@ -73,7 +72,9 @@ async def check_winner(current_game: Match, manager):
             current_game.board_configuration = BoardConfiguration().dict(by_alias=True)
             current_game.available = []
             current_game.dice = []
-            current_game.turn = 0
+            current_game.turn = -1
+            current_game.starter = 0
+            current_game.startDice = StartDice()
 
             #Message for round end
             websocket_player1 = await manager.get_user(current_game.player1)
@@ -90,6 +91,9 @@ async def check_winner(current_game: Match, manager):
                                                     "dice": current_game.dice,
                                                     "turn": current_game.turn,
                                                     "winsP1": current_game.winsP1,
-                                                    "winsP2": current_game.winsP2}}) 
+                                                    "winsP2": current_game.winsP2,
+                                                    "starter": current_game.starter,
+                                                    "startDice": jsonable_encoder(current_game.startDice)
+                                                    }}) 
 
         

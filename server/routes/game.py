@@ -132,8 +132,6 @@ async def start_dice_endpoint(token: str = Depends(oauth2_scheme)):
         elif old_start_dice.roll2 > old_start_dice.roll1:
             starter, turn = 2, 1
 
-    print(starter)
-
     await get_db().matches.update_one({"_id": current_game.id}, {"$set": {"startDice": jsonable_encoder(old_start_dice), "starter": starter, "turn": turn}})
     websocket_player1 = await manager.get_user(current_game.player1)
     if websocket_player1:
