@@ -2,7 +2,7 @@
 	<div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center">
 		<div class="background"></div>
 		<div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
-      <div class="flex justify-center w-full gap-4">
+      <div class="flex justify-center w-full gap-4 mt-6" v-if="started">
         <div id="p1-display" class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
         :class="username == player1 ? 'player-turn-1' : 'player-turn-2'">
           <v-icon :name="[ai_names.includes(player1) ? 'fa-robot' : 'io-person']" class="text-white" />
@@ -29,6 +29,7 @@
           </div>
         </div>
       </div>
+      <div id="game-over" class="bg-yellow-500 font-medium relative p-2 rounded" v-if="gameOver">{{winnerMessage}}</div>
       <div class="relative" v-if="started">
         <GameBoard :configuration="configuration" :player1="isPlayer1" :dice="availableDice" :your-turn="isYourTurn"
           @movePiece="movePiece" />
@@ -164,6 +165,11 @@ export default defineComponent({
     const started = starter.value > 0
     const ai_names = ["ai_easy", "ai_normal", "ai_hard"];
 
+    console.log('started', started);
+    console.log('starter', starter.value);
+
+    console.log(startDice.value)
+
     return {
       configuration: computed(() => boardConfiguration.value),
       isPlayer1: computed(() => username === player1.value),
@@ -174,7 +180,7 @@ export default defineComponent({
       },
       availableDice: computed(() => dice.value.available),
       startDice: computed(() => startDice.value),
-      starter: starter,
+      starter,
       player1,
       player2,
       turn,
@@ -226,6 +232,9 @@ export default defineComponent({
       this.started = true;
     },
     throwStartDice() {
+
+      console.log(this.startDice)
+
       axiosInstance
         .get('/throw_start_dice')
         .catch(error => {

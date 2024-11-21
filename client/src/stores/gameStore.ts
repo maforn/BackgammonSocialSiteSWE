@@ -84,6 +84,8 @@ export const useGameStore = defineStore('game', {
       this.rounds_to_win = data.rounds_to_win
 			this.winsP1 = data.winsP1;
 			this.winsP2 = data.winsP2;
+      this.starter = data.starter;
+      this.startDice = data.startDice;
       setTimeout(async () => await this.checkAITurn(), 1000)
     },
     async checkAITurn() {
