@@ -5,6 +5,18 @@ from services.game import create_started_match
 
 from tests.conftest import clear_matches
 
+@pytest.mark.anyio
+async def test_throw_start_dice(client: AsyncClient, token: str):
+    await clear_matches()
+    await create_started_match("testuser", "a")
+    response = await client.get("/throw_start_dice", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    match = await get_db().matches.find_one({"player1": "testuser"})
+    assert match is not None
+    assert match["startDice"]["roll1"] > 0
+    assert match["startDice"]["roll2"] <= 0
+    assert match["startDice"]["count1"] == 1
+    assert match["startDice"]["count2"] == 0
 
 @pytest.mark.anyio
 async def test_throw_dice(client: AsyncClient, token: str):
