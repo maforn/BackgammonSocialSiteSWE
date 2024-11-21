@@ -15,6 +15,8 @@ export class Match {
 	first_to: number;
 	winsP1: number;
 	winsP2: number;
+	starter: number;
+	startDice: {roll1 : number, count1: number, roll2: number, count2: number};
 
 	constructor(
 		player1: string,
@@ -26,6 +28,7 @@ export class Match {
 		updated_at: Date,
 		status: string,
 		first_to: number,
+		starter: number,
 	) {
 		this.player1 = player1;
 		this.player2 = player2;
@@ -38,5 +41,7 @@ export class Match {
 		this.first_to = first_to;
 		this.winsP1 = 0;
 		this.winsP2 = 0;
+		this.starter = starter;
+		this.startDice = {roll1: 0, count1: 0, roll2: 0, count2: 0};
 	}
 }

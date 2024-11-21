@@ -52,6 +52,16 @@ class BoardConfiguration(BaseModel):
         super().__init__(points=points, bar=bar)
 
 
+class StartDice(BaseModel):
+    roll1: int
+    count1: int
+    roll2: int
+    count2: int
+
+    def __init__(self, roll1: int = 0, count1: int = 0, roll2: int = 0, count2: int = 0):
+        super().__init__(roll1=roll1, count1=count1, roll2=roll2, count2=count2)
+
+
 class Match(BaseModel):
     id: str = Field(default_factory=default_id, alias="_id")
     player1: str
@@ -64,6 +74,8 @@ class Match(BaseModel):
     first_to: int
     winsP1: int = 0
     winsP2: int = 0
+    starter: int = 0
+    startDice: StartDice = StartDice()
 
 
 class CreateInviteRequest(BaseModel):
