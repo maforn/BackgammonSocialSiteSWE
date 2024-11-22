@@ -66,9 +66,7 @@
         </button>
       </div>
       <div>
-        <button id="btn-pass-turn" v-if="showPassButton&&isYourTurn&&diceThrown" class="btn-preformed p-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">
-          Pass the turn
-        </button>
+        <button v-if="showPassButton&&isYourTurn&&diceThrown" class="btn-pass-turn p-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">Pass the turn</button>
       </div>
 		</div>
 	</div>
