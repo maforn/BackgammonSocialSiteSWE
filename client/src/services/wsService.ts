@@ -31,7 +31,7 @@ class WebSocketService {
 		}
 	}
 
-	private handleMessage(event: MessageEvent) {
+	private async handleMessage(event: MessageEvent) {
 		const data = JSON.parse(event.data);
 		switch (data.type) {
 			case 'error':
@@ -46,14 +46,26 @@ class WebSocketService {
 			case 'msg':
 				this.showMessage(data.msg);
 				break;
+			case 'start_dice_roll':
+				useGameStore().setStartDice(data.result.roll1, data.result.count1, data.result.roll2, data.result.count2);
+				useGameStore().setStarter(data.starter, data.turn);
+				break;
 			case 'dice_roll':
 				useGameStore().setDice(data.result, data.available);
 				break;
 			case 'move_piece':
-				useGameStore().setMatch(data.match);
+				await useGameStore().setMatch(data.match);
 				break;
-      case 'in_game_msg':
+			case 'in_game_msg':
 				this.showInGameMessage(data.msg, data.user);
+				break;
+			case 'match_over':
+				this.showMessage(data.winner + " won the match!")
+				this.showMessage(data.winner + "'s rating: " + data.old_winner_rating + " -> " + data.new_winner_rating)
+				this.showMessage(data.loser + "'s rating: " + data.old_loser_rating + " -> " + data.new_loser_rating);
+				break;
+			case 'round_over':
+				this.showMessage(data.winner + " won the round!")
 				break;
       case 'pass_turn':
         useGameStore().setMatch(data.match);

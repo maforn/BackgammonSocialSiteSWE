@@ -12,7 +12,7 @@
 
         <div class="flex flex-col justify-evenly lg:flex-row">
           <div class="flex justify-center items-center pl-3 py-2 gap-x-2">
-            <label for="first_to" class="text-right">Difficulty</label>
+            <label for="rounds_to_win" class="text-right">Difficulty</label>
             <div class="container">
               <div class="select">
                 <select name="difficulty" id="difficulty" v-model="difficulty">
@@ -25,10 +25,10 @@
           </div>
 
           <div class="flex justify-center items-center pl-3 py-2 gap-x-2">
-            <label for="first_to" class="text-right">Matches to win</label>
+            <label for="rounds_to_win" class="text-right">Rounds to win</label>
             <div class="container">
               <div class="select">
-                <select name="first_to" id="first_to" v-model="first_to">
+                <select name="rounds_to_win" id="rounds_to_win" v-model="rounds_to_win">
                   <option value="1">1</option>
                   <option value="2">2</option>
                   <option value="3">3</option>
@@ -73,12 +73,12 @@ export default defineComponent({
     return { hasSuspendedGame }
   },
   data(): {
-    first_to: number,
+    rounds_to_win: number,
     difficulty: string,
     hasSuspendedGame: boolean
   } {
     return {
-      first_to: 1,
+      rounds_to_win: 1,
       difficulty: 'easy',
       hasSuspendedGame: true
     }
@@ -91,7 +91,7 @@ export default defineComponent({
     },
     async startGame() {
       try {
-        await sendInviteService("ai_" + this.difficulty, this.first_to)
+        await sendInviteService("ai_" + this.difficulty, this.rounds_to_win)
         await router.push({ name: 'game' });
       } catch (error) {
         console.error('Error sending invite:', error)
