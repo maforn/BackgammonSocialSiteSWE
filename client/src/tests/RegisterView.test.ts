@@ -40,7 +40,7 @@ describe('RegisterView.vue', () => {
 		wrapper.vm.showRegisterForm = true;
 
 		const mockResponse = { access_token: 'fake_token' };
-		mock.onPost('http://localhost:8000/register').reply(200, mockResponse);
+		mock.onPost(`${import.meta.env.VITE_API_URL}/api/register`).reply(200, mockResponse);
 
 		await wrapper.vm.registerUser();
 
@@ -54,7 +54,7 @@ describe('RegisterView.vue', () => {
 		wrapper.vm.showRegisterForm = true;
 
 		const mockErrorResponse = { detail: 'Registration failed' };
-		mock.onPost('http://localhost:8000/register').reply(400, mockErrorResponse);
+		mock.onPost(`${import.meta.env.VITE_API_URL}/api/register`).reply(400, mockErrorResponse);
 
 		await wrapper.vm.registerUser();
 

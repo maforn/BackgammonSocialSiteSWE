@@ -6,22 +6,29 @@ export class Match {
 	boardConfiguration: BoardConfiguration;
 	dice: {
 		roll: number[];
-		used: number[];
+		available: number[];
 	};
 	turn: number;
 	created_at: Date;
 	updated_at: Date;
 	status: string;
+	rounds_to_win: number;
+	winsP1: number;
+	winsP2: number;
+	starter: number;
+	startDice: {roll1 : number, count1: number, roll2: number, count2: number};
 
 	constructor(
 		player1: string,
 		player2: string,
 		boardConfiguration: BoardConfiguration,
-		dice: { roll: number[]; used: number[] },
+		dice: { roll: number[]; available: number[] },
 		turn: number,
 		created_at: Date,
 		updated_at: Date,
 		status: string,
+		starter: number,
+		rounds_to_win: number,
 	) {
 		this.player1 = player1;
 		this.player2 = player2;
@@ -31,5 +38,10 @@ export class Match {
 		this.created_at = created_at;
 		this.updated_at = updated_at;
 		this.status = status;
+		this.rounds_to_win = rounds_to_win;
+		this.winsP1 = 0;
+		this.winsP2 = 0;
+		this.starter = starter;
+		this.startDice = {roll1: 0, count1: 0, roll2: 0, count2: 0};
 	}
 }

@@ -1,73 +1,91 @@
 <template>
-	<div class="board bg-gray-300" @click.stop="deselectPoint">
-		<!-- Left part of the board -->
-		<div class="bin">
-			<!-- Upper row -->
-			<div class="row rotate-180">
-				<PointComponent
-					v-for="(pointConf, index) in internalConfig.points.slice(12, 18)"
-					:key="index"
-					:configuration="pointConf"
-					:isEven="index % 2 === 0"
-					:upperPoint="true"
-					:available="allowedPointIndices.includes(index + 12)"
-					:selected="srcPointIndex === index + 12"
-					@select-point="selectPoint(index + 12)"
-				/>
+	<div class="flex items-center gap-4">
+		<div class="board max-w-5xl bg-gray-300" @click.stop="deselectPoint">
+			<!-- Left part of the board -->
+			<div class="bin">
+				<!-- Upper row -->
+				<div class="row rotate-180">
+					<PointComponent
+						v-for="(pointConf, index) in internalConfig.points.slice(12, 18)"
+						:key="index"
+						:configuration="pointConf"
+						:isEven="index % 2 === 0"
+						:upperPoint="true"
+						:available="allowedPointIndices.includes(index + 12)"
+						:selected="srcPointIndex === index + 12"
+						@select-point="selectPoint(index + 12)"
+					/>
+				</div>
+				<!-- Lower row -->
+				<div class="row">
+					<PointComponent
+						v-for="(pointConf, index) in internalConfig.points.slice(6, 12)"
+						:key="index"
+						:configuration="pointConf"
+						:isEven="index % 2 === 0"
+						:available="allowedPointIndices.includes(index + 6)"
+						:selected="srcPointIndex === index + 6"
+						@select-point="selectPoint(index + 6)"
+					/>
+				</div>
 			</div>
-			<!-- Lower row -->
-			<div class="row">
-				<PointComponent
-					v-for="(pointConf, index) in internalConfig.points.slice(6, 12)"
-					:key="index"
-					:configuration="pointConf"
-					:isEven="index % 2 === 0"
-					:available="allowedPointIndices.includes(index + 6)"
-					:selected="srcPointIndex === index + 6"
-					@select-point="selectPoint(index + 6)"
-				/>
+
+			<!-- Middel bar -->
+			<div id="bar" class="flex flex-col items-center justify-center gap-4">
+				<div
+					v-if="internalConfig.bar.player1 > 0"
+					:class="['bar-piece', 'player-1', 'font-bold', { 'animate-pulse': allowedPointIndices.length > 0 }]"
+				>
+					{{ internalConfig.bar.player1 }}
+				</div>
+				<div v-if="internalConfig.bar.player2 > 0" class="bar-piece player-2 font-bold">
+					{{ internalConfig.bar.player2 }}
+				</div>
+			</div>
+
+			<!-- Right part of the board -->
+			<div class="bin">
+				<!-- Upper row -->
+				<div class="row rotate-180">
+					<PointComponent
+						v-for="(pointConf, index) in internalConfig.points.slice(18, 24)"
+						:key="index"
+						:configuration="pointConf"
+						:isEven="index % 2 === 0"
+						:upperPoint="true"
+						:available="allowedPointIndices.includes(index + 18)"
+						:selected="srcPointIndex === index + 18"
+						@select-point="selectPoint(index + 18)"
+					/>
+				</div>
+				<!-- Lower row -->
+				<div class="row">
+					<PointComponent
+						v-for="(pointConf, index) in internalConfig.points.slice(0, 6)"
+						:key="index"
+						:configuration="pointConf"
+						:isEven="index % 2 === 0"
+						:available="allowedPointIndices.includes(index)"
+						:selected="srcPointIndex === index"
+						@select-point="selectPoint(index)"
+					/>
+				</div>
 			</div>
 		</div>
-
-		<!-- Middel bar -->
-		<div id="bar" class="flex flex-col items-center justify-center gap-4">
+		<div class="bear-off bg-gray-200 w-full h-full" id="bear-off" v-if="showBearOff">
 			<div
-				v-if="internalConfig.bar.player1 > 0"
-				:class="['bar-piece', 'player-1', 'font-bold', { 'animate-pulse': allowedPointIndices.length > 0 }]"
+				class="grid grid-cols-3 grid-rows-5 justify-items-center align-items-center gap-x-1 gap-y-1 p-2 aspect-square"
 			>
-				{{ internalConfig.bar.player1 }}
+				<div v-for="index in bearOffCountPlayer2" :key="index" class="piece player-2"></div>
 			</div>
-			<div v-if="internalConfig.bar.player2 > 0" class="bar-piece player-2 font-bold">
-				{{ internalConfig.bar.player2 }}
-			</div>
-		</div>
-
-		<!-- Right part of the board -->
-		<div class="bin">
-			<!-- Upper row -->
-			<div class="row rotate-180">
-				<PointComponent
-					v-for="(pointConf, index) in internalConfig.points.slice(18, 24)"
-					:key="index"
-					:configuration="pointConf"
-					:isEven="index % 2 === 0"
-					:upperPoint="true"
-					:available="allowedPointIndices.includes(index + 18)"
-					:selected="srcPointIndex === index + 18"
-					@select-point="selectPoint(index + 18)"
-				/>
-			</div>
-			<!-- Lower row -->
-			<div class="row">
-				<PointComponent
-					v-for="(pointConf, index) in internalConfig.points.slice(0, 6)"
-					:key="index"
-					:configuration="pointConf"
-					:isEven="index % 2 === 0"
-					:available="allowedPointIndices.includes(index)"
-					:selected="srcPointIndex === index"
-					@select-point="selectPoint(index)"
-				/>
+			<div id="divider"></div>
+			<div
+				class="grid grid-cols-3 grid-rows-5 justify-items-center align-items-center gap-x-1 gap-y-1 p-2 aspect-square"
+				:style="{ backgroundColor: bearOffAllowed ? '#edd612' : '', cursor: bearOffAllowed ? 'pointer' : '' }"
+				id="bear-off-1"
+				@click="bearOffAllowed && selectPoint(-1)"
+			>
+				<div v-for="index in bearOffCountPlayer1" :key="index" class="piece player-1"></div>
 			</div>
 		</div>
 	</div>
@@ -77,12 +95,10 @@
 import { defineComponent } from 'vue';
 import { BoardConfiguration } from '@/models/BoardConfiguration';
 import PointComponent from './PointComponent.vue';
-import axiosInstance from '@/axios';
-import { useWsStore } from '@/stores/wsStore';
-import { isAxiosError } from 'axios';
 
 export default defineComponent({
 	name: 'GameBoard',
+	emits: ['movePiece'],
 	components: {
 		PointComponent,
 	},
@@ -95,7 +111,7 @@ export default defineComponent({
 			type: Boolean,
 			default: true,
 		},
-		dices: {
+		dice: {
 			type: Array as () => number[],
 			required: true,
 		},
@@ -110,34 +126,47 @@ export default defineComponent({
 			internalConfig: {} as BoardConfiguration,
 
 			/* Dices available to the player */
-			availableDices: null as number[] | null,
+			availableDice: null as number[] | null,
 
 			/* Index of the point the player wants to move pieces from */
 			srcPointIndex: null as number | null,
+
+			/* The number of pieces per player */
+			piecesPerPlayer: 15,
 		};
 	},
 	created() {
 		this.internalConfig = this.player1 ? { ...this.configuration } : this.swapPlayers(this.configuration);
 	},
 	watch: {
-		dices(newDices) {
-			this.availableDices = [...newDices];
+		dice(newDice) {
+			this.availableDice = [...newDice];
 		},
 		configuration(newConfig) {
 			this.internalConfig = this.player1 ? { ...newConfig } : this.swapPlayers(newConfig);
 		},
 	},
 	methods: {
+    /**
+     * Checks if there is a winner in the game.
+     */
+    isThereAWinner() {
+      return (this.internalConfig.points.every(point => point.player1 === 0) && this.internalConfig.bar.player1 === 0)
+        || (this.internalConfig.points.every(point => point.player2 === 0) && this.internalConfig.bar.player2 === 0);
+    },
 		/**
 		 * Selects a point to move pieces from or to.
 		 * @param index Index of the selected point.
 		 */
 		selectPoint(index: number) {
+      // If the game is over, do not allow any more moves
+      if (this.isThereAWinner()) {
+        return;
+      }
 			if (this.internalConfig.bar.player1 > 0) {
 				this.movePiece(24, index); // Move piece from bar to point
-			} else if (!this.srcPointIndex) {
+			} else if (this.srcPointIndex === null) {
 				this.srcPointIndex = index;
-				console.log('Selected point', index);
 			} else {
 				this.movePiece(this.srcPointIndex, index); // Move piece from one point to another
 			}
@@ -146,7 +175,6 @@ export default defineComponent({
 		 * Deselects the currently selected point.
 		 */
 		deselectPoint() {
-			console.log('Deselected point');
 			this.srcPointIndex = null;
 		},
 		/**
@@ -165,36 +193,41 @@ export default defineComponent({
 			} else {
 				this.internalConfig.points[srcPointIndex].player1--;
 			}
-			this.internalConfig.points[dstPointIndex].player1++;
 
-			// Hit the opponent's piece if there is only one
-			if (this.internalConfig.points[dstPointIndex].player2 === 1) {
-				this.internalConfig.points[dstPointIndex].player2 = 0;
-				this.internalConfig.bar.player2++;
+			if (dstPointIndex >= 0) {
+				this.internalConfig.points[dstPointIndex].player1++;
+
+				// Hit the opponent's piece if there is only one
+				if (this.internalConfig.points[dstPointIndex].player2 === 1) {
+					this.internalConfig.points[dstPointIndex].player2 = 0;
+					this.internalConfig.bar.player2++;
+				}
 			}
 
-			// Update the available dices and reset the source point index
-			if (this.availableDices && this.availableDices.length > 1 && this.availableDices[0] === this.availableDices[1]) {
-				this.availableDices.pop();
+			// Update the available dice and reset the source point index
+			let usedDice = this.availableDice?.reduce((min, dice) => {
+				if (srcPointIndex - dice <= dstPointIndex && dice < min) {
+					return dice;
+				}
+				return min;
+			}, Infinity);
+
+			if (usedDice === Infinity || usedDice === undefined) {
+				throw new Error('No valid dice');
 			} else {
-				this.availableDices =
-					this.availableDices?.filter(dice => dice !== Math.abs(srcPointIndex - dstPointIndex)) || null;
+				const diceIndex = this.availableDice?.indexOf(usedDice);
+				if (diceIndex !== -1 && diceIndex !== undefined) {
+					this.availableDice?.splice(diceIndex, 1);
+				}
 			}
+
 			this.srcPointIndex = null;
 
-			axiosInstance
-				.post('/move_piece', {
-					board: this.player1 ? this.internalConfig : this.swapPlayers(this.internalConfig),
-					dice: Math.abs(srcPointIndex - dstPointIndex),
-				})
-				.catch(error => {
-					if (isAxiosError(error)) {
-						useWsStore().addError(error?.response?.data?.detail);
-					}
-				});
+			// Emit the move to the parent component
+			this.$emit('movePiece', this.player1 ? this.internalConfig : this.swapPlayers(this.internalConfig), usedDice);
 
 			// Check if the player can still move pieces
-			if (!this.availableDices || this.availableDices.length === 0 || this.allowedPointIndices.length === 0) {
+			if (!this.availableDice || this.availableDice.length === 0 || this.allowedPointIndices.length === 0) {
 				console.log('Dices have been used, switch players');
 			}
 		},
@@ -204,7 +237,7 @@ export default defineComponent({
 		 * @param dstPointIndex Index of the destination point.
 		 */
 		checkMoveValidity(srcPointIndex: number, dstPointIndex: number) {
-			if (srcPointIndex > 24 || srcPointIndex < 0 || dstPointIndex > 23 || dstPointIndex < 0)
+			if (srcPointIndex > 24 || srcPointIndex < 0 || dstPointIndex > 23 || dstPointIndex < -1)
 				throw new Error('Indices are out of range');
 			else if (this.internalConfig.bar.player1 >= 1 && srcPointIndex !== 24)
 				throw new Error('You should move pieces out of the bar first!');
@@ -248,25 +281,55 @@ export default defineComponent({
 		 * to move pieces from or to.
 		 */
 		allowedPointIndices() {
-			if (!this.availableDices || this.availableDices.length === 0 || !this.yourTurn) {
+			if (!this.availableDice || this.availableDice.length === 0 || !this.yourTurn) {
 				// No selection can be done if the dices have not been rolled or it is not you turn
 				return [];
 			} else if (this.internalConfig.bar.player1 > 0) {
 				// There are pieces in the bar, return the points where the pieces can be moved to
-				return this.availableDices
+				return this.availableDice
 					.map(dice => 24 - dice)
 					.filter(index => index <= 23 && index >= 0 && this.internalConfig.points[index].player2 <= 1);
-			} else if (!this.srcPointIndex) {
+			} else if (this.srcPointIndex === null) {
 				// No point has been selected yet, return the points with pieces
 				return this.internalConfig.points
 					.map((point, index) => (point.player1 >= 1 ? index : -1))
 					.filter(index => index !== -1);
 			} else {
-				// A point has been selected, return the points where the pieces can be moved to
-				return this.availableDices
+				// Find the points reachable from the selected point, with at most one opponent's piece
+				const allowedIndices = this.availableDice
 					.map(dice => (this.srcPointIndex ?? 24) - dice)
 					.filter(index => index <= 23 && index >= 0 && this.internalConfig.points[index].player2 <= 1);
+
+				// If the player has all pieces in base, allow moving pieces to the bear-off area
+				if (
+					this.internalConfig.points.slice(6, 24).every(point => point.player1 === 0) &&
+					this.availableDice.some(dice => dice > (this.srcPointIndex ?? 0))
+				) {
+					allowedIndices.push(-1);
+				}
+
+				return allowedIndices;
 			}
+		},
+		bearOffAllowed() {
+			return this.allowedPointIndices.includes(-1);
+		},
+		bearOffCountPlayer1() {
+			return (
+				this.piecesPerPlayer -
+				this.internalConfig.points.reduce((sum, point) => sum + point.player1, 0) -
+				this.internalConfig.bar.player1
+			);
+		},
+		bearOffCountPlayer2() {
+			return (
+				this.piecesPerPlayer -
+				this.internalConfig.points.reduce((sum, point) => sum + point.player2, 0) -
+				this.internalConfig.bar.player2
+			);
+		},
+		showBearOff() {
+			return this.bearOffCountPlayer1 + this.bearOffCountPlayer2 > 0 || this.allowedPointIndices.includes(-1);
 		},
 	},
 });
@@ -276,11 +339,25 @@ export default defineComponent({
 .board {
 	border: 2em solid rgb(75 85 99);
 	display: flex;
+	box-shadow: 0px 0px 3px black;
 }
 
 #bar {
 	background-color: rgb(75 85 99);
 	min-width: 4em;
+}
+
+.bear-off {
+	border: 1em solid rgb(75 85 99);
+	display: flex;
+	flex-direction: column;
+	box-shadow: 0px 0px 3px black;
+	max-width: 12vw;
+}
+
+#divider {
+	background-color: rgb(75 85 99);
+	min-height: 1em;
 }
 
 .bin {
@@ -307,10 +384,28 @@ export default defineComponent({
 	#bar {
 		min-width: 2em;
 	}
+
+	.bear-off {
+		border: 0.5em solid rgb(75 85 99);
+	}
+
+	#divider {
+		min-height: 0.5em;
+	}
 }
 
 .bar-piece {
 	width: 75%;
+	aspect-ratio: 1;
+	border-radius: 50%;
+	color: white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.piece {
+	height: 100%;
 	aspect-ratio: 1;
 	border-radius: 50%;
 	color: white;

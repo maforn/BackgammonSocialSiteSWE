@@ -29,7 +29,7 @@ describe('WebSocketService', () => {
 			expect(wsService.socket).toBe(mockWebSocket);
 			expect(mockWebSocket.onmessage).toBeInstanceOf(Function);
 			expect(mockWebSocket.onerror).toBeInstanceOf(Function);
-			expect(WebSocket).toHaveBeenCalledWith(`ws://localhost:8000/ws?token=${mockToken}`);
+			expect(WebSocket).toHaveBeenCalledWith(`${import.meta.env.VITE_WS_URL}/ws?token=${mockToken}`);
 		});
 
 		it('should not connect if authStore.token is not present', () => {
@@ -136,10 +136,10 @@ describe('WebSocketService', () => {
 			const setDice = vi.fn();
 			(useGameStore as any).mockReturnValue({ setDice });
 
-			const event = { data: JSON.stringify({ type: 'dice_roll', result: [1, 2] }) };
+			const event = { data: JSON.stringify({ type: 'dice_roll', result: [1, 2], available: [3, 4] }) };
 			wsService['handleMessage'](event as MessageEvent);
 
-			expect(setDice).toHaveBeenCalledWith(1, 2);
+			expect(setDice).toHaveBeenCalledWith([1, 2], [3, 4]);
 		});
 
 		it('should handle move_piece message', () => {

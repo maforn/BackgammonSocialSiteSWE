@@ -1,5 +1,4 @@
 import { mount } from '@vue/test-utils';
-import { createRouter, createWebHistory, useRouter } from 'vue-router';
 import HomeView from '@/views/HomeView.vue';
 import axiosInstance from '@/axios';
 import { nextTick } from 'vue';
@@ -10,7 +9,6 @@ import { createPinia, setActivePinia } from 'pinia';
 describe('HomeView.vue', () => {
 	let mock: MockAdapter;
 	const pinia = createPinia();
-	const router = useRouter();
 
 	beforeAll(() => {
 		setActivePinia(pinia);
@@ -28,7 +26,7 @@ describe('HomeView.vue', () => {
 	it('renders correctly', () => {
 		const wrapper = mount(HomeView);
 		expect(wrapper.exists()).toBe(true);
-		expect(wrapper.find('h1').text()).toBe('SOCIALBACKGAMMON');
+		expect(wrapper.find('h1').text()).toBe('SOCIAL BACKGAMMON');
 	});
 
 	it('shows invites overlay when button is clicked', async () => {
@@ -57,21 +55,34 @@ describe('HomeView.vue', () => {
 		const wrapper = mount(HomeView);
 		wrapper.vm.hasSuspendedGame = false;
 		await nextTick();
-		expect(wrapper.find('router-link').text()).toContain('NEW MATCH');
+		expect(wrapper.find('router-link').text()).toContain('PLAY HUMAN');
 	});
 
-	it('renders no invites message when invites list is empty', async () => {
-		const wrapper = mount(HomeView);
-		wrapper.vm.showOverlay = true;
-		wrapper.vm.invites = [];
-		await nextTick();
-		expect(wrapper.find('.overlay-content p').text()).toBe('No invites.');
-	});
+    it('renders play human button when hasSuspendedGame is false', async () => {
+        const wrapper = mount(HomeView)
+        wrapper.vm.hasSuspendedGame = false
+        await nextTick()
+        expect(wrapper.find('router-link').text()).toContain('PLAY HUMAN')
+    })
+
+    it('renders play AI button when hasSuspendedGame is false', async () => {
+        const wrapper = mount(HomeView)
+        wrapper.vm.hasSuspendedGame = false
+        await nextTick()
+        expect(wrapper.find('router-link:nth-child(2)').text()).toContain('PLAY AI')
+    })
+
+    it('does not render play AI button when hasSuspendedGame is true', async () => {
+        const wrapper = mount(HomeView)
+        wrapper.vm.hasSuspendedGame = true
+        await nextTick()
+        expect(wrapper.find('router-link:nth-child(2)').text()).not.toContain('PLAY AI')
+    })
 
 	it('renders invites list when invites are present', async () => {
 		const wrapper = mount(HomeView);
 		wrapper.vm.showOverlay = true;
-		wrapper.vm.invites = [{ _id: '1', player1: 'player1' }];
+		wrapper.vm.invites = [{ _id: '1', player1: 'player1', rounds_to_win: 1 }];
 		await nextTick();
 		expect(wrapper.findAll('.overlay-content ul li').length).toBe(1);
 	});

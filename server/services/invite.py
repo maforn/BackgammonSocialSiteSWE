@@ -3,8 +3,8 @@ from models.board_configuration import Match
 from services.database import get_db
 
 
-async def create_invite(player1: str, player2: str):
-    match = Match(player1=player1, player2=player2)
+async def create_invite(player1: str, player2: str, rounds_to_win: int):
+    match = Match(player1=player1, player2=player2, rounds_to_win=rounds_to_win)
     match_data = match.dict(by_alias=True)
     await get_db().matches.insert_one(match_data)
 

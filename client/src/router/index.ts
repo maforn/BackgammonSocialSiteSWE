@@ -4,6 +4,7 @@ import RegisterView from '../views/RegisterView.vue';
 import { isAuthenticated } from '@/services/authService';
 import GameView from '@/views/GameView.vue';
 import PlayHumanView from '@/views/PlayHumanView.vue';
+import PlayAiView from '@/views/PlayAiView.vue';
 
 const routes = [
 	{
@@ -29,6 +30,12 @@ const routes = [
 		name: 'human',
 		component: PlayHumanView,
 	},
+	{
+		meta: { requiresAuth: true },
+		path: '/ai',
+		name: 'ai',
+		component: PlayAiView,
+	}
 ];
 
 const router = createRouter({

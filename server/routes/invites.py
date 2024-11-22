@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from models.board_configuration import CreateInviteRequest, AcceptInviteRequest
+from services.ai import is_ai
 from services.auth import oauth2_scheme, get_user_from_token
 from services.database import get_db
+from services.game import create_started_match
 from services.invite import create_invite, get_pending_invites, accept_invite
 from services.websocket import manager
 
@@ -26,12 +28,27 @@ async def receive_invite_endpoint(token: str = Depends(oauth2_scheme)):
 async def create_invite_endpoint(request: CreateInviteRequest, token: str = Depends(oauth2_scheme)):
     user = await get_user_from_token(token)
     opponent_username = request.opponent_username
+    rounds_to_win = request.rounds_to_win
+
     if user.username == opponent_username:
         raise HTTPException(status_code=400, detail="You cannot invite yourself")
-    await create_invite(user.username, opponent_username)
-    websocket = await manager.get_user(opponent_username)
-    if websocket:
-        await manager.send_personal_message({"type": "invite", "from": user.username}, websocket)
+    
+    else:
+        already_started_matches = await get_db().matches.find(
+            {"$or": [{"player1": user.username}, {"player2": user.username}], "status": "started"}).to_list(length=None)
+        
+        if len(already_started_matches) > 0:
+            raise HTTPException(status_code=400, detail="You are already playing a match")
+        
+        elif is_ai(opponent_username):
+            await create_started_match(user.username, opponent_username, rounds_to_win)
+
+        else: 
+            await create_invite(user.username, opponent_username, rounds_to_win)
+            websocket = await manager.get_user(opponent_username)
+            if websocket:
+                await manager.send_personal_message({"type": "invite", "from": user.username}, websocket)
+                
     return JSONResponse(status_code=200, content={"message": "Invite created successfully"})
 
 
@@ -46,6 +63,11 @@ async def accept_invite_endpoint(request: AcceptInviteRequest, token: str = Depe
         raise HTTPException(status_code=400, detail="You are already playing a match")
     if invite is None:
         raise HTTPException(status_code=404, detail="Invite not found")
+    opponent_username = invite["player1"]
+    opponent_started_matches = await get_db().matches.find(
+        {"$or": [{"player1": opponent_username}, {"player2": opponent_username}], "status": "started"}).to_list(length=None)
+    if len(opponent_started_matches) > 0:
+        raise HTTPException(status_code=400, detail="Opponent is already playing a match")    
     if invite["player2"] != user.username:
         raise HTTPException(status_code=403, detail="You are not the recipient of this invite")
     await accept_invite(invite_id)

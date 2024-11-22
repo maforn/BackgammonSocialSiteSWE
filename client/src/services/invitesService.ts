@@ -3,10 +3,11 @@ import { useAuthStore } from '@/stores/authStore';
 import axios from 'axios';
 import { useWsStore } from '@/stores/wsStore';
 
-export const sendInviteService = async (opponent_username: string) => {
+export const sendInviteService = async (opponent_username: string, rounds_to_win: number) => {
 	try {
 		await axiosInstance.post('/invites', {
 			opponent_username: opponent_username,
+			rounds_to_win: rounds_to_win,
 		});
 	} catch (error) {
 		if (axios.isAxiosError(error) && error.response) {
@@ -35,13 +36,14 @@ export const receiveInviteService = async () => {
 };
 
 export const acceptInviteService = async (invite_id: string) => {
-	try {
-		await axiosInstance.post('/invites/accept', { invite_id: invite_id });
-	} catch (error) {
-		if (axios.isAxiosError(error) && error.response) {
-			useWsStore().addError(error.response.data.detail);
-		} else {
-			console.error('Error accepting invite:', error);
-		}
-	}
-};
+  try {
+    await axiosInstance.post('/invites/accept', { invite_id: invite_id })
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      useWsStore().addError(error.response.data.detail)
+      throw new Error(error.response.data.detail)
+    } else {
+      console.error('Error accepting invite:', error)
+    }
+  }
+}
