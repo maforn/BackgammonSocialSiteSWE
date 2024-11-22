@@ -1,9 +1,12 @@
 import pytest
 from httpx import AsyncClient
 
+from services.database import get_db
+
 
 @pytest.mark.anyio
 async def test_register_user(client: AsyncClient):
+    get_db().users.delete_one({"username": "testuser"})
     response = await client.post("/register", json={
         "username": "testuser",
         "email": "testuser@example.com",

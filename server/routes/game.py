@@ -8,6 +8,10 @@ from services.websocket import manager
 from models.board_configuration import StartDice
 from fastapi.encoders import jsonable_encoder
 
+NOT_YOUR_TURN = "It's not your turn"
+
+NO_ONGOING_GAME_FOUND = "No ongoing game found"
+
 router = APIRouter()
 
 
@@ -35,11 +39,11 @@ async def move(move_data: dict, token: str = Depends(oauth2_scheme)):
     current_game = await get_current_game(user.username)
 
     if not current_game or current_game.status != "started":
-        raise HTTPException(status_code=400, detail="No ongoing game found")
+        raise HTTPException(status_code=400, detail=NO_ONGOING_GAME_FOUND)
 
     if (current_game.turn % 2 == 0 and current_game.player1 != user.username) or \
             (current_game.turn % 2 == 1 and current_game.player2 != user.username):
-        raise HTTPException(status_code=400, detail="It's not your turn")
+        raise HTTPException(status_code=400, detail=NOT_YOUR_TURN)
 
     board_value = move_data.get("board")
     dice_value = move_data.get("dice")
@@ -76,10 +80,10 @@ async def move(move_data: dict, token: str = Depends(oauth2_scheme)):
     current_game = await get_current_game(user.username)
 
     if not current_game or current_game.status != "started":
-        raise HTTPException(status_code=400, detail="No ongoing game found")
+        raise HTTPException(status_code=400, detail=NO_ONGOING_GAME_FOUND)
 
     if current_game.player1 not in ai_names and current_game.player2 not in ai_names:
-        raise HTTPException(status_code=400, detail="It's not your turn")
+        raise HTTPException(status_code=400, detail=NOT_YOUR_TURN)
 
     board_value = move_data.get("board")
 
@@ -151,7 +155,7 @@ async def dice_endpoint(token: str = Depends(oauth2_scheme)):
 
     if (current_game.turn % 2 == 0 and current_game.player1 != user.username) or \
             (current_game.turn % 2 == 1 and current_game.player2 != user.username):
-        raise HTTPException(status_code=400, detail="It's not your turn")
+        raise HTTPException(status_code=400, detail=NOT_YOUR_TURN)
 
     if current_game.dice:
         raise HTTPException(status_code=400, detail="Dice already thrown")
@@ -185,7 +189,7 @@ async def send_in_game_message(request: InGameMessageRequest, token: str = Depen
     current_game = await get_current_game(user.username)
 
     if not current_game or current_game.status != "started":
-        raise HTTPException(status_code=400, detail="No ongoing game found")
+        raise HTTPException(status_code=400, detail=NO_ONGOING_GAME_FOUND)
 
     websocket_player1 = await manager.get_user(current_game.player1)
     if websocket_player1:

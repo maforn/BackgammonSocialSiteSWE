@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from core.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from fastapi import APIRouter, HTTPException, status
-from models.user import UserCreate, LoginRequest
+from models.user import UserCreate, LoginRequest, DEFAULT_RATING
 from pymongo.errors import DuplicateKeyError
 from services.ai import is_ai
 from services.auth import get_password_hash, authenticate_user, create_access_token
@@ -17,6 +17,7 @@ async def register_user(user: UserCreate):
     user_dict = user.dict(by_alias=True)
     user_dict["password"] = get_password_hash(user_dict.pop("password"))
     user_dict["_id"] = default_id()
+    user_dict["rating"] = DEFAULT_RATING
     
     if is_ai(user_dict["username"]):
         raise HTTPException(
