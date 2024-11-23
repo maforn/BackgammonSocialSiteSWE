@@ -4,7 +4,6 @@ from services.database import get_db
 from services.game import create_started_match
 
 from tests.conftest import clear_matches
-from services.game import check_win_condition, get_current_game
 
 
 @pytest.mark.anyio
