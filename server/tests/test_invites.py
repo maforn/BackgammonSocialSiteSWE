@@ -13,16 +13,20 @@ async def test_receive_invite_endpoint(client: AsyncClient, token: str):
 
 @pytest.mark.anyio
 async def test_create_invite_endpoint(client: AsyncClient, token: str):
-    response = await client.post("/invites", json={"opponent_username": "opponent", "rounds_to_win": 1},
+    await get_db().matches.delete_many({"$or": [{"player1": "testuser"}, {"player2": "testuser"}]})
+    response = await client.post("/invites", json={"opponent_username": "testuser2", "rounds_to_win": 1},
                                  headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     assert response.json() == {"message": "Invite created successfully"}
 
 
 @pytest.mark.anyio
-async def test_create_invite_endpoint(client: AsyncClient, token: str):
+async def test_accept_invite_endpoint(client: AsyncClient, token: str):
     await get_db().matches.delete_many({"$or": [{"player1": "testuser"}, {"player2": "testuser"}]})
-    response = await client.post("/invites", json={"opponent_username": "opponent", "rounds_to_win": 1},
+    await create_invite("testuser1", "testuser", 1)
+    response = await client.get("/invites", headers={"Authorization": f"Bearer {token}"})
+    print(response.json())
+    response = await client.post("/invites/accept", json={"invite_id": response.json()["pending_invites"][0]["_id"]},
                                  headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
-    assert response.json() == {"message": "Invite created successfully"}
+    assert response.json() == {"message": "Invite accepted successfully"}
