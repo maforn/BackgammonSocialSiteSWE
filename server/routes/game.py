@@ -7,6 +7,7 @@ from services.game import throw_dice, get_current_game, check_winner
 from services.websocket import manager
 from models.board_configuration import StartDice
 from fastapi.encoders import jsonable_encoder
+from tensorflow.python.distribute.device_util import current
 
 NOT_YOUR_TURN = "It's not your turn"
 
@@ -126,8 +127,12 @@ async def start_dice_endpoint(token: str = Depends(oauth2_scheme)):
     result = throw_dice()
     if is_player1:
         old_start_dice.roll1, old_start_dice.count1 = result[0], old_start_dice.count1 + 1
+        if current_game.player2 in ai_names:
+            old_start_dice.roll2, old_start_dice.count2 = result[1], old_start_dice.count2 + 1
     else:
         old_start_dice.roll2, old_start_dice.count2 = result[0], old_start_dice.count2 + 1
+        if current_game.player1 in ai_names:
+            old_start_dice.roll2, old_start_dice.count2 = result[1], old_start_dice.count2 + 1
 
     starter, turn = 0, -1
     if old_start_dice.count1 == old_start_dice.count2:
@@ -198,4 +203,32 @@ async def send_in_game_message(request: InGameMessageRequest, token: str = Depen
     websocket_player2 = await manager.get_user(current_game.player2)
     if websocket_player2:
         await manager.send_personal_message({"type": "in_game_msg", "msg": request.message, "user": user.username},
+                                            websocket_player2)
+
+@router.post("/game/pass_turn")
+async def pass_turn(token: str = Depends(oauth2_scheme)):
+    user = await get_user_from_token(token)
+    current_game = await get_current_game(user.username)
+
+    if not current_game or current_game.status != "started":
+        raise HTTPException(status_code=400, detail="No ongoing game found")
+
+    if (current_game.turn % 2 == 0 and current_game.player1 != user.username) or \
+            (current_game.turn % 2 == 1 and current_game.player2 != user.username):
+        raise HTTPException(status_code=400, detail="It's not your turn")
+
+    current_game.turn += 1
+    current_game.dice = []
+    current_game.available = []
+
+    await get_db().matches.update_one({"_id": current_game.id}, {
+        "$set": {"dice": current_game.dice, "available": current_game.available, "turn": current_game.turn}})
+
+    websocket_player1 = await manager.get_user(current_game.player1)
+    if websocket_player1:
+        await manager.send_personal_message({"type": "pass_turn", "match": current_game.dict(by_alias=True)},
+                                            websocket_player1)
+    websocket_player2 = await manager.get_user(current_game.player2)
+    if websocket_player2:
+        await manager.send_personal_message({"type": "pass_turn", "match": current_game.dict(by_alias=True)},
                                             websocket_player2)

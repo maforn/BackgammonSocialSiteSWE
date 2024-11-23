@@ -67,6 +67,9 @@ class WebSocketService {
 			case 'round_over':
 				this.showMessage(data.winner + " won the round!")
 				break;
+      case 'pass_turn':
+        useGameStore().setMatch(data.match);
+        break;
 			default:
 				console.warn('Unknown event:', data.type);
 		}

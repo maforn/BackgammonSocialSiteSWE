@@ -98,7 +98,7 @@ import PointComponent from './PointComponent.vue';
 
 export default defineComponent({
 	name: 'GameBoard',
-	emits: ['movePiece'],
+	emits: ['movePiece', 'noAvailableMoves'],
 	components: {
 		PointComponent,
 	},
@@ -137,10 +137,12 @@ export default defineComponent({
 	},
 	created() {
 		this.internalConfig = this.player1 ? { ...this.configuration } : this.swapPlayers(this.configuration);
+    if (!this.isMoveAvailable) this.$emit('noAvailableMoves');
 	},
 	watch: {
 		dice(newDice) {
 			this.availableDice = [...newDice];
+      if (!this.isMoveAvailable) this.$emit('noAvailableMoves');
 		},
 		configuration(newConfig) {
 			this.internalConfig = this.player1 ? { ...newConfig } : this.swapPlayers(newConfig);
@@ -205,7 +207,7 @@ export default defineComponent({
 			}
 
 			// Update the available dice and reset the source point index
-			let usedDice = this.availableDice?.reduce((min, dice) => {
+			const usedDice = this.availableDice?.reduce((min, dice) => {
 				if (srcPointIndex - dice <= dstPointIndex && dice < min) {
 					return dice;
 				}
@@ -274,6 +276,45 @@ export default defineComponent({
 
 			return newBoard;
 		},
+		/**
+		 * Returns the indices of the points the player can select given the current board configuration,
+		 * the available dices and the source point index.
+		 */
+		getAllowedPointIndices(
+			boardConfig: BoardConfiguration,
+			availableDice: number[] | null,
+			srcPointIndex: number | null = null,
+		) {
+			if (!availableDice || availableDice.length === 0 || !this.yourTurn) {
+				// No selection can be done if the dices have not been rolled or it is not you turn
+				return [];
+			} else if (boardConfig.bar.player1 > 0) {
+				// There are pieces in the bar, return the points where the pieces can be moved to
+				return availableDice
+					.map(dice => 24 - dice)
+					.filter(index => index <= 23 && index >= 0 && boardConfig.points[index].player2 <= 1);
+			} else if (srcPointIndex === null) {
+				// No point has been selected yet, return the points with pieces
+				return boardConfig.points
+					.map((point, index) => (point.player1 >= 1 ? index : -1))
+					.filter(index => index !== -1);
+			} else {
+				// Find the points reachable from the selected point, with at most one opponent's piece
+				const allowedIndices = availableDice
+					.map(dice => (srcPointIndex ?? 24) - dice)
+					.filter(index => index <= 23 && index >= 0 && boardConfig.points[index].player2 <= 1);
+
+				// If the player has all pieces in base, allow moving pieces to the bear-off area
+				if (
+					boardConfig.points.slice(6, 24).every(point => point.player1 === 0) &&
+					availableDice.some(dice => dice > (this.srcPointIndex ?? 0))
+				) {
+					allowedIndices.push(-1);
+				}
+
+				return allowedIndices;
+			}
+		},
 	},
 	computed: {
 		/**
@@ -281,34 +322,21 @@ export default defineComponent({
 		 * to move pieces from or to.
 		 */
 		allowedPointIndices() {
-			if (!this.availableDice || this.availableDice.length === 0 || !this.yourTurn) {
-				// No selection can be done if the dices have not been rolled or it is not you turn
-				return [];
+			return this.getAllowedPointIndices(this.internalConfig, this.availableDice, this.srcPointIndex);
+		},
+		/**
+		 * Returns whether the player can make a move given the current board configuration and available dices.
+		 */
+		isMoveAvailable() {
+			if (!this.yourTurn) {
+				return false;
 			} else if (this.internalConfig.bar.player1 > 0) {
-				// There are pieces in the bar, return the points where the pieces can be moved to
-				return this.availableDice
-					.map(dice => 24 - dice)
-					.filter(index => index <= 23 && index >= 0 && this.internalConfig.points[index].player2 <= 1);
-			} else if (this.srcPointIndex === null) {
-				// No point has been selected yet, return the points with pieces
-				return this.internalConfig.points
-					.map((point, index) => (point.player1 >= 1 ? index : -1))
-					.filter(index => index !== -1);
+				return this.getAllowedPointIndices(this.internalConfig, this.availableDice, 24).length > 0;
 			} else {
-				// Find the points reachable from the selected point, with at most one opponent's piece
-				const allowedIndices = this.availableDice
-					.map(dice => (this.srcPointIndex ?? 24) - dice)
-					.filter(index => index <= 23 && index >= 0 && this.internalConfig.points[index].player2 <= 1);
-
-				// If the player has all pieces in base, allow moving pieces to the bear-off area
-				if (
-					this.internalConfig.points.slice(6, 24).every(point => point.player1 === 0) &&
-					this.availableDice.some(dice => dice > (this.srcPointIndex ?? 0))
-				) {
-					allowedIndices.push(-1);
-				}
-
-				return allowedIndices;
+				const possibleSrcIndices = this.getAllowedPointIndices(this.internalConfig, this.availableDice);
+				return possibleSrcIndices.some(
+					srcIndex => this.getAllowedPointIndices(this.internalConfig, this.availableDice, srcIndex).length > 0,
+				);
 			}
 		},
 		bearOffAllowed() {

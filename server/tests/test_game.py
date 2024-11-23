@@ -4,8 +4,8 @@ from services.database import get_db
 from services.game import create_started_match
 
 from tests.conftest import clear_matches
-from models.board_configuration import Match, BoardConfiguration, Point
 from services.game import check_win_condition, get_current_game
+
 
 @pytest.mark.anyio
 async def test_throw_start_dice(client: AsyncClient, token: str):
@@ -19,6 +19,7 @@ async def test_throw_start_dice(client: AsyncClient, token: str):
     assert match["startDice"]["roll2"] <= 0
     assert match["startDice"]["count1"] == 1
     assert match["startDice"]["count2"] == 0
+
 
 @pytest.mark.anyio
 async def test_throw_dice(client: AsyncClient, token: str):
@@ -116,6 +117,7 @@ async def test_move_ai(client: AsyncClient, token: str):
     assert updated_game["board_configuration"]["points"][3]["player1"] == 1
     assert updated_game["turn"] == 1
 
+
 @pytest.mark.anyio
 async def test_round_progression(client: AsyncClient, token: str):
     await clear_matches()
@@ -133,3 +135,58 @@ async def test_round_progression(client: AsyncClient, token: str):
     assert updated_game is not None
     assert updated_game["turn"] == -1
     assert updated_game["winsP2"] == 1
+
+
+@pytest.mark.anyio
+async def test_pass_turn(client: AsyncClient, token: str):
+    await clear_matches()
+    await create_started_match("testuser", "testuser2")
+    await get_db().matches.update_one({"player1": "testuser"},
+                                      {"$set": {"turn": 0, "dice": [3, 5], "available": [3, 5]}})
+
+    response = await client.post("/api/game/pass_turn", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+
+    updated_game = await get_db().matches.find_one({"player1": "testuser"})
+    assert updated_game is not None
+    assert updated_game["turn"] == 1
+    assert updated_game["dice"] == []
+    assert updated_game["available"] == []
+
+@pytest.mark.anyio
+async def test_throw_start_dice_already_thrown(client: AsyncClient, token: str):
+    await clear_matches()
+    await create_started_match("testuser", "testuser2")
+
+    response = await client.get("/api/throw_start_dice", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+
+    response = await client.get("/api/throw_start_dice", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 400
+    assert response.json()["detail"] == "You have already thrown the start dice. Wait for the other player"
+
+@pytest.mark.anyio
+async def test_throw_start_dice_player2(client: AsyncClient, token: str):
+    await clear_matches()
+    await create_started_match("testuser2", "testuser")
+    response = await client.get("/api/throw_start_dice", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    match = await get_db().matches.find_one({"player2": "testuser"})
+    assert match is not None
+    assert match["startDice"]["roll2"] > 0
+    assert match["startDice"]["roll1"] == 0
+    assert match["startDice"]["count2"] == 1
+    assert match["startDice"]["count1"] == 0
+
+@pytest.mark.anyio
+async def test_throw_start_dice_ai(client: AsyncClient, token: str):
+    await clear_matches()
+    await create_started_match("testuser", "ai_easy")
+    response = await client.get("/api/throw_start_dice", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    match = await get_db().matches.find_one({"player1": "testuser"})
+    assert match is not None
+    assert match["startDice"]["roll1"] > 0
+    assert match["startDice"]["roll2"] > 0
+    assert match["startDice"]["count1"] == 1
+    assert match["startDice"]["count2"] == 1

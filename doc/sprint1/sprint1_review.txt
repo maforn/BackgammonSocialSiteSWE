@@ -1,0 +1,39 @@
+US #2: Da utente, vorrei potermi registrare al sito se non l'ho già fatto
+Tramite l'interfaccia fornita dalla view RegisterView, l'utente può inserire username, email e password per registrarsi. Questo viene gestito dall'endpoint per "/register" definita in /server/routes/auth.py che a sua volta si basa sullo schema per l'utente definito in /server/models/auth.py.
+Rispettivamente, task 34, 33 e 32.
+
+US #3: Da utente, vorrei poter accedere al sito se mi sono già registrato
+Tramite l'interfaccia fornita dalla view RegisterView, l'utente può inserire username e password per eseguire l'accesso. Questo viene gestito dall'endpoint per "/token" definita in /server/routes/auth.py che implementa un meccanismo di consistenza della sessione tramite token.
+Rispettivamente, task 35, 42 e 63.
+
+US #18: Da utente che sta giocando una partita , vorrei vedere la board e le pedine per giocare
+Tramite la componente GameBoard definita in /client/src/components/GameBoard.vue è possibile visualizzare la board vuota, e basandosi su questa si ha un'estensione per mostrare una configurazione nella view GameView, definita in /client/src/views/GameView.vue. La struttura dati per memorizzare la configurazione della board è BoardConfiguration in /client/src/models/BoardConfiguration.ts.
+Rispettivamente, task 56, 57 e 55.
+
+US #20: Da utente che sta giocando una partita, vorrei poter lanciare i dadi in modo da poter poi spostare le mie pedine
+La view GameView citata sopra presenta un pulsante per lanciare due dadi; cliccandoci sopra, si ha l'invio di una GET che viene gestita lato server dall'endpoint "/throw_dice" definito in /server/routes/game.py. Il risultato del lancio viene visualizzato dall'utente tramite la componente DieFace definita in /client/src/components/DieFace.vue.
+Rispettivamente, task 39, 40 e 41.
+
+US #17: Da utente che sta giocando una partita, vorrei poter muovere le mie pedine su una punta non occupata
+L'interattività di pedine e punte sulla board è data dalla possibilità di cliccarci sopra nei momenti opportuni durante una partita, come definito in GameView. La validazione delle mosse e l'effettivo aggiornamento della board vengono effettuate tramite l'interazione tra il componente GameBoard e l'endpoint "/move_piece", definito in /server/routes/games.py. In seguito ad una mossa, il nuovo stato della partita è tramsesso ad entrambi i giocatori coinvolti tramite websocket.
+Rispettivamente, task 36, 37, 43 e 70.
+
+US #19: Da utente che sta giocando una partita, vorrei poter mangiare una pedina avversaria con la mia pedina
+La validazione delle mosse e l'effettivo aggiornamento della board vengono effettuate tramite l'interazione tra il componente GameBoard e l'endpoint "/move_piece", definito in /server/routes/games.py. In seguito ad una mossa, il nuovo stato della partita è tramsesso ad entrambi i giocatori coinvolti tramite websocket.
+Rispettivamente, task 58 e 69.
+
+US #21: Da utente che sta giocando una partita, vorrei poter spostare la mia pedina su una pila di altre mie pedine
+La validazione delle mosse e l'effettivo aggiornamento della board vengono effettuate tramite l'interazione tra il componente GameBoard e l'endpoint "/move_piece", definito in /server/routes/games.py. In seguito ad una mossa, il nuovo stato della partita è tramsesso ad entrambi i giocatori coinvolti tramite websocket.
+Rispettivamente task 62, 64 e 68.
+
+US #6: Da utente, vorrei poter invitare un'altra persona online ad una partita
+Si è definito lo schema per un invito come un caso specifico dello schema per le partite (Match, in server/models/board_configuration.py) dove l'attributo status è posto al valore "pending". Tramite l'interfaccia grafica fornita da PlayHumanView (in /client/src/views/PlayHumanView.vue), contenente un apposito form per la ricerca dell'avversario tramite username, un utente può invitare un altro utente ad una partita. Questa funzionalità si basa su websocket, come definito in /server/services/websocket.py.
+Rispettivamente, task 44, 46, 45, 49, 65 e 66.
+
+US #12: Da utente, vorrei poter accettare l'invito ad una partita contro un'altra persona online per iniziare la partita
+Nella pagina home visualizzata dopo l'accesso (definita in /client/src/views/HomeView.vue) tramite un pulsante l'utente può visualizzare gli inviti ricevuti ed accettarli; questo viene implementato tramite una richiesta sull'endpoint lato server "/invites/accept" definito in /server/routes/invites.py.
+Rispettivamente, task 48 e 47.
+
+US #29: Da utente, vorrei che quando l'utente invitato ad una partita accetti, la partita inizi
+Lo schema della partita è il già citato Match in server/models/board_configuration.py. La creazione di una connessione tra server e giocatori viene realizzata in /server/services/websocket.py, e la creazione di un'istanza per la partita avviata avviene impostando il campo status del Match a cui si riferiva l'invito al valore "started" (funzione accept_invite() in /server/services/invite.py).
+Rispettivamente, task 54, 59 e 60.
