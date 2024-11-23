@@ -7,6 +7,7 @@ from services.game import throw_dice, get_current_game, check_winner
 from services.websocket import manager
 from models.board_configuration import StartDice
 from fastapi.encoders import jsonable_encoder
+from tensorflow.python.distribute.device_util import current
 
 NOT_YOUR_TURN = "It's not your turn"
 
@@ -126,8 +127,12 @@ async def start_dice_endpoint(token: str = Depends(oauth2_scheme)):
     result = throw_dice()
     if is_player1:
         old_start_dice.roll1, old_start_dice.count1 = result[0], old_start_dice.count1 + 1
+        if current_game.player2 in ai_names:
+            old_start_dice.roll2, old_start_dice.count2 = result[1], old_start_dice.count2 + 1
     else:
         old_start_dice.roll2, old_start_dice.count2 = result[0], old_start_dice.count2 + 1
+        if current_game.player1 in ai_names:
+            old_start_dice.roll2, old_start_dice.count2 = result[1], old_start_dice.count2 + 1
 
     starter, turn = 0, -1
     if old_start_dice.count1 == old_start_dice.count2:
