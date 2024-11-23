@@ -23,6 +23,12 @@ describe('PlayHumanView.vue', () => {
 		expect(wrapper.exists()).toBe(true);
 	});
 
+	it('displays the input to select the number of rounds to win', () => {
+		const wrapper = mount(PlayHumanView);
+		const roundsSelect = wrapper.find('#rounds_to_win');
+		expect(roundsSelect.exists()).toBe(true);
+	});
+
 	it('disables the invite button initially', () => {
 		const wrapper = mount(PlayHumanView);
 		const inviteButton = wrapper.find('#invite-btn');
