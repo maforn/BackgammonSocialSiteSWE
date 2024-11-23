@@ -6,6 +6,7 @@ import MockAdapter from 'axios-mock-adapter';
 import { createPinia, setActivePinia } from 'pinia';
 import { useGameStore } from '@/stores/gameStore';
 import { useWsStore } from '@/stores/wsStore';
+import GameBoard from "@/components/GameBoard.vue";
 
 describe('GameView.vue', () => {
   let mock: MockAdapter;
@@ -143,4 +144,15 @@ describe('GameView.vue', () => {
     const gameBoards = wrapper.findAllComponents({ name: 'GameBoard' });
     expect(gameBoards.length).toBeGreaterThan(0);
   });
+
+  it('should not render the button pass the turn',()=>{
+
+    const wrapper = mount(GameView, {
+      pinia,
+    });
+    const button = wrapper.find('.btn-pass-turn');
+
+    expect(button.exists()).toBe(false);
+  });
+
 });

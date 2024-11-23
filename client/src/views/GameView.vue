@@ -32,7 +32,7 @@
       <div id="game-over" class="bg-yellow-500 font-medium relative p-2 rounded" v-if="gameOver">{{winnerMessage}}</div>
       <div class="relative" v-if="started">
         <GameBoard :configuration="configuration" :player1="isPlayer1" :dice="availableDice" :your-turn="isYourTurn"
-          @movePiece="movePiece" />
+          @movePiece="movePiece" @noAvailableMoves="buttonShower"/>
         <button v-if="!diceThrown && isYourTurn" class="dice-button p-2 w-10 sm:w-16 lg:w-20" @click.stop="diceThrow">
           <v-icon name="gi-rolling-dices" width="100%" height="100%" />
         </button>
@@ -111,6 +111,9 @@
           {{ msg }}
         </button>
       </div>
+      <div>
+        <button v-if="showPassButton&&isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">Pass the turn</button>
+      </div>
     </div>
   </div>
 </template>
@@ -170,9 +173,24 @@ export default defineComponent({
 
     console.log(startDice.value)
 
+    const passTheTurn = async () => {
+      showPassButton.value = false;
+      try {
+        await axiosInstance.post('/game/pass_turn')
+      } catch (error) {
+        if (isAxiosError(error)) {
+          useWsStore().addError(error?.response?.data?.detail)
+        }
+      }
+    }
+
+    const showPassButton = ref()
+    const buttonShower = () =>{
+      showPassButton.value = true;
+    }
+
     return {
       configuration: computed(() => boardConfiguration.value),
-      isPlayer1: computed(() => username === player1.value),
       thrower: computed(() => (turn.value % 2) + 1),
       diceResult: {
         die1: computed(() => (dice.value.roll.length > 0 ? dice.value.roll[0] : null)),
@@ -191,6 +209,9 @@ export default defineComponent({
       username,
       preformedMessages,
       sendPreformedMessage,
+      showPassButton,
+      buttonShower,
+      passTheTurn,
       started: ref(started),
       initialText: 'Throw the die to pick the starter!',
       status,
@@ -208,6 +229,7 @@ export default defineComponent({
 	},
   methods: {
     async diceThrow() {
+      this.showPassButton = false;
       try {
         await axiosInstance.get('/throw_dice')
       } catch (error) {
@@ -218,7 +240,7 @@ export default defineComponent({
     },
     movePiece(board: BoardConfiguration, dice: number) {
       axiosInstance
-        .post('/move_piece', {
+        .post('/move/piece', {
           board,
           dice,
         })
