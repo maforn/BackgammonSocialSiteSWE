@@ -1,0 +1,22 @@
+Checklist S1
+Prodotto online: Ora presente - gioco vs. ai sembra funzionare
+User Stories (Taiga/Text)
+	migliorate
+	
+
+Documenti: nulla di aggiornato
+Sprint preparation: 
+	S3 sembra molto ambiziosa!
+	
+Sprint review: 
+	S1:Video più demo che review
+	S2:Presente (bella)
+Retrospective: 
+	S1:OK
+	S2: Presente relazione
+Git Stats 
+        Tag presenti
+	Si conferma squilibro git: poco daorsi e Brajevic
+Testing/Coverage: Presenti test sia in front che back (questi ultimi sembrano tutti integration test, voluto?)
+SQ: Presente, configurato parzialemente (Coverage 0%?)
+Devops: SI
