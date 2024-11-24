@@ -1,5 +1,8 @@
 # Server
 
+## Documentation
+FastAPI automatically provides interactive API documentation via Swagger UI, accessible at http://serveraddress:port/docs.
+
 ## Server Folder Structure
 
 The `server` folder contains the backend code for the application. Below is a description of the key files and directories:
