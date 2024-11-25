@@ -5,6 +5,8 @@ import { isAuthenticated } from '@/services/authService';
 import GameView from '@/views/GameView.vue';
 import PlayHumanView from '@/views/PlayHumanView.vue';
 import PlayAiView from '@/views/PlayAiView.vue';
+import PasswordRecoveryView from '@/views/PasswordRecoveryView.vue'
+import PasswordResetView from '@/views/PasswordResetView.vue'
 
 const routes = [
 	{
@@ -23,6 +25,16 @@ const routes = [
 		path: '/register',
 		name: 'register',
 		component: RegisterView,
+	},
+	{
+		path: '/forgot-password',
+		name: 'forgot-password',
+		component: PasswordRecoveryView,
+	},
+	{
+		path: '/reset-password',
+		name: 'reset-password',
+		component: PasswordResetView,
 	},
 	{
 		meta: { requiresAuth: true },
