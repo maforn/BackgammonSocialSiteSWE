@@ -9,7 +9,7 @@
   
 		<div
 		  class="flex flex-col mt-20 w-1/2 sm:p-8 p-6 shadow-md rounded-md gap-3 pl-3 py-2 text-sm md:text-lg bg-white">
-		  <button
+		  <button id="random-btn" :disabled="hasSuspendedGame"
 		  	@click="sendRandomInvite"
 			class="flex justify-center items-center pl-3 py-2 bg-green-600 text-white rounded-r-full rounded-l-full hover:bg-green-700 shadow-md">
 			RANDOM OPPONENT
@@ -205,7 +205,7 @@ hr {
 	border-color: white;
 }
 
-#invite-btn:disabled {
+#invite-btn:disabled, #random-btn:disabled {
 	background-color: #14532d;
 	color: gray;
 	cursor: not-allowed;
@@ -216,7 +216,8 @@ hr {
 	color: white;
 }
 
-#invite-btn:not(:disabled):hover {
+#invite-btn:not(:disabled):hover,
+#random-btn:not(:disabled):hover {
 	background-color: #15803d;
 }
 
