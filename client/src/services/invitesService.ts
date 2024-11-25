@@ -36,14 +36,31 @@ export const receiveInviteService = async () => {
 };
 
 export const acceptInviteService = async (invite_id: string) => {
-  try {
-    await axiosInstance.post('/invites/accept', { invite_id: invite_id })
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      useWsStore().addError(error.response.data.detail)
-      throw new Error(error.response.data.detail)
-    } else {
-      console.error('Error accepting invite:', error)
-    }
-  }
+	try {
+		await axiosInstance.post('/invites/accept', { invite_id: invite_id })
+	} catch (error) {
+		if (axios.isAxiosError(error) && error.response) {
+			useWsStore().addError(error.response.data.detail)
+			throw new Error(error.response.data.detail)
+		} else {
+			console.error('Error accepting invite:', error)
+		}
+	}
+}
+
+export const getRandomOpponentService = async () => {
+	try {
+		const response = await axiosInstance.get('/users/');
+
+		//Extract list of usernames, remove the current user's username
+		const usernames_list = response.data.map((user: any) => user.username).filter((username: string) => username !== useAuthStore().username);
+
+		if (usernames_list.length === 0) {
+			throw { message: 'No other users found' };
+		}
+
+		return usernames_list[Math.floor(Math.random() * usernames_list.length)];
+	} catch (error: Error | any) {
+		useWsStore().addError(error.message);
+	}
 }
