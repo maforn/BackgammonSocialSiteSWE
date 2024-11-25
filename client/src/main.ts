@@ -14,7 +14,9 @@ import {
 	IoCloseSharp,
 	IoHourglassSharp,
 	BiCircle,
-	BiCircleFill
+	BiCircleFill,
+	FaMedal,
+	FaEllipsisH
 } from 'oh-vue-icons/icons';
 import App from './App.vue';
 import router from './router';
@@ -37,7 +39,9 @@ addIcons(
 	IoCloseSharp,
 	IoHourglassSharp,
 	BiCircle,
-	BiCircleFill
+	BiCircleFill,
+	FaMedal,
+	FaEllipsisH
 );
 
 app.component('v-icon', OhVueIcon);

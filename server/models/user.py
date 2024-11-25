@@ -9,6 +9,9 @@ class UserInDB(BaseModel):
     password: str
     rating: int = DEFAULT_RATING
 
+class UserInLeaderboard(UserInDB):
+    position: int = 0
+
 class UserOnline(BaseModel):
     id: str = Field(default_factory=default_id, alias="_id")
     username: str
