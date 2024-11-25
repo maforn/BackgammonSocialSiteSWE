@@ -33,7 +33,7 @@
                 </div>
 
                 <!-- Not very elegant, repeat the same pattern as the user info displays but hide most things to easily align the ellipsis to usernames-->
-                <div class="flex w-full flex-col justify-evenly items-center gap-3">
+                <div v-if="!userIsInTop" class="flex w-full flex-col justify-evenly items-center gap-3">
                   <div class="flex w-5/6 flex-col justify-evenly gap-3">
                     <div class="flex gap-1 justify-evenly" :class="`${getPositionColor(0)}`">
                         <div class="w-1/12 font-black text-center self-center">
@@ -106,10 +106,14 @@
     setup() {
       const myData = ref<User>({ _id: '', username: '', rating: 0, position: 0 });
       const usersData = ref<User[]>([]);
+      const userIsInTop = ref(false);
 
       onMounted(async () => {
         usersData.value = await getTop5AndMe();
         const len = usersData.value.length;
+
+        userIsInTop.value = usersData.value.filter((user, index, self) =>
+            self.findIndex(u => u.username === user.username) !== index).length > 0;
 
         // The user's data is the last element in the usersData array due to how the API is defined
         myData.value = {_id : usersData.value[len-1]._id,
@@ -119,7 +123,7 @@
         console.log("myData", myData.value);
       })
 
-      return { usersData, myData }
+      return { usersData, myData, userIsInTop }
     },
     methods: {
       async goHome() {
