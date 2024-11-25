@@ -10,7 +10,7 @@
         <div v-if="myData"
           class="flex flex-col mt-20 w-5/6 sm:p-8 p-6 shadow-md rounded-md gap-3 pl-3 py-2 text-sm md:text-lg bg-white items-center">
 
-                <div v-for="u in usersData.slice(0, usersData.length-1)" class="flex w-5/6 flex-col justify-evenly gap-3">
+                <div v-for="u in usersData.slice(0, usersData.length-1)" class="leaderboard-object flex w-5/6 flex-col justify-evenly gap-3">
                     <div class="flex gap-1 justify-evenly" :class="`${getPositionColor(u.position)}`">
                         <div class="w-1/12 font-black text-center self-center">
                             <v-icon v-if="u.position <= 3" name="fa-medal" scale="1.5" />
@@ -55,7 +55,7 @@
                 </div>
                 <!---->
 
-                <div class="flex w-full flex-col justify-evenly items-center gap-3">
+                <div class="flex w-full flex-col justify-evenly items-center gap-3 leaderboard-object">
                   <div class="flex w-5/6 flex-col justify-evenly gap-3">
                     <div class="flex gap-1 justify-evenly" :class="`${getPositionColor(myData.position)}`">
                         <div class="w-1/12 font-black text-center self-center">
@@ -109,7 +109,7 @@
 
       onMounted(async () => {
         usersData.value = await getTop5AndMe();
-        let len = usersData.value.length;
+        const len = usersData.value.length;
 
         // The user's data is the last element in the usersData array due to how the API is defined
         myData.value = {_id : usersData.value[len-1]._id,
