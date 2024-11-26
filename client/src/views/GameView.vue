@@ -1,4 +1,5 @@
 <template>
+  <QuitModal v-if="isModalVisible" @confirm="confirmQuit" @cancel="cancelQuit" />
 	<div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center">
 		<div class="background"></div>
 		<div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
@@ -129,10 +130,12 @@ import { useGameStore } from '@/stores/gameStore'
 import { useWsStore } from '@/stores/wsStore'
 import { useAuthStore } from '@/stores/authStore'
 import { isAxiosError } from 'axios'
+import QuitModal from "@/components/QuitModal.vue";
 
 export default defineComponent({
   name: 'GameView',
   components: {
+    QuitModal,
     GameBoard,
     DieFace
   },
@@ -189,6 +192,18 @@ export default defineComponent({
       showPassButton.value = true;
     }
 
+    const isModalVisible = ref(false)
+    const confirmQuit = () => {
+      isModalVisible.value = false
+      console.log('Partita abbandonata.')
+      //TODO: Inserisci qui la logica per abbandonare la partita
+    }
+
+    const cancelQuit = () => {
+      isModalVisible.value = false
+      console.log('Abbandono annullato.')
+    }
+
     return {
       configuration: computed(() => boardConfiguration.value),
       thrower: computed(() => (turn.value % 2) + 1),
@@ -225,6 +240,9 @@ export default defineComponent({
         }
         return '';
       }),
+      isModalVisible,
+      confirmQuit,
+      cancelQuit
 		};
 	},
   methods: {
