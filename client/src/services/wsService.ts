@@ -40,6 +40,9 @@ class WebSocketService {
 			case 'invite':
 				this.showMessage(`${data.from} invited you to a game`);
 				break;
+			case 'invite-sent':
+				this.showMessage(`Invite sent to ${data.to}`);
+				break;
 			case 'invite-accepted':
 				this.showMessage(`${data.from} accepted your invite`);
 				break;
@@ -67,9 +70,9 @@ class WebSocketService {
 			case 'round_over':
 				this.showMessage(data.winner + " won the round!")
 				break;
-      case 'pass_turn':
-        useGameStore().setMatch(data.match);
-        break;
+			case 'pass_turn':
+				useGameStore().setMatch(data.match);
+				break;
 			default:
 				console.warn('Unknown event:', data.type);
 		}

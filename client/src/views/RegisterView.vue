@@ -732,10 +732,7 @@ export default defineComponent({
 			toggleTerms,
 			errorMessage,
 		};
-	},
-	mounted() {
-		console.log('RegisterView mounted');
-	},
+	}
 });
 </script>
 
