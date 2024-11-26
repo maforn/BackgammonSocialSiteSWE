@@ -23,3 +23,18 @@ async def test_login_user(client: AsyncClient):
     })
     assert response.status_code == 200
     assert "access_token" in response.json()
+
+
+@pytest.mark.anyio
+async def test_password_recovery(client: AsyncClient):
+    email = "testuser@example.com"
+    response = await client.post("/password-recovery", json={"email": email})
+    assert response.status_code == 200
+    assert response.json()["message"] == "Password recovery email sent"
+
+@pytest.mark.anyio
+async def test_password_reset(client: AsyncClient, token: str):
+    new_password = "new_password123"
+    response = await client.post("/password-reset", json={"token": token, "new_password": new_password})
+    assert response.status_code == 200
+    assert response.json()["message"] == "Password has been reset"
