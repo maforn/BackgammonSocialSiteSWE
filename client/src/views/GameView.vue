@@ -1,4 +1,5 @@
 <template>
+
   <QuitModal v-if="isModalVisible" @confirm="confirmQuit" @cancel="cancelQuit" />
 	<div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center">
 		<div class="background"></div>
@@ -112,8 +113,16 @@
           {{ msg }}
         </button>
       </div>
-      <div>
-        <button v-if="showPassButton&&isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">Pass the turn</button>
+      <div class="flex gap-2 mt-4 flex-wrap" v-if="configuration && started">
+        <button
+          class="p-2 mb-2 bg-red-500 text-white rounded shadow-md hover:bg-red-600"
+          @click="isModalVisible = true">
+          Abbandona
+        </button>
+        <div>
+          <button v-if="showPassButton&&isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">Passa il turno</button>
+        </div>
+
       </div>
     </div>
   </div>
