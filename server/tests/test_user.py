@@ -19,3 +19,13 @@ async def test_search_usernames(client: AsyncClient, token: str):
     response = await client.get("/users/search", params={"query": "test"}, headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     assert isinstance(response.json(), list)
+
+@pytest.mark.anyio
+async def test_get_top5_and_me(client: AsyncClient, token: str):
+    response = await client.get("/users/top5_and_me", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    print(data)
+    assert data[-1]["username"] == "testuser"
+    assert "position" in data[-1]
