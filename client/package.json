@@ -17,8 +17,9 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "@vue/test-utils": "^2.4.6",
     "@vitest/coverage-v8": "^2.1.4",
+    "@vue/cli-service": "^5.0.8",
+    "@vue/test-utils": "^2.4.6",
     "axios": "^1.7.7",
     "axios-mock-adapter": "^2.1.0",
     "oh-vue-icons": "^1.0.0-rc3",
