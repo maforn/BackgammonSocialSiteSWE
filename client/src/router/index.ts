@@ -7,6 +7,7 @@ import PlayHumanView from '@/views/PlayHumanView.vue';
 import PlayAiView from '@/views/PlayAiView.vue';
 import PasswordRecoveryView from '@/views/PasswordRecoveryView.vue'
 import PasswordResetView from '@/views/PasswordResetView.vue'
+import LeaderboardView from '@/views/LeaderboardView.vue';
 
 const routes = [
 	{
@@ -47,6 +48,12 @@ const routes = [
 		path: '/ai',
 		name: 'ai',
 		component: PlayAiView,
+	},
+	{
+		meta: { requiresAuth: true },
+		path: '/leaderboard',
+		name: 'leaderboard',
+		component: LeaderboardView,
 	}
 ];
 

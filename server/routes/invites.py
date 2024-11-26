@@ -45,9 +45,14 @@ async def create_invite_endpoint(request: CreateInviteRequest, token: str = Depe
 
         else: 
             await create_invite(user.username, opponent_username, rounds_to_win)
-            websocket = await manager.get_user(opponent_username)
-            if websocket:
-                await manager.send_personal_message({"type": "invite", "from": user.username}, websocket)
+
+            inviterWebsocket = await manager.get_user(user.username)
+            if inviterWebsocket:
+                await manager.send_personal_message({"type": "invite-sent", "to": opponent_username}, inviterWebsocket)
+
+            invitedWebsocket = await manager.get_user(opponent_username)
+            if invitedWebsocket:
+                await manager.send_personal_message({"type": "invite", "from": user.username}, invitedWebsocket)
                 
     return JSONResponse(status_code=200, content={"message": "Invite created successfully"})
 

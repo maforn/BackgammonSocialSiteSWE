@@ -9,7 +9,8 @@
   
 		<div
 		  class="flex flex-col mt-20 w-1/2 sm:p-8 p-6 shadow-md rounded-md gap-3 pl-3 py-2 text-sm md:text-lg bg-white">
-		  <button
+		  <button id="random-btn" :disabled="hasSuspendedGame"
+		  	@click="sendRandomInvite"
 			class="flex justify-center items-center pl-3 py-2 bg-green-600 text-white rounded-r-full rounded-l-full hover:bg-green-700 shadow-md">
 			RANDOM OPPONENT
 		  </button>
@@ -66,7 +67,7 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 import { debounce } from 'lodash'
-import { sendInviteService } from '@/services/invitesService';
+import { sendInviteService, getRandomOpponentService } from '@/services/invitesService';
 import { useGameStore } from '@/stores/gameStore';
 import axiosInstance from '@/axios'
 import router from '@/router';
@@ -155,6 +156,17 @@ export default defineComponent({
 			} catch (error) {
 				console.error('Error sending invite:', error)
 			}
+		},
+		async sendRandomInvite() {
+			try{
+				const opponent_username = await getRandomOpponentService()
+				if(!opponent_username) {
+					return
+				}
+				await sendInviteService(opponent_username, this.rounds_to_win)
+			} catch (error) {
+				console.error('Error sending random invite:', error)
+			}
 		}
 	},
 	watch: {
@@ -193,7 +205,7 @@ hr {
 	border-color: white;
 }
 
-#invite-btn:disabled {
+#invite-btn:disabled, #random-btn:disabled {
 	background-color: #14532d;
 	color: gray;
 	cursor: not-allowed;
@@ -204,7 +216,8 @@ hr {
 	color: white;
 }
 
-#invite-btn:not(:disabled):hover {
+#invite-btn:not(:disabled):hover,
+#random-btn:not(:disabled):hover {
 	background-color: #15803d;
 }
 

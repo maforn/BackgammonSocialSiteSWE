@@ -29,6 +29,12 @@ describe('PlayHumanView.vue', () => {
 		expect(roundsSelect.exists()).toBe(true);
 	});
 
+	it('displays the button to challenge a random opponent', () => {
+		const wrapper = mount(PlayHumanView);
+		const challengeRandomButton = wrapper.find('#random-btn');
+		expect(challengeRandomButton.exists()).toBe(true);
+	});
+
 	it('disables the invite button initially', () => {
 		const wrapper = mount(PlayHumanView);
 		const inviteButton = wrapper.find('#invite-btn');
