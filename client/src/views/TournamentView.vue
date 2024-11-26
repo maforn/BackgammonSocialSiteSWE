@@ -7,53 +7,28 @@
   
 		<h1 class="text-center text-6xl font-black text-white">TOURNAMENT</h1>
   
-		<div
-		  class="flex flex-col mt-20 w-1/2 sm:p-8 p-6 shadow-md items-center rounded-md gap-6 pl-3 py-2 text-sm md:text-lg bg-white">
-
-		  <h3 class="text-xl font-semibold">Settings</h3>
-
-		<div class="flex justify-center items-center gap-2">
-			<input type="checkbox" class="size-5">
-			Open to everyone
+		<div class="mt-10 flex items-center justify-center rounded-l-full rounded-r-full overflow-hidden bg-gray-400 text-white font-semibold">
+			<button :class="['px-8 py-2 flex-1', showCreate ? 'bg-green-800': '']" @click="showCreate=true">Create</button>
+			<button :class="['px-8 py-2 flex-1', !showCreate ? 'bg-green-800': '']" @click="showCreate=false">Join</button>
 		</div>
 
-		<button id="invite-btn" @click=""
-			  class="mt-2 px-4 py-2 w-2/3 rounded-xl">Create Tournament
-			</button>
-		  <!--
-		  <div
-			class="relative flex justify-center items-center pl-3 pe-3 py-2 bg-gray-900 text-white rounded-r-full rounded-l-full shadow-sm">
-			<input v-model="searchQuery" @input="onInput" class="flex-grow pl-3 py-2 outline-none bg-gray-900 text-white"
-			  placeholder="Search by username..." />
-			<i class="fas fa-search text-white pr-3"></i>
-			<ul v-if="showDropdown"
-			  class="absolute top-full left-0 w-full bg-white border border-gray-300 rounded-md mt-1 z-10">
-			  <li v-for="user in filteredUsers" :key="user.username"
-				class="px-4 py-2 hover:bg-gray-200 cursor-pointer text-black" @click="selectUser(user)">
-				{{ user.username }}
-			  </li>
-			</ul>
-		  </div>
-  
-		  <div class="flex justify-center items-center pl-3 py-2 gap-x-2 self-center">
-			<label for="rounds_to_win" class="text-right">Rounds to win</label>
-			<div class="container">
-			  <div class="select">
-				<select name="rounds_to_win" id="rounds_to_win" v-model="rounds_to_win">
-				  <option value="1">1</option>
-				  <option value="2">2</option>
-				  <option value="3">3</option>
-				</select>
-			  </div>
+		<div
+		  class="flex flex-col mt-6 w-1/2 sm:p-8 p-6 shadow-md items-center rounded-md gap-6 pl-3 py-2 text-sm md:text-lg bg-white">
+
+		  <form class="w-full flex flex-col items-center gap-4" @submit="createTournament">
+
+			<input type="text" placeholder="Tournament Name" required v-model="tournamentName" class="text-center text-xl font-bold py-2 border-b-2 mb-4">
+
+			<div class="flex justify-center items-center gap-2">
+				<input type="checkbox" class="size-5" v-model="openToEveryone">
+				Open to everyone
 			</div>
-		  </div>
-  
-		  <div class="flex justify-center">
-			<button id="invite-btn" :disabled="!hasSelectedOpponent || hasSuspendedGame" @click="sendInvite"
-			  class="mt-2 px-4 py-2 w-2/3 rounded-xl">Invite
+
+			<button id="invite-btn" type="submit" v-if="allowCreation" @click=""
+			  class="mt-8 px-4 py-2 w-2/3 rounded-xl">Create Tournament
 			</button>
-		  </div>
-			-->
+
+		  </form>
 		</div>
 	  </div>
   
@@ -66,106 +41,35 @@
   
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
-import { debounce } from 'lodash'
-import { sendInviteService } from '@/services/invitesService';
-import { useGameStore } from '@/stores/gameStore';
-import axiosInstance from '@/axios'
+import { defineComponent } from 'vue'
 import router from '@/router';
+import { createTournament } from '@/services/tournamentService';
 
 export default defineComponent({
 	name: 'TournamentView',
-	setup() {
-		const hasSuspendedGame = ref(true)
-		const hasSelectedOpponent = ref(false)
-
-		useGameStore()
-			.checkSuspendedGameExists()
-			.then((exists) => {
-				hasSuspendedGame.value = exists
-			});
-
-		return { hasSuspendedGame, hasSelectedOpponent }
-	},
-	data(): {
-		searchQuery: string;
-		users: Array<{ id: number; username: string }>;
-		showDropdown: boolean;
-		hasSelectedOpponent: boolean,
-		rounds_to_win: number,
-		hasSuspendedGame: boolean,
-	} {
+	data(){
 		return {
-			searchQuery: '',
-			users: [] as Array<{ id: number; username: string }>,
-			showDropdown: false,
-			hasSelectedOpponent: false,
-			rounds_to_win: 1,
-			hasSuspendedGame: true
-		}
-	},
-	computed: {
-		filteredUsers() {
-			return this.users.filter(u =>
-				u.username.toLowerCase().includes(this.searchQuery.toLowerCase())
-			)
+			showCreate: true,
+			tournamentName: '',
+			openToEveryone: false,
+			participants: []
 		}
 	},
 	methods: {
-		onInput: debounce(function (this: {
-			searchQuery: string;
-			fetchUsers: () => void;
-			showDropdown: boolean;
-			hasSelectedOpponent: boolean
-		}) {
-			this.hasSelectedOpponent = false
-			if (this.searchQuery.length >= 2) {
-				this.fetchUsers()
-			} else {
-				this.showDropdown = false
-			}
-		}, 300),
 		async goHome() {
 			await router.push({ name: 'home' });
 		},
-		async fetchUsers() {
-			try {
-				const response = await axiosInstance.get('/users/search', {
-					params: { query: this.searchQuery }
-				})
-				if (Array.isArray(response.data)) {
-					this.users = response.data.map(u => ({ id: u.id, username: u.username })) // Ensure each item is an object with id and username properties
-				} else {
-					this.users = []
-				}
-				this.showDropdown = this.users.length > 0
-			} catch (error) {
-				console.error('Error fetching users:', error)
-				this.users = []
-			}
-		},
-		selectUser(user: { username: string }) {
-			this.searchQuery = user.username
-			this.showDropdown = false
-			this.hasSelectedOpponent = true
-		},
-		async sendInvite() {
-			try {
-				await sendInviteService(this.searchQuery, this.rounds_to_win)
-				this.searchQuery = ''
-				this.hasSelectedOpponent = false
-			} catch (error) {
-				console.error('Error sending invite:', error)
-			}
+		async createTournament(event: Event){
+			event.preventDefault();
+			await createTournament(this.tournamentName, this.openToEveryone, this.participants);
 		}
 	},
-	watch: {
-		searchQuery() {
-			if (this.searchQuery.length < 2) {
-				this.showDropdown = false
-			}
+	computed: {
+		allowCreation(){
+			return this.openToEveryone;
 		}
-	}
+	},
+
 })
 </script>
 
