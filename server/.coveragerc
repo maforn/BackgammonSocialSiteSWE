@@ -1,4 +1,4 @@
 [coverage:run]
 relative_files = True
 include = ./*
-omit = tests/*
+omit = tests/*,venv/*
