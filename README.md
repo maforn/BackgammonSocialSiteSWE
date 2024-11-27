@@ -2,6 +2,8 @@
 
 This project is a web application for playing backgammon online, allowing two players or a player against an intelligent agent (bot) to compete. The platform also enables tournament organization among players and features a leaderboard updated with personal scores.
 
+[![Quality gate](https://aminsep.disi.unibo.it/sonarqube/api/project_badges/quality_gate?project=SWE-team-3-backgammon-social-site&token=sqb_065b31a13f0c6fa4084d8a65d62724ac761e6f18)](https://aminsep.disi.unibo.it/sonarqube/dashboard?id=SWE-team-3-backgammon-social-site)
+
 ## Table of Contents
 - [Introduction](#introduction)
 - [Project Features](#project-features)
