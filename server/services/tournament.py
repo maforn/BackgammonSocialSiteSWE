@@ -15,6 +15,10 @@ async def create_new_tournament(request: CreateTournamentRequest, owner: str):
                                 open=request.open,
                                 name=request.name,
                                 match_ids=[],
-                                status="pending")
+                                status="pending",
+                                rounds_to_win=request.rounds_to_win
+                                )
     tournament_data = new_tournament.model_dump(by_alias=True)
     await get_db().tournaments.insert_one(tournament_data)
+    print(new_tournament)
+    return new_tournament

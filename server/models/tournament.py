@@ -10,8 +10,10 @@ class Tournament(BaseModel):
     match_ids: List[List[str]]
     name: str
     status: str
+    rounds_to_win: int
 
 class CreateTournamentRequest(BaseModel):
     name: str
     participants: List[str]
     open: bool
+    rounds_to_win: int

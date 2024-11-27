@@ -25,7 +25,6 @@ async def test_accept_invite_endpoint(client: AsyncClient, token: str):
     await get_db().matches.delete_many({"$or": [{"player1": "testuser"}, {"player2": "testuser"}]})
     await create_invite("testuser1", "testuser", 1)
     response = await client.get("/invites", headers={"Authorization": f"Bearer {token}"})
-    print(response.json())
     response = await client.post("/invites/accept", json={"invite_id": response.json()["pending_invites"][0]["_id"]},
                                  headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
