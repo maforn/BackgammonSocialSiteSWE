@@ -12,13 +12,14 @@ mock_request_data = CreateTournamentRequest(
     participants=["testuser"], 
     rounds_to_win=2)
 
+tournaments_route = "/tournaments"
 
 @pytest.mark.anyio
 async def test_create_tournament(client: AsyncClient, token: str):
     await clear_tournaments()
     await clear_matches()
 
-    response = await client.post("/tournaments", json=mock_request_data.model_dump(),
+    response = await client.post(tournaments_route, json=mock_request_data.model_dump(),
                                  headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     res_data = response.json()
@@ -34,11 +35,11 @@ async def test_create_tournament(client: AsyncClient, token: str):
 @pytest.mark.anyio
 async def test_get_tournament(client: AsyncClient, token: str):
     await clear_tournaments()
-    response = await client.get("/tournaments", headers={"Authorization": f"Bearer {token}"})
+    response = await client.get(tournaments_route, headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 404
 
     await create_new_tournament(mock_request_data, owner="testuser")
-    response = await client.get("/tournaments", headers={"Authorization": f"Bearer {token}"})
+    response = await client.get(tournaments_route, headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
 
     res_data = response.json()
@@ -52,9 +53,9 @@ async def test_get_tournament(client: AsyncClient, token: str):
 @pytest.mark.anyio
 async def test_tournament_exists(client: AsyncClient, token: str):
     await clear_tournaments()
-    response = await client.get("/tournaments/exists", headers={"Authorization": f"Bearer {token}"})
+    response = await client.get(tournaments_route + "/exists", headers={"Authorization": f"Bearer {token}"})
     assert response.json() == False
 
     await create_new_tournament(mock_request_data, owner="testuser")
-    response = await client.get("/tournaments/exists", headers={"Authorization": f"Bearer {token}"})
+    response = await client.get(tournaments_route + "/exists", headers={"Authorization": f"Bearer {token}"})
     assert response.json() == True
