@@ -1,73 +1,75 @@
 <template>
 	<div class="play-human-view">
-	  <div class="bg"></div>
-	  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-  
-	  <div class="w-screen h-screen flex flex-col pt-20 items-center">
-  
-		<h1 class="text-center text-6xl font-black text-white">TOURNAMENT</h1>
-  
-		<div class="mt-10 flex items-center justify-center rounded-l-full rounded-r-full overflow-hidden bg-gray-400 text-white font-semibold">
-			<button :class="['px-8 py-2 flex-1', showCreate ? 'bg-green-800': '']" @click="showCreate=true">Create</button>
-			<button :class="['px-8 py-2 flex-1', !showCreate ? 'bg-green-800': '']" @click="showCreate=false">Join</button>
-		</div>
+		<div class="bg"></div>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-		<div
-		  class="flex flex-col mt-6 w-1/2 sm:p-8 p-6 shadow-md items-center rounded-md gap-6 pl-3 py-2 text-sm md:text-lg bg-white">
+		<div class="w-screen h-screen flex flex-col pt-20 items-center">
 
-		  <form class="w-full flex flex-col items-center gap-4" @submit="createTournament">
+			<h1 class="text-center text-6xl font-black text-white">TOURNAMENT</h1>
 
-			<input type="text" placeholder="Tournament Name" required v-model="tournamentName" class="text-center text-xl font-bold py-2 border-b-2 mb-4">
-
-			<div class="flex justify-center items-center gap-2">
-				<input type="checkbox" class="size-5" v-model="openToEveryone">
-				Open to everyone
+			<div
+				class="mt-10 flex items-center justify-center rounded-l-full rounded-r-full overflow-hidden bg-gray-400 text-white font-semibold">
+				<button :class="['px-8 py-2 flex-1', showCreate ? 'bg-green-800' : '']" v-if="!hasCreatedTournament"
+					@click="showCreate = true">Create</button>
+				<button :class="['px-8 py-2 flex-1', !showCreate ? 'bg-green-800' : '']" v-if="!hasCreatedTournament"
+					@click="showCreate = false">Join</button>
+				<button :class="['px-8 py-2 flex-1', 'bg-green-800']" v-if="hasCreatedTournament"
+					@click="">Active</button>
 			</div>
 
-			<button id="invite-btn" type="submit" v-if="allowCreation" @click=""
-			  class="mt-8 px-4 py-2 w-2/3 rounded-xl">Create Tournament
-			</button>
-
-		  </form>
+			<div
+				class="flex flex-col mt-6 w-1/2 sm:p-8 p-6 shadow-md items-center rounded-md gap-6 pl-3 py-2 text-sm md:text-lg bg-white">
+				<TournamentForm v-if="!hasCreatedTournament && showCreate" @created-tournament="updateTournament" />
+				<TournamentVisualizer v-if="hasCreatedTournament" />
+			</div>
 		</div>
-	  </div>
-  
-	  <button @click="goHome"
-		class="absolute top-4 left-4 px-4 py-2 bg-white text-black rounded-md hover:bg-gray-400"><v-icon
-		  name="io-home-sharp" />
-	  </button>
+
+		<button @click="goHome"
+			class="absolute top-4 left-4 px-4 py-2 bg-white text-black rounded-md hover:bg-gray-400"><v-icon
+				name="io-home-sharp" />
+		</button>
 	</div>
-  </template>
-  
+</template>
+
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import router from '@/router';
-import { createTournament } from '@/services/tournamentService';
+import { checkCreatedTournamentExists } from '@/services/tournamentService';
+import TournamentForm from '@/components/TournamentForm.vue';
+import TournamentVisualizer from '@/components/TournamentVisualizer.vue';
+import type { Tournament } from '@/models/Tournament';
 
 export default defineComponent({
 	name: 'TournamentView',
-	data(){
+	components: {
+		TournamentForm,
+		TournamentVisualizer
+	},
+	setup() {
+		const hasCreatedTournament = ref(false)
+		checkCreatedTournamentExists().then(exists => {
+			hasCreatedTournament.value = exists
+		})
+		return { hasCreatedTournament }
+	},
+	data() {
 		return {
 			showCreate: true,
-			tournamentName: '',
-			openToEveryone: false,
-			participants: []
+			activeTournament: null as Tournament | null,
 		}
 	},
 	methods: {
 		async goHome() {
 			await router.push({ name: 'home' });
 		},
-		async createTournament(event: Event){
-			event.preventDefault();
-			await createTournament(this.tournamentName, this.openToEveryone, this.participants);
+		async updateTournament(tournament: Tournament) {
+			if (tournament)
+				this.hasCreatedTournament = true;
 		}
 	},
 	computed: {
-		allowCreation(){
-			return this.openToEveryone;
-		}
+
 	},
 
 })
@@ -97,21 +99,6 @@ hr {
 	width: 30%;
 	height: 1px;
 	border-color: white;
-}
-
-#invite-btn:disabled {
-	background-color: #14532d;
-	color: gray;
-	cursor: not-allowed;
-}
-
-#invite-btn {
-	background-color: #16a34a;
-	color: white;
-}
-
-#invite-btn:not(:disabled):hover {
-	background-color: #15803d;
 }
 
 select {
