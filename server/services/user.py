@@ -1,4 +1,4 @@
-from models.user import UserInDB, UserOnline
+from models.user import UserInDB, UserOnline, UserInLeaderboard
 from services.database import get_db
 
 
@@ -22,3 +22,7 @@ async def get_usernames_starting_with(query: str):
 async def get_all_users():
     users = await get_db().users.find().to_list(length=None)
     return [UserOnline(**user) for user in users]
+
+async def get_all_users_leaderboard():
+    users = await get_db().users.find().to_list(length=None)
+    return [UserInLeaderboard(**user) for user in users]

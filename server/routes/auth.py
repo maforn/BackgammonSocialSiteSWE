@@ -3,11 +3,12 @@ from datetime import timedelta
 from core.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from fastapi import APIRouter, HTTPException, status
 from models.user import UserCreate, LoginRequest, DEFAULT_RATING
+from pydantic import BaseModel
 from pymongo.errors import DuplicateKeyError
 from services.ai import is_ai
-from services.auth import get_password_hash, authenticate_user, create_access_token
-from services.database import default_id
-from services.database import get_db
+from services.auth import get_password_hash, authenticate_user, create_access_token, get_user_by_email, \
+    send_password_reset_email, create_reset_token, verify_reset_token, update_user_password
+from services.database import default_id, get_db
 
 router = APIRouter()
 
@@ -18,13 +19,13 @@ async def register_user(user: UserCreate):
     user_dict["password"] = get_password_hash(user_dict.pop("password"))
     user_dict["_id"] = default_id()
     user_dict["rating"] = DEFAULT_RATING
-    
+
     if is_ai(user_dict["username"]):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username cannot be 'ai_easy', 'ai_medium', or 'ai_hard'.",
         )
-    
+
     try:
         await get_db().users.insert_one(user_dict)
     except DuplicateKeyError:
@@ -53,3 +54,31 @@ async def login_for_access_token(login_request: LoginRequest):
         data={"sub": user.username}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+class PasswordRecoveryRequest(BaseModel):
+    email: str
+
+
+class PasswordResetRequest(BaseModel):
+    token: str
+    new_password: str
+
+
+@router.post("/password-recovery")
+async def password_recovery(request: PasswordRecoveryRequest):
+    user = await get_user_by_email(request.email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    token = create_reset_token(user["_id"])
+    await send_password_reset_email(user["email"], token)
+    return {"message": "Password recovery email sent"}
+
+
+@router.post("/password-reset")
+async def password_reset(request: PasswordResetRequest):
+    user_id = verify_reset_token(request.token)
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+    await update_user_password(user_id, request.new_password)
+    return {"message": "Password has been reset"}

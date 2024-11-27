@@ -6,6 +6,9 @@ import GameView from '@/views/GameView.vue';
 import PlayHumanView from '@/views/PlayHumanView.vue';
 import PlayAiView from '@/views/PlayAiView.vue';
 import TournamentView from '@/views/TournamentView.vue';
+import PasswordRecoveryView from '@/views/PasswordRecoveryView.vue'
+import PasswordResetView from '@/views/PasswordResetView.vue'
+import LeaderboardView from '@/views/LeaderboardView.vue';
 
 const routes = [
 	{
@@ -26,6 +29,16 @@ const routes = [
 		component: RegisterView,
 	},
 	{
+		path: '/forgot-password',
+		name: 'forgot-password',
+		component: PasswordRecoveryView,
+	},
+	{
+		path: '/reset-password',
+		name: 'reset-password',
+		component: PasswordResetView,
+	},
+	{
 		meta: { requiresAuth: true },
 		path: '/human',
 		name: 'human',
@@ -43,6 +56,11 @@ const routes = [
 		name: 'tournament',
 		component: TournamentView,
 	},
+	{
+		path: '/leaderboard',
+		name: 'leaderboard',
+		component: LeaderboardView,
+	}
 ];
 
 const router = createRouter({

@@ -7,10 +7,20 @@ export default mergeConfig(
   defineConfig({
     test: {
       coverage: {
-        reporter: ['text', 'json', 'html']
+        reporter: ['text', 'lcov', 'html'],
+        exclude: [
+          ...configDefaults.exclude,
+          '**/wasm/**',
+          '**/*config.js',
+          '**/main.ts',
+          'e2e/**'
+        ],
       },
       environment: 'jsdom',
-      exclude: [...configDefaults.exclude, 'e2e/**'],
+      exclude: [
+        ...configDefaults.exclude,
+        'e2e/**'
+      ],
       root: fileURLToPath(new URL('./', import.meta.url))
     }
   })
