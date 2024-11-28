@@ -11,7 +11,7 @@ async def get_current_tournament(username: str) -> Tournament:
 
 async def create_new_tournament(request: CreateTournamentRequest, owner: str):
     new_tournament = Tournament(owner=owner, 
-                                participants=[owner], 
+                                participants= [owner] if request.open else request.participants, 
                                 open=request.open,
                                 name=request.name,
                                 match_ids=[],
