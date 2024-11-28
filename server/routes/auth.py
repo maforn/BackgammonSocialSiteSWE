@@ -4,7 +4,7 @@ from core.config import ACCESS_TOKEN_EXPIRE_MINUTES, GOOGLE_CLIENT_ID
 from fastapi import APIRouter, HTTPException, status
 from google.auth.transport.requests import Request
 from google.oauth2 import id_token
-from models.user import UserCreate, LoginRequest, DEFAULT_RATING, UserInDB
+from models.user import DEFAULT_RATING, UserInDB, LoginRequest, UserCreate
 from pydantic import BaseModel
 from pymongo.errors import DuplicateKeyError
 from services.ai import is_ai
@@ -16,26 +16,39 @@ router = APIRouter()
 
 
 class GoogleLoginRequest(BaseModel):
-    code: str
+    accessToken: str
 
 
 @router.post("/google-login")
 async def google_login(request: GoogleLoginRequest):
     try:
-        id_info = id_token.verify_oauth2_token(request.code, Request(), GOOGLE_CLIENT_ID)
+        id_token_str = request.accessToken
+
+        if not id_token_str:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Google token str")
+
+        # Verify the ID token
+        id_info = id_token.verify_oauth2_token(id_token_str, Request(), GOOGLE_CLIENT_ID)
         email = id_info.get("email")
         if not email:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Google token")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Google email")
 
         user = await get_user_by_email(email)
         if not user:
-            user = UserInDB(email=email, username=email.split('@')[0], password=None)
-            get_db().users.insert_one(user.dict(by_alias=True))
+            username = email.split('@')[0]
+            base_username = email.split('@')[0]
+            counter = 1
+            while await get_db().users.find_one({"username": username}):
+                username = f"{base_username}{counter}"
+                counter += 1
+            user = UserInDB(email=email, username=username, password=None).model_dump(by_alias=True)
+            get_db().users.insert_one(user)
 
-        access_token = create_access_token(data={"sub": user.username})
-        return {"access_token": access_token, "username": user.username}
-    except ValueError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Google token")
+        access_token = create_access_token(data={"sub": user["username"]})
+        return {"access_token": access_token, "username": user["username"]}
+
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid Google token {error}")
 
 
 @router.post("/register")

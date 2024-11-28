@@ -38,8 +38,6 @@ export function isAuthenticated(): boolean {
 }
 
 export const loginWithGoogle = () => {
-  console.warn(import.meta.env.VITE_WS_URL)
-  console.log(import.meta.env.VITE_GOOGLE_AUTH_ID)
   googleSdkLoaded(google => {
     google.accounts.oauth2
       .initCodeClient({
@@ -47,10 +45,23 @@ export const loginWithGoogle = () => {
         scope: 'profile email https://www.googleapis.com/auth/contacts.readonly',
         redirect_uri: import.meta.env.VITE_APP_REDIRECT_URL,
         callback: async response => {
-          if (response.code)
+          const code = response.code
+          if (code)
             try {
-              const { data } = await axios.post('http://localhost:8000/google-login', { code: response.code })
-              useAuthStore().setUserData(data.access_token, data.username)
+              const response = await axios.post(
+            "https://oauth2.googleapis.com/token",
+            {
+                  code,
+                  client_id: import.meta.env.VITE_GOOGLE_AUTH_ID,
+                  client_secret: import.meta.env.VITE_GOOGLE_AUTH_SECRET,
+                  redirect_uri: "postmessage",
+                  grant_type: "authorization_code"
+                }
+              );
+
+              const accessToken = response.data.id_token;
+              const { data } = await axios.post('http://localhost:8000/google-login', { accessToken: accessToken })
+              useAuthStore().setUserData(data.access_token, data.username, response.data.access_token)
               await router.push({ name: 'home' })
             } catch (error) {
               console.error('Error logging in with Google:', error)
