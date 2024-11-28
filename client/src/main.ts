@@ -2,22 +2,22 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import { addIcons, OhVueIcon } from 'oh-vue-icons';
 import {
-	FaRobot,
-	GiRollingDices,
-	IoHomeSharp,
-	IoTrophySharp,
-	IoPerson,
-	IoStatsChart,
-	IoTriangleSharp,
-	IoMailSharp,
-	FaUserCircle,
-	IoCloseSharp,
-	IoHourglassSharp,
-	BiCircle,
-	BiCircleFill,
-	FaMedal,
-	FaEllipsisH
-} from 'oh-vue-icons/icons';
+  FaRobot,
+  GiRollingDices,
+  IoHomeSharp,
+  IoTrophySharp,
+  IoPerson,
+  IoStatsChart,
+  IoTriangleSharp,
+  IoMailSharp,
+  FaUserCircle,
+  IoCloseSharp,
+  IoHourglassSharp,
+  BiCircle,
+  BiCircleFill,
+  FaMedal,
+  FaEllipsisH, IoLogoWhatsapp, IoLogoFacebook, IoLogoTwitter
+} from 'oh-vue-icons/icons'
 import App from './App.vue';
 import router from './router';
 import './assets/tailwind.css';
@@ -41,7 +41,10 @@ addIcons(
 	BiCircle,
 	BiCircleFill,
 	FaMedal,
-	FaEllipsisH
+	FaEllipsisH,
+  IoLogoWhatsapp,
+  IoLogoFacebook,
+  IoLogoTwitter
 );
 
 app.component('v-icon', OhVueIcon);
