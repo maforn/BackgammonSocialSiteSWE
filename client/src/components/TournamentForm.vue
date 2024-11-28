@@ -52,17 +52,17 @@
 import { defineComponent, onMounted, ref } from 'vue';
 import { createTournament } from '@/services/tournamentService';
 import { debounce } from 'lodash'
+import { useAuthStore } from '@/stores/authStore';
 import axiosInstance from '@/axios'
 
 export default defineComponent({
     name: 'TournamentForm',
     emits: ['createdTournament'],
 	setup(){
-		const username = ref('')
+		const username = useAuthStore().username;
 		const participants = ref([] as string[])
 		onMounted(async () => {
-			username.value = await axiosInstance.get('/users/me').then(res => res.data.username)
-			participants.value.push(username.value)
+			participants.value.push(username)
 		})
 		return { username, participants }
 	},

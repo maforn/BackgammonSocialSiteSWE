@@ -21,6 +21,7 @@
 				class="flex flex-col mt-6 w-1/2 sm:p-8 p-6 shadow-md items-center rounded-md gap-6 pl-3 py-2 text-sm md:text-lg bg-white">
 				<TournamentForm v-if="!hasCreatedTournament && showCreate" @created-tournament="updateTournament" />
 				<TournamentVisualizer v-if="hasCreatedTournament" />
+				<button @click="getAvailableTournaments">Get available (console log)</button>
 			</div>
 		</div>
 
@@ -39,6 +40,9 @@ import { checkCreatedTournamentExists } from '@/services/tournamentService';
 import TournamentForm from '@/components/TournamentForm.vue';
 import TournamentVisualizer from '@/components/TournamentVisualizer.vue';
 import type { Tournament } from '@/models/Tournament';
+import { useWsStore } from '@/stores/wsStore';
+import { isAxiosError } from 'axios'
+import axiosInstance from '@/axios';
 
 export default defineComponent({
 	name: 'TournamentView',
@@ -66,6 +70,17 @@ export default defineComponent({
 		async updateTournament(tournament: Tournament) {
 			if (tournament)
 				this.hasCreatedTournament = true;
+		},
+		async getAvailableTournaments() {
+			const wsStore = useWsStore();
+			try{
+				const response = await axiosInstance.get('/tournaments/available');
+				console.log(response.data);
+			} catch (error){
+				if (isAxiosError(error)) {
+					wsStore.addError(error?.response?.data?.detail)
+				} 
+			}
 		}
 	},
 	computed: {

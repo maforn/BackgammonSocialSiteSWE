@@ -1,4 +1,5 @@
 from models.tournament import Tournament, CreateTournamentRequest
+from typing import List
 from services.database import get_db
 
 async def get_current_tournament(username: str) -> Tournament:
@@ -7,6 +8,17 @@ async def get_current_tournament(username: str) -> Tournament:
     })
     if tournament_data:
         return Tournament(**tournament_data)
+    return None
+
+async def get_available_tournaments(username: str) -> List[Tournament]:
+    tournament_data = await get_db().tournaments.find({
+        "$or": [
+            {"participants": {"$in": [username]}},
+            {"open": True}
+        ]
+    }).to_list(length=None)
+    if tournament_data:
+        return [Tournament(**tournament) for tournament in tournament_data]
     return None
 
 async def create_new_tournament(request: CreateTournamentRequest, owner: str):
