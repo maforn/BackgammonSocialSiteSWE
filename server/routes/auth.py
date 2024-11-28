@@ -1,8 +1,10 @@
 from datetime import timedelta
 
-from core.config import ACCESS_TOKEN_EXPIRE_MINUTES
+from core.config import ACCESS_TOKEN_EXPIRE_MINUTES, GOOGLE_CLIENT_ID
 from fastapi import APIRouter, HTTPException, status
-from models.user import UserCreate, LoginRequest, DEFAULT_RATING
+from google.auth.transport.requests import Request
+from google.oauth2 import id_token
+from models.user import UserCreate, LoginRequest, DEFAULT_RATING, UserInDB
 from pydantic import BaseModel
 from pymongo.errors import DuplicateKeyError
 from services.ai import is_ai
@@ -11,6 +13,29 @@ from services.auth import get_password_hash, authenticate_user, create_access_to
 from services.database import default_id, get_db
 
 router = APIRouter()
+
+
+class GoogleLoginRequest(BaseModel):
+    code: str
+
+
+@router.post("/google-login")
+async def google_login(request: GoogleLoginRequest):
+    try:
+        id_info = id_token.verify_oauth2_token(request.code, Request(), GOOGLE_CLIENT_ID)
+        email = id_info.get("email")
+        if not email:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Google token")
+
+        user = await get_user_by_email(email)
+        if not user:
+            user = UserInDB(email=email, username=email.split('@')[0], password=None)
+            get_db().users.insert_one(user.dict(by_alias=True))
+
+        access_token = create_access_token(data={"sub": user.username})
+        return {"access_token": access_token, "username": user.username}
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Google token")
 
 
 @router.post("/register")

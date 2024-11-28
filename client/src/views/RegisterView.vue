@@ -179,7 +179,7 @@
             </div>
 
             <div class="space-x-6 flex justify-center mt-6">
-              <button type="button" class="border-none outline-none">
+              <button type="button" class="border-none outline-none" @click="loginWithGoogle">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32px" class="inline" viewBox="0 0 512 512">
                   <path
                     fill="#fbbd00"
@@ -671,7 +671,7 @@
 import { defineComponent, ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
-import { registerOrLogin } from '@/services/authService'
+import { registerOrLogin, loginWithGoogle } from '@/services/authService'
 
 export default defineComponent({
   name: 'RegisterView',
@@ -728,7 +728,8 @@ export default defineComponent({
       registerUser,
       showTerms,
       toggleTerms,
-      errorMessage
+      errorMessage,
+      loginWithGoogle
     }
   }
 })
