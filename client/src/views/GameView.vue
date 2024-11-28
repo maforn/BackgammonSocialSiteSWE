@@ -129,6 +129,7 @@ import { useGameStore } from '@/stores/gameStore'
 import { useWsStore } from '@/stores/wsStore'
 import { useAuthStore } from '@/stores/authStore'
 import { isAxiosError } from 'axios'
+import { isGammon, isBackgammon } from '@/services/gameService';
 
 export default defineComponent({
   name: 'GameView',
@@ -167,11 +168,6 @@ export default defineComponent({
 
     const started = starter.value > 0
     const ai_names = ["ai_easy", "ai_normal", "ai_hard"];
-
-    console.log('started', started);
-    console.log('starter', starter.value);
-
-    console.log(startDice.value)
 
     const passTheTurn = async () => {
       showPassButton.value = false;
@@ -217,17 +213,17 @@ export default defineComponent({
       status,
       ai_names,
       gameOver: computed(() => status.value === 'player_1_won' || status.value === 'player_2_won'),
-      winnerMessage: computed(() => {
-        if (status.value === 'player_1_won') {
-          return `${player1.value} has won the match!`;
-        } else if (status.value === 'player_2_won') {
-          return `${player2.value} has won the match!`;
-        }
-        return '';
-      }),
 		};
 	},
   methods: {
+    formatWinMessage(winnerUsername: string, winnerIsPlayer1: boolean, board: BoardConfiguration) {
+      let opt = '';
+      if(isBackgammon(board, winnerIsPlayer1))
+        opt = ' with a backgammon';
+      else if(isGammon(board, winnerIsPlayer1))
+        opt = ' with a gammon';
+      return `${winnerIsPlayer1} has won the match${opt}!`;
+    },
     async diceThrow() {
       this.showPassButton = false;
       try {
@@ -284,6 +280,14 @@ export default defineComponent({
       return this.starter <= 0 && this.isPlayer1 && this.startDice.count1 <= this.startDice.count2
       || this.starter <= 0 && !this.isPlayer1 && this.startDice.count2 <= this.startDice.count1;
     },
+    winnerMessage(): string {
+      if (this.status === 'player_1_won') {
+          return this.formatWinMessage(this.player1, true, this.configuration);
+        } else if (this.status === 'player_2_won') {
+          return this.formatWinMessage(this.player2, false, this.configuration);
+        }
+        return '';
+    }
   },
   watch: {
         starter(newVal, oldVal) {
@@ -295,7 +299,7 @@ export default defineComponent({
             this.initialText = 'You start!';
           else if(newVal === 1 && !this.isPlayer1 || newVal === 2 && this.isPlayer1)
             this.initialText = `${this.player2} starts!`;
-        }
+        },
   },
 })
 </script>
