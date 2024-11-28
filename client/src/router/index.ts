@@ -5,6 +5,7 @@ import { isAuthenticated } from '@/services/authService';
 import GameView from '@/views/GameView.vue';
 import PlayHumanView from '@/views/PlayHumanView.vue';
 import PlayAiView from '@/views/PlayAiView.vue';
+import TournamentView from '@/views/TournamentView.vue';
 import PasswordRecoveryView from '@/views/PasswordRecoveryView.vue'
 import PasswordResetView from '@/views/PasswordResetView.vue'
 import LeaderboardView from '@/views/LeaderboardView.vue';
@@ -51,6 +52,11 @@ const routes = [
 	},
 	{
 		meta: { requiresAuth: true },
+		path: '/tournament',
+		name: 'tournament',
+		component: TournamentView,
+	},
+	{
 		path: '/leaderboard',
 		name: 'leaderboard',
 		component: LeaderboardView,

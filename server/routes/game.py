@@ -7,7 +7,6 @@ from services.game import throw_dice, get_current_game, check_winner
 from services.websocket import manager
 from models.board_configuration import StartDice
 from fastapi.encoders import jsonable_encoder
-from tensorflow.python.distribute.device_util import current
 
 NOT_YOUR_TURN = "It's not your turn"
 

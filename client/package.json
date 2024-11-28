@@ -9,6 +9,7 @@
     "build:check": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "test": "vitest run --silent --reporter verbose",
+    "coverage": "npx vitest run --coverage",
     "test:coverage": "vitest run --silent --reporter verbose --coverage",
     "test:unit": "vitest",
     "build-only": "vite build",
