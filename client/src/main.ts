@@ -16,7 +16,8 @@ import {
 	BiCircle,
 	BiCircleFill,
 	FaMedal,
-	FaEllipsisH
+	FaEllipsisH,
+	FaDiceD20
 } from 'oh-vue-icons/icons';
 import App from './App.vue';
 import router from './router';
@@ -41,7 +42,8 @@ addIcons(
 	BiCircle,
 	BiCircleFill,
 	FaMedal,
-	FaEllipsisH
+	FaEllipsisH,
+	FaDiceD20
 );
 
 app.component('v-icon', OhVueIcon);

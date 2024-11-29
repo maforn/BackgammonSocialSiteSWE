@@ -73,6 +73,12 @@ class WebSocketService {
 			case 'pass_turn':
 				useGameStore().setMatch(data.match);
 				break;
+			case 'double_proposed':
+			case 'double_accepted':
+			case 'double_rejected':
+				console.log(data.match);
+				useGameStore().setMatch(data.match);
+				break;
 			default:
 				console.warn('Unknown event:', data.type);
 		}

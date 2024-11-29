@@ -25,6 +25,7 @@ interface GameData {
 	winsP2: number;
 	starter: number;
 	startDice: { roll1: number; count1: number; roll2: number; count2: number };
+  doublingCube: { value: number; lastUsage: number };
 }
 
 const ai_players = ['ai_hard', 'ai_medium', 'ai_easy']
@@ -46,6 +47,7 @@ export const useGameStore = defineStore('game', {
     loaded: false,
     starter: -1,
 		startDice: { roll1: 0, count1: 0, roll2: 0, count2: 0 },
+    doublingCube: { count: 0, lastUsage: 0 }
   }),
   actions: {
     async initializeWasm() {
@@ -86,6 +88,7 @@ export const useGameStore = defineStore('game', {
 			this.winsP2 = data.winsP2;
       this.starter = data.starter;
       this.startDice = data.startDice;
+      this.doublingCube = data.doublingCube;
       setTimeout(async () => await this.checkAITurn(), 1000)
     },
     async checkAITurn() {
