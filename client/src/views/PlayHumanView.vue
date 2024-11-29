@@ -2,11 +2,11 @@
 	<div class="play-human-view">
 	  <div class="bg"></div>
 	  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-  
+
 	  <div class="w-screen h-screen flex flex-col pt-20 items-center">
-  
+
 		<h1 class="text-center text-6xl font-black text-white">PLAY HUMAN</h1>
-  
+
 		<div
 		  class="flex flex-col mt-20 w-1/2 sm:p-8 p-6 shadow-md rounded-md gap-3 pl-3 py-2 text-sm md:text-lg bg-white">
 		  <button id="random-btn" :disabled="hasSuspendedGame"
@@ -14,13 +14,13 @@
 			class="flex justify-center items-center pl-3 py-2 bg-green-600 text-white rounded-r-full rounded-l-full hover:bg-green-700 shadow-md">
 			RANDOM OPPONENT
 		  </button>
-  
+
 		  <div class="flex justify-evenly items-center pl-3 py-2">
 			<hr style="border-color: black;">
 			<span class="text-black text-sm">OR</span>
 			<hr style="border-color: black;">
 		  </div>
-  
+
 		  <div
 			class="relative flex justify-center items-center pl-3 pe-3 py-2 bg-gray-900 text-white rounded-r-full rounded-l-full shadow-sm">
 			<input v-model="searchQuery" @input="onInput" class="flex-grow pl-3 py-2 outline-none bg-gray-900 text-white"
@@ -34,7 +34,7 @@
 			  </li>
 			</ul>
 		  </div>
-  
+
 		  <div class="flex justify-center items-center pl-3 py-2 gap-x-2 self-center">
 			<label for="rounds_to_win" class="text-right">Rounds to win</label>
 			<div class="container">
@@ -47,7 +47,7 @@
 			  </div>
 			</div>
 		  </div>
-  
+
 		  <div class="flex justify-center">
 			<button id="invite-btn" :disabled="!hasSelectedOpponent || hasSuspendedGame" @click="sendInvite"
 			  class="mt-2 px-4 py-2 w-2/3 rounded-xl">Invite
@@ -55,19 +55,23 @@
 		  </div>
 		</div>
 	  </div>
-  
+
 	  <button @click="goHome"
 		class="absolute top-4 left-4 px-4 py-2 bg-white text-black rounded-md hover:bg-gray-400"><v-icon
 		  name="io-home-sharp" />
 	  </button>
 	</div>
   </template>
-  
+
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 import { debounce } from 'lodash'
-import { sendInviteService, getRandomOpponentService } from '@/services/invitesService';
+import {
+  sendInviteService,
+  getRandomOpponentService,
+  getGoogleContactsEmails
+} from '@/services/invitesService'
 import { useGameStore } from '@/stores/gameStore';
 import axiosInstance from '@/axios'
 import router from '@/router';
@@ -77,6 +81,10 @@ export default defineComponent({
 	setup() {
 		const hasSuspendedGame = ref(true)
 		const hasSelectedOpponent = ref(false)
+
+    getGoogleContactsEmails().then((emails) => {
+      console.log(emails)
+    })
 
 		useGameStore()
 			.checkSuspendedGameExists()
