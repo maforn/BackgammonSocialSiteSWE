@@ -62,6 +62,16 @@ class StartDice(BaseModel):
         super().__init__(roll1=roll1, count1=count1, roll2=roll2, count2=count2)
 
 
+class DoublingCube(BaseModel):
+    count: int
+    last_usage: int
+    proposed: bool
+    proposer: int
+
+    def __init__(self, count: int = 0, last_usage: int = 0, proposed: bool = False, proposer: int = 0):
+        super().__init__(count=count, last_usage=last_usage, proposed=proposed, proposer=proposer)
+
+
 class Match(BaseModel):
     id: str = Field(default_factory=default_id, alias="_id")
     player1: str
@@ -76,6 +86,7 @@ class Match(BaseModel):
     winsP2: int = 0
     starter: int = 0
     startDice: StartDice = StartDice()
+    doublingCube: DoublingCube = DoublingCube()
 
 
 class CreateInviteRequest(BaseModel):
