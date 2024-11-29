@@ -128,6 +128,9 @@
         </button>
       </div>
       <div>
+        <button v-if="isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="getAISuggestion">Get AI Suggestion</button>
+      </div>
+      <div>
         <button v-if="showPassButton&&isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">Pass the turn</button>
       </div>
     </div>
@@ -205,6 +208,10 @@ export default defineComponent({
       showPassButton.value = true;
     }
 
+    const getAISuggestion = () => {
+      gameStore.getAISuggestions()
+    }
+
     return {
       configuration: computed(() => boardConfiguration.value),
       thrower: computed(() => (turn.value % 2) + 1),
@@ -241,6 +248,7 @@ export default defineComponent({
         }
         return '';
       }),
+      getAISuggestion
 		};
 	},
   methods: {

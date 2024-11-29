@@ -6,25 +6,26 @@ import { Match } from '@/models/Match'
 import '@/wasm/wasm_exec'
 import { useAuthStore } from '@/stores/authStore'
 import { doRandomMove, findUsedDie, moveOnBoard, swapPlayers } from '@/services/gameService'
+import { useWsStore } from '@/stores/wsStore'
 
 interface GameData {
-	player1: string;
-	player2: string;
-	board_configuration: {
-		points: PointConfiguration[];
-		bar: PointConfiguration;
-	};
-	dice: number[];
-	available: number[];
-	turn: number;
-	created_at: string;
-	updated_at: string;
-	status: string;
-	rounds_to_win: number;
-	winsP1: number;
-	winsP2: number;
-	starter: number;
-	startDice: { roll1: number; count1: number; roll2: number; count2: number };
+  player1: string;
+  player2: string;
+  board_configuration: {
+    points: PointConfiguration[];
+    bar: PointConfiguration;
+  };
+  dice: number[];
+  available: number[];
+  turn: number;
+  created_at: string;
+  updated_at: string;
+  status: string;
+  rounds_to_win: number;
+  winsP1: number;
+  winsP2: number;
+  starter: number;
+  startDice: { roll1: number; count1: number; roll2: number; count2: number };
 }
 
 const ai_players = ['ai_hard', 'ai_medium', 'ai_easy']
@@ -45,7 +46,7 @@ export const useGameStore = defineStore('game', {
     goInstance: null,
     loaded: false,
     starter: -1,
-		startDice: { roll1: 0, count1: 0, roll2: 0, count2: 0 },
+    startDice: { roll1: 0, count1: 0, roll2: 0, count2: 0 }
   }),
   actions: {
     async initializeWasm() {
@@ -82,11 +83,43 @@ export const useGameStore = defineStore('game', {
       this.updated_at = new Date(data.updated_at)
       this.status = data.status
       this.rounds_to_win = data.rounds_to_win
-			this.winsP1 = data.winsP1;
-			this.winsP2 = data.winsP2;
-      this.starter = data.starter;
-      this.startDice = data.startDice;
+      this.winsP1 = data.winsP1
+      this.winsP2 = data.winsP2
+      this.starter = data.starter
+      this.startDice = data.startDice
       setTimeout(async () => await this.checkAITurn(), 1000)
+    },
+    async getAISuggestions(isPlayer1) {
+      const board = isPlayer1 ? swapPlayers(this.boardConfiguration) : this.boardConfiguration
+
+      const input = {
+        board: {
+          o: {
+            ...board.points.reduce((acc, point, index) => {
+              if (point.player2 > 0) acc[index + 1] = point.player2
+              return acc
+            }, {}),
+            bar: board.bar.player2
+          },
+          x: {
+            ...board.points.reduce((acc, point, index) => {
+              if (point.player1 > 0) acc[index + 1] = point.player1
+              return acc
+            }, {}),
+            bar: board.bar.player1
+          }
+        },
+        cubeful: false,
+        dice: this.dice.roll,
+        'max-moves':
+          1,
+        player:
+          'o',
+        'score-moves':
+          true
+      }
+      const moves = await this.getMovesFromWasm(input)
+      useWsStore().addNotification(`AI suggests: ${moves[0].play.map(move => `move ${move.from} to ${move.to}`)[0]}`)
     },
     async checkAITurn() {
       const isPlayer1 = this.player1 === useAuthStore().username
@@ -145,8 +178,8 @@ export const useGameStore = defineStore('game', {
 
         console.log(piece_move)
 
-        const srcIndex = piece_move.from === 'bar' ? 24 : piece_move.from - 1;
-        const dstIndex = piece_move.to === 'off' ? -1 : piece_move.to - 1;
+        const srcIndex = piece_move.from === 'bar' ? 24 : piece_move.from - 1
+        const dstIndex = piece_move.to === 'off' ? -1 : piece_move.to - 1
 
         let usedDice = null
 
@@ -204,12 +237,12 @@ export const useGameStore = defineStore('game', {
       this.dice.available = available
     },
     setStartDice(roll1: number, count1: number, roll2: number, count2: number) {
-			this.startDice = { roll1, count1, roll2, count2 };
+      this.startDice = { roll1, count1, roll2, count2 }
 
-		},
-		setStarter(starter: number, turn: number) {
-			this.starter = starter;
-			this.turn = turn;
-		}
+    },
+    setStarter(starter: number, turn: number) {
+      this.starter = starter
+      this.turn = turn
+    }
   }
 })
