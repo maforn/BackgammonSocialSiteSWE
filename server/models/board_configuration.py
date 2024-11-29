@@ -81,6 +81,7 @@ class Match(BaseModel):
 class CreateInviteRequest(BaseModel):
     opponent_username: str
     rounds_to_win: int
+    use_email: bool = False
 
 
 class AcceptInviteRequest(BaseModel):

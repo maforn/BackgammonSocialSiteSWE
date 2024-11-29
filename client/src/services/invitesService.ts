@@ -3,11 +3,12 @@ import { useAuthStore } from '@/stores/authStore';
 import axios from 'axios';
 import { useWsStore } from '@/stores/wsStore';
 
-export const sendInviteService = async (opponent_username: string, rounds_to_win: number) => {
+export const sendInviteService = async (opponent_username: string, rounds_to_win: number, use_email: boolean) => {
 	try {
 		await axiosInstance.post('/invites', {
 			opponent_username: opponent_username,
 			rounds_to_win: rounds_to_win,
+      use_email: use_email
 		});
 	} catch (error) {
 		if (axios.isAxiosError(error) && error.response) {
@@ -79,7 +80,7 @@ export const getGoogleContactsEmails = async () => {
     });
     return response.data.connections.map((contact: any) => {
       return contact.emailAddresses.map((email: any) => email.value);
-    });
+    }).flat();
   }
   return null;
 }

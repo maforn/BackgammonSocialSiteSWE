@@ -4,8 +4,6 @@ from httpx import AsyncClient
 from unittest.mock import patch
 from services.database import get_db
 
-from tests.conftest import clear_db
-
 
 @pytest.mark.anyio
 async def test_register_user(client: AsyncClient):

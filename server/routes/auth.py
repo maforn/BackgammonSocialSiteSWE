@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from core.config import ACCESS_TOKEN_EXPIRE_MINUTES, GOOGLE_CLIENT_ID
+from core.config import ACCESS_TOKEN_EXPIRE_MINUTES, GOOGLE_CLIENT_ID, TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET
 from fastapi import APIRouter, HTTPException, status
 from google.auth.transport.requests import Request
 from google.oauth2 import id_token

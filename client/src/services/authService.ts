@@ -49,17 +49,17 @@ export const loginWithGoogle = () => {
           if (code)
             try {
               const response = await axios.post(
-            "https://oauth2.googleapis.com/token",
-            {
+                'https://oauth2.googleapis.com/token',
+                {
                   code,
                   client_id: import.meta.env.VITE_GOOGLE_AUTH_ID,
                   client_secret: import.meta.env.VITE_GOOGLE_AUTH_SECRET,
-                  redirect_uri: "postmessage",
-                  grant_type: "authorization_code"
+                  redirect_uri: 'postmessage',
+                  grant_type: 'authorization_code'
                 }
-              );
+              )
 
-              const accessToken = response.data.id_token;
+              const accessToken = response.data.id_token
               const { data } = await axios.post('http://localhost:8000/google-login', { accessToken: accessToken })
               useAuthStore().setUserData(data.access_token, data.username, response.data.access_token)
               await router.push({ name: 'home' })
