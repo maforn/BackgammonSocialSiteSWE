@@ -1,6 +1,6 @@
 import random
 
-from models.board_configuration import Match, BoardConfiguration, StartDice
+from models.board_configuration import Match, BoardConfiguration, StartDice, DoublingCube
 from services.ai import ai_names, ai_rating
 from services.database import get_db
 from services.rating import new_ratings_after_match
@@ -41,9 +41,10 @@ def check_win_condition(match: Match):
     return {"winner": 1} if player1_counter == 0 else {"winner": 2}
 
 
-async def check_winner(current_game: Match, manager):
-    winner = check_win_condition(current_game)
-    winner = winner.get("winner")
+async def check_winner(current_game: Match, manager, winner = None):
+    if winner is None:
+        winner = check_win_condition(current_game)
+        winner = winner.get("winner")
 
     p1_data = await get_db().users.find_one({
         "username": current_game.player1
@@ -64,6 +65,8 @@ async def check_winner(current_game: Match, manager):
 
         # Check if someone won the entire match (won rounds_to_win rounds)
         if current_game.winsP1 == current_game.rounds_to_win or current_game.winsP2 == current_game.rounds_to_win:
+            current_game.doublingCube.proposed = False
+            current_game.doublingCube.proposer = 0
             await update_on_match_win(current_game, loser_username, manager, old_loser_rating, old_winner_rating,
                                       winner, winner_username)
 
@@ -71,12 +74,13 @@ async def check_winner(current_game: Match, manager):
         else:
             # Must proceed to next round
             # Reset the board configuration, turn, dice and available
-            current_game.board_configuration = BoardConfiguration().dict(by_alias=True)
+            current_game.board_configuration = BoardConfiguration()
             current_game.available = []
             current_game.dice = []
             current_game.turn = -1
             current_game.starter = 0
             current_game.startDice = StartDice()
+            current_game.doublingCube = DoublingCube()
 
             # Message for round end
             websocket_player1 = await manager.get_user(current_game.player1)
@@ -87,28 +91,38 @@ async def check_winner(current_game: Match, manager):
             if websocket_player2:
                 await manager.send_personal_message({"type": "round_over", "winner": winner_username},
                                                     websocket_player2)
+                
+        print('before save', current_game) 
 
         await get_db().matches.update_one({"_id": current_game.id},
-                                          {"$set": {"board_configuration": current_game.board_configuration,
+                                          {"$set": {"board_configuration": current_game.board_configuration.model_dump(by_alias=True),
                                                     "status": current_game.status,
                                                     "available": current_game.available,
                                                     "dice": current_game.dice,
                                                     "turn": current_game.turn,
+                                                    "startDice": current_game.startDice.model_dump(by_alias=True),
+                                                    "doublingCube": current_game.doublingCube.model_dump(by_alias=True),
                                                     "winsP1": current_game.winsP1,
                                                     "winsP2": current_game.winsP2}})
 
 
 async def update_rating(current_game, p1_data, p2_data, winner):
+
+    if isinstance(current_game.doublingCube, DoublingCube):
+        doubling_value = 2**current_game.doublingCube.count
+    else:
+        doubling_value = 2**int(current_game.doublingCube['count'])
+
     if winner == 1:
         # Player 1 won the current round
-        current_game.winsP1 += 1
+        current_game.winsP1 += 1 * doubling_value
         winner_username = p1_data["username"]
         loser_username = p2_data["username"]
         old_winner_rating = p1_data["rating"]
         old_loser_rating = p2_data["rating"]
     else:
         # Player 2 won the current round
-        current_game.winsP2 += 1
+        current_game.winsP2 += 1 * doubling_value
         winner_username = p2_data["username"]
         loser_username = p1_data["username"]
         old_winner_rating = p2_data["rating"]
