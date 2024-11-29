@@ -4,9 +4,8 @@ import GameView from '@/views/GameView.vue';
 import axiosInstance from '@/axios';
 import MockAdapter from 'axios-mock-adapter';
 import { createPinia, setActivePinia } from 'pinia';
-import { useGameStore } from '@/stores/gameStore';
-import { useWsStore } from '@/stores/wsStore';
-import GameBoard from "@/components/GameBoard.vue";
+import { useGameStore } from '@/stores/gameStore'
+import { useWsStore } from '@/stores/wsStore'
 
 describe('GameView.vue', () => {
   let mock: MockAdapter;
@@ -38,7 +37,7 @@ describe('GameView.vue', () => {
     expect(wrapper.find('#p2-display').text()).toBe('Player 2');
     expect(wrapper.findAll('v-icon[name="bi-circle-fill"]').length).toBe(3)
     expect(wrapper.findAll('v-icon[name="bi-circle"]').length).toBe(3)
-  })
+  });
 
   it('should fetch dice throw result and update diceResult on diceThrow method call', async () => {
     const getSpy = vi.spyOn(axiosInstance, 'get');
@@ -49,13 +48,13 @@ describe('GameView.vue', () => {
     });
     await wrapper.vm.diceThrow();
 
-		useGameStore().setDice([3, 5], [4, 6]);
+    useGameStore().setDice([3, 5], [4, 6]);
 
-		expect(getSpy).toHaveBeenCalledWith('/throw_dice');
-		expect(wrapper.vm.diceResult.die1.value).toBe(3);
-		expect(wrapper.vm.diceResult.die2.value).toBe(5);
-		expect(wrapper.vm.availableDice).toEqual([4, 6]);
-	});
+    expect(getSpy).toHaveBeenCalledWith('/throw_dice');
+    expect(wrapper.vm.diceResult.die1.value).toBe(3);
+    expect(wrapper.vm.diceResult.die2.value).toBe(5);
+    expect(wrapper.vm.availableDice).toEqual([4, 6]);
+  });
 
   it('should render preformed message buttons', async () => {
     const wrapper = mount(GameView, {
@@ -145,8 +144,7 @@ describe('GameView.vue', () => {
     expect(gameBoards.length).toBeGreaterThan(0);
   });
 
-  it('should not render the button pass the turn',()=>{
-
+  it('should not render the button pass the turn', () => {
     const wrapper = mount(GameView, {
       pinia,
     });
@@ -155,4 +153,30 @@ describe('GameView.vue', () => {
     expect(button.exists()).toBe(false);
   });
 
+  it('should open the correct URL when share buttons are clicked', async () => {
+  const wrapper = mount(GameView, {
+    pinia,
+  });
+
+  // Set the necessary conditions for the game to be over
+  wrapper.vm.started = true;
+  wrapper.vm.status = 'player_1_won';
+  await wrapper.vm.$nextTick();
+
+  // Ensure the gameOver condition is met
+  expect(wrapper.find('#game-over').exists()).toBe(true);
+
+  const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+  await wrapper.vm.shareOnWhatsApp()
+  expect(openSpy).toHaveBeenCalledWith(expect.stringContaining('https://wa.me/?text='), '_blank');
+
+  await wrapper.vm.shareOnTwitter()
+  expect(openSpy).toHaveBeenCalledWith(expect.stringContaining('https://twitter.com/intent/tweet?text='), '_blank');
+
+  await wrapper.vm.shareOnFacebook()
+  expect(openSpy).toHaveBeenCalledWith(expect.stringContaining('https://www.facebook.com/sharer/sharer.php?u='), '_blank');
+
+  openSpy.mockRestore();
+});
 });
