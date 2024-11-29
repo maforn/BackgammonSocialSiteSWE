@@ -4,7 +4,8 @@ from services.database import get_db
 
 async def get_current_tournament(username: str) -> Tournament:
     tournament_data = await get_db().tournaments.find_one({
-        "participants": {"$in": [username]}
+        "participants": {"$in": [username]},
+        "status": "started"
     })
     if tournament_data:
         return Tournament(**tournament_data)
