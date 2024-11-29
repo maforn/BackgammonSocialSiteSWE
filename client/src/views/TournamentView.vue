@@ -67,8 +67,10 @@ export default defineComponent({
 			await router.push({ name: 'home' });
 		},
 		async updateTournament(tournament: Tournament) {
+			/*
 			if (tournament)
 				this.hasCreatedTournament = true;
+			*/
 		}
 	},
 	computed: {
