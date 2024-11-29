@@ -21,7 +21,7 @@
           <hr style="border-color: black;">
         </div>
 
-        <div class="flex justify-center items-center pl-3 py-2 gap-x-2 self-center">
+        <div class="flex justify-center items-center pl-3 py-2 gap-x-2 self-center" v-if="isGoogle">
           <label for="google-friends-switch" class="text-right">Invite Only Google Friends</label>
           <input type="checkbox" id="google-friends-switch" v-model="inviteGoogleFriends"
                  @change="toggleGoogleFriends" />
@@ -79,6 +79,7 @@ import { getGoogleContactsEmails, getRandomOpponentService, sendInviteService } 
 import { useGameStore } from '@/stores/gameStore'
 import axiosInstance from '@/axios'
 import router from '@/router'
+import { useAuthStore } from '@/stores/authStore'
 
 export default defineComponent({
   name: 'PlayHumanView',
@@ -86,6 +87,7 @@ export default defineComponent({
     const hasSuspendedGame = ref(true)
     const hasSelectedOpponent = ref(false)
     const inviteGoogleFriends = ref(false)
+    const isGoogle = useAuthStore().google_token != null
 
     useGameStore()
       .checkSuspendedGameExists()
@@ -93,7 +95,7 @@ export default defineComponent({
         hasSuspendedGame.value = exists
       })
 
-    return { hasSuspendedGame, hasSelectedOpponent, inviteGoogleFriends }
+    return { hasSuspendedGame, hasSelectedOpponent, inviteGoogleFriends, isGoogle }
   },
   data(): {
     searchQuery: string;
