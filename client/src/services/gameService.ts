@@ -29,7 +29,8 @@ export const moveOnBoard = (
 	srcPointIndex: number,
 	dstPointIndex: number,
 ) => {
-	checkMoveValidity(board, dice, srcPointIndex, dstPointIndex);
+  console.log(board, dice, srcPointIndex, dstPointIndex)
+	dstPointIndex != -1 && checkMoveValidity(board, dice, srcPointIndex, dstPointIndex);
 
 	if (srcPointIndex === 24) {
 		board.bar.player1--;
@@ -140,7 +141,7 @@ export const doRandomMove = (board: BoardConfiguration, dice: number[]) => {
 
 /**
  * Determines if a player committed a gammon.
- * 
+ *
  * @param boardConfig The configuration of the game board.
  * @param isPlayer1 Whether to check for gammon by player1 or player2.
  * @returns Whether the player has committed a gammon.
@@ -154,7 +155,7 @@ export const isGammon = (boardConfig: BoardConfiguration, isPlayer1: boolean): b
 
 /**
  * Determines if a player committed a backgammon.
- * 
+ *
  * @param boardConfig The configuration of the game board.
  * @param isPlayer1 Whether to check for backgammon by player1 or player2.
  * @returns Whether the player has committed a backgammon.
@@ -172,7 +173,7 @@ export const isBackgammon = (boardConfig: BoardConfiguration, isPlayer1: boolean
 
 /**
  * Returns a summary of the player's pieces distribution on a given board.
- * 
+ *
  * @param boardConfig The game board configuration.
  * @param isPlayer1 Whether to count for player1 or player2.
  * @returns A tuple containing:
