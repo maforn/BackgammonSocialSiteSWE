@@ -222,7 +222,7 @@ export default defineComponent({
         opt = ' with a backgammon';
       else if(isGammon(board, winnerIsPlayer1))
         opt = ' with a gammon';
-      return `${winnerIsPlayer1} has won the match${opt}!`;
+      return `${winnerUsername} has won the match${opt}!`;
     },
     async diceThrow() {
       this.showPassButton = false;
@@ -250,9 +250,6 @@ export default defineComponent({
       this.started = true;
     },
     throwStartDice() {
-
-      console.log(this.startDice)
-
       axiosInstance
         .get('/throw_start_dice')
         .catch(error => {
