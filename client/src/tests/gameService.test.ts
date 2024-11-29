@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { BoardConfiguration, PointConfiguration } from '@/models/BoardConfiguration';
-import { swapPlayers, moveOnBoard, findUsedDie, checkMoveValidity, getAllowedPointIndices, doRandomMove } from '@/services/gameService';
+import { swapPlayers, moveOnBoard, findUsedDie, checkMoveValidity, getAllowedPointIndices, doRandomMove, getPiecesSummary, isBackgammon, isGammon, NUMBER_OF_PLAYER_PIECES } from '@/services/gameService';
 
 describe('swapPlayers', () => {
     it('should invert the order of points', () => {
@@ -260,4 +260,113 @@ describe('doRandomMove', () => {
 
 		expect(result).toBeNull();
 	});
+});
+
+describe("getPiecesSummary", () => {
+    it("should correctly calculate the pieces for base configuration", () => {
+        const baseBoard: BoardConfiguration = new BoardConfiguration();
+
+        const [onBoard1, onBar1, onOpp1] = getPiecesSummary(baseBoard, true);
+        const [onBoard2, onBar2, onOpp2] = getPiecesSummary(baseBoard, false);
+
+        expect(onBoard1).toBe(NUMBER_OF_PLAYER_PIECES);
+        expect(onBoard1).toBe(onBoard2);
+        expect(onBar1).toBe(0);
+        expect(onBar1).toBe(onBar2);
+        expect(onOpp1).toBe(2);
+        expect(onOpp1).toBe(onOpp2);
+    });
+
+	it("should correctly calculate the pieces for custom configuration", () => {
+        const baseBoard = new BoardConfiguration();
+
+		baseBoard.bar.player1 = 4;
+        baseBoard.points[22].player1 = 5;
+        baseBoard.points[2].player2 = 5; 
+
+        const [onBoard1, onBar1, onOpp1] = getPiecesSummary(baseBoard, true);
+        const [onBoard2, onBar2, onOpp2] = getPiecesSummary(baseBoard, false);
+
+        expect(onBoard1).toBe(20); 
+        expect(onBoard2).toBe(20); 
+        expect(onBar1).toBe(4);   
+        expect(onBar2).toBe(0);   
+        expect(onOpp1).toBe(7);    
+        expect(onOpp2).toBe(7);  
+    });
+});
+
+describe("isGammon", () => {
+    it("should correctly determine if a gammon condition is met", () => {
+        const board = new BoardConfiguration();
+        // Test 1: Default board, no gammon
+        expect(isGammon(board, true)).toBe(false);
+        expect(isGammon(board, false)).toBe(false);
+
+        // Test 2: All points cleared, no gammon
+        board.points = board.points.map(() => ({ player1: 0, player2: 0 }));
+        expect(isGammon(board, true)).toBe(false);
+        expect(isGammon(board, false)).toBe(false);
+
+        // Test 3: Player 2 has all pieces in one point
+        board.points[7] = { player1: 0, player2: 15 };
+        expect(isGammon(board, true)).toBe(true);
+        expect(isGammon(board, false)).toBe(false);
+
+        // Test 4: Player 1 has all pieces in one point
+        board.points[7] = { player1: 15, player2: 0 };
+        expect(isGammon(board, true)).toBe(false);
+        expect(isGammon(board, false)).toBe(true);
+    });
+});
+
+describe("isBackgammon", () => {
+    it("should correctly determine if a backgammon condition is met", () => {
+        const board = new BoardConfiguration();
+
+        // Test 1: Default board, no backgammon
+        expect(isBackgammon(board, true)).toBe(false);
+        expect(isBackgammon(board, false)).toBe(false);
+
+        // Test 2: All points cleared, no backgammon
+        board.points = board.points.map(() => ({ player1: 0, player2: 0 }));
+        expect(isBackgammon(board, true)).toBe(false);
+        expect(isBackgammon(board, false)).toBe(false);
+
+        // Test 3: Player 2 has all pieces in one point, no backgammon
+        board.points[7] = { player1: 0, player2: 15 };
+        expect(isBackgammon(board, true)).toBe(false);
+        expect(isBackgammon(board, false)).toBe(false);
+
+        // Test 4: Player 1 has all pieces in one point, no backgammon
+        board.points[7] = { player1: 15, player2: 0 };
+        expect(isBackgammon(board, true)).toBe(false);
+        expect(isBackgammon(board, false)).toBe(false);
+
+        // Test 5: Player 2 has pieces in Player 1's home and bar, backgammon for Player 1
+        board.points[7] = { player1: 0, player2: 8 };
+        board.points[0] = { player1: 0, player2: 7 };
+        expect(isBackgammon(board, true)).toBe(true);
+        expect(isBackgammon(board, false)).toBe(false);
+
+        // Test 6: Player 2's pieces moved to the bar, still backgammon for Player 1
+        board.points[0] = { player1: 0, player2: 0 };
+        board.bar = { player1: 0, player2: 7 };
+        expect(isBackgammon(board, true)).toBe(true);
+        expect(isBackgammon(board, false)).toBe(false);
+
+        // Test 7: Player 1 has pieces in Player 2's home, backgammon for Player 2
+        board.points[7] = { player1: 8, player2: 0 };
+        board.points[0] = { player1: 0, player2: 0 };
+        board.points[23] = { player1: 7, player2: 0 };
+        board.bar = { player1: 0, player2: 0 };
+        expect(isBackgammon(board, true)).toBe(false);
+        expect(isBackgammon(board, false)).toBe(true);
+
+        // Test 8: Player 1's pieces moved to the bar, still backgammon for Player 2
+        board.points[23] = { player1: 0, player2: 0 };
+        board.bar = { player1: 7, player2: 0 };
+        expect(isBackgammon(board, true)).toBe(false);
+        expect(isBackgammon(board, false)).toBe(true);
+    });
 });
