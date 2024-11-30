@@ -3,18 +3,18 @@
     <div class="w-1/2 flex flex-col justify-start items-center">
         <h3 class="text-center text-xl font-black text-black mb-3">OPEN</h3>
         <button v-for="tournament,index in openTournaments" :key="index" 
-		class="flex justify-center items-center px-3 py-2 mb-2 bg-green-600 text-white rounded-r-full rounded-l-full hover:bg-green-700 shadow-md"
+		class="flex justify-center items-center w-5/6 px-3 py-2 mb-2 bg-green-600 text-white rounded-r-full rounded-l-full hover:bg-green-700 shadow-md"
 		@click="selectTournament(tournament)">
-            {{ tournament.name }} by {{ tournament.owner }}
+            {{ tournament.name }}
 		</button>
     </div>
         
     <div class="w-1/2 flex flex-col justify-start items-center">
         <h3 class="text-center text-xl font-black text-black mb-3">CLOSED</h3>
         <button v-for="tournament,index in closedTournaments" :key="index" 
-		class="flex justify-center items-center px-3 py-2 mb-2 bg-green-600 text-white rounded-r-full rounded-l-full hover:bg-green-700 shadow-md"
+		class="flex justify-center items-center w-5/6 px-3 py-2 mb-2 bg-green-600 text-white rounded-r-full rounded-l-full hover:bg-green-700 shadow-md"
 		@click="selectTournament(tournament)">
-            {{ tournament.name }} by {{ tournament.owner }}
+            {{ tournament.name }}
 		</button>
     </div>
 </div>
@@ -24,8 +24,13 @@
 	  <button @click="closeOverlay" class="absolute top-0 right-0 m-2 text-black x-receive-invites">
 		<v-icon name="io-close-sharp" scale="1.5" />
 	  </button>
-	  <h2 class="font-black mb-1 text-lg">{{selectedTournament.name}}</h2>
-	  <p>created by {{selectedTournament.owner}}</p>
+	  <div class="flex flex-col gap-y-1 justify-around items-center">
+		<h2 class="font-black mb-1 text-lg">{{selectedTournament.name}}</h2>
+		<p>Created by: {{selectedTournament.owner}}</p>
+		<p>Participants: {{ selectedTournament.participants.join(", ") }}</p>
+		<p>Rounds to win: {{ selectedTournament.rounds_to_win }} </p>
+		<button class="flex justify-center items-center px-3 py-2 mt-3 mb-2 bg-green-600 text-white rounded-r-full rounded-l-full hover:bg-green-700 shadow-md">{{ selectedTournament.open ? "Request participation" : "Confirm participation" }}</button>
+	</div>
 	</div>
   </div>
     
