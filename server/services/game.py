@@ -94,18 +94,31 @@ async def check_winner(current_game: Match, manager, winner = None):
                 await manager.send_personal_message({"type": "round_over", "winner": winner_username, "info": info_str},
                                                     websocket_player2)
                 
-        print('before save', current_game) 
+        current_game = game_fields_to_dict(current_game)
 
         await get_db().matches.update_one({"_id": current_game.id},
-                                          {"$set": {"board_configuration": current_game.board_configuration.model_dump(by_alias=True),
+                                          {"$set": {"board_configuration": current_game.board_configuration,
                                                     "status": current_game.status,
                                                     "available": current_game.available,
                                                     "dice": current_game.dice,
                                                     "turn": current_game.turn,
-                                                    "startDice": current_game.startDice.model_dump(by_alias=True),
-                                                    "doublingCube": current_game.doublingCube.model_dump(by_alias=True),
+                                                    "startDice": current_game.startDice,
+                                                    "doublingCube": current_game.doublingCube,
                                                     "winsP1": current_game.winsP1,
                                                     "winsP2": current_game.winsP2}})
+
+
+def game_fields_to_dict(game: Match):
+    board = game.board_configuration
+    game.board_configuration = board.model_dump(by_alias=True) if isinstance(board, BoardConfiguration) else board
+
+    doubling = game.doublingCube
+    game.doublingCube = doubling.model_dump(by_alias=True) if isinstance(doubling, DoublingCube) else doubling
+
+    start_dice = game.startDice
+    game.startDice = start_dice.model_dump(by_alias=True) if isinstance(start_dice, StartDice) else start_dice
+
+    return game
 
 
 async def update_rating(current_game: Match, p1_data, p2_data, winner):
@@ -136,7 +149,11 @@ def compute_win_multiplier(current_game: Match, winner: int) -> int:
     else:
         doubling_value = 2**int(current_game.doublingCube['count'])
 
-    board = BoardConfiguration(**current_game.board_configuration)
+    if not isinstance(current_game.board_configuration, BoardConfiguration):
+        board = BoardConfiguration(**current_game.board_configuration)
+    else: 
+        board = current_game.board_configuration
+        
     is_player1 = winner == 1
 
     if is_backgammon(board, is_player1):
