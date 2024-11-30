@@ -21,7 +21,7 @@
 				class="flex flex-col mt-6 w-1/2 sm:p-8 p-6 shadow-md items-center rounded-md gap-6 pl-3 py-2 text-sm md:text-lg bg-white">
 				<TournamentVisualizer v-if="hasCreatedTournament" />
 				<TournamentForm v-if="!hasCreatedTournament && showCreate" @created-tournament="updateTournament" />
-				<TournamentLists v-if="!hasCreatedTournament && !showCreate" />
+				<TournamentLists v-if="!hasCreatedTournament && !showCreate" @joined-tournament="updateTournament" />
 			</div>
 		</div>
 
@@ -67,10 +67,8 @@ export default defineComponent({
 			await router.push({ name: 'home' });
 		},
 		async updateTournament(tournament: Tournament) {
-			/*
 			if (tournament)
 				this.hasCreatedTournament = true;
-			*/
 		}
 	},
 	computed: {

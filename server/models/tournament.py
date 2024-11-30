@@ -18,3 +18,7 @@ class CreateTournamentRequest(BaseModel):
     participants: List[str]
     open: bool
     rounds_to_win: int
+
+class JoinTournamentRequest(BaseModel):
+    owner: str
+    name: str

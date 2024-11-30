@@ -30,7 +30,8 @@
 		<p>{{selectedTournament.open ? "Participants" : "Invited"}}: {{ selectedTournament.participants.join(", ") }}</p>
 		<p v-if="!selectedTournament.open">Confimed participants: {{ selectedTournament.confirmed_participants.join(", ")}} </p>
 		<p>Rounds to win: {{ selectedTournament.rounds_to_win }} </p>
-		<button class="flex justify-center items-center px-4 py-2 mt-3 mb-2 bg-green-600 text-white rounded-r-full rounded-l-full hover:bg-green-700 shadow-md">{{ selectedTournament.open ? "Request participation" : "Confirm participation" }}</button>
+		<button class="flex justify-center items-center px-4 py-2 mt-3 mb-2 bg-green-600 text-white rounded-r-full rounded-l-full hover:bg-green-700 shadow-md"
+		@click="joinTournament(selectedTournament.owner, selectedTournament.name)">{{ selectedTournament.open ? "Request participation" : "Confirm participation" }}</button>
 	</div>
 	</div>
   </div>
@@ -46,7 +47,8 @@ import { isAxiosError } from 'axios'
 
 export default defineComponent({
     name: 'TournamentLists',
-	setup(){
+    emits: ['joinedTournament'],
+	setup(_, { emit }){
 		const openTournaments = ref([] as Array<Tournament>)
 		const closedTournaments = ref([] as Array<Tournament>)
 		const showOverlay = ref(false)
@@ -78,7 +80,20 @@ export default defineComponent({
 			showOverlay.value = true;
 		};
 
-		return { openTournaments, closedTournaments, showOverlay, selectedTournament, getAvailableTournaments, closeOverlay, selectTournament }
+		const joinTournament = async (owner: string, name: string) => {
+			const wsStore = useWsStore();
+			try{
+				const response = await axiosInstance.post('/tournaments/join', { owner, name });
+				wsStore.addNotification("Joined")
+				emit('joinedTournament', response.data.tournament)
+			} catch (error){
+				if (isAxiosError(error)) {
+					wsStore.addError(error?.response?.data?.detail)
+				} 
+			}
+		};
+
+		return { openTournaments, closedTournaments, showOverlay, selectedTournament, getAvailableTournaments, closeOverlay, selectTournament, joinTournament }
 	},
 	data(){
 		return {

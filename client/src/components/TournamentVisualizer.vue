@@ -1,13 +1,8 @@
 <template>
     <div class="w-full flex flex-col items-center gap-4">
         <h2 class="text-center text-xl font-bold py-2 border-b-2 mb-4">
-            {{ tournament?.name }}
+            You are already participating in tournament "{{ tournament?.name }}"
         </h2>
-
-        <div class="flex justify-center items-center gap-2">
-            <input type="checkbox" class="size-5" :checked="tournament?.open" disabled="true">
-            Open to everyone
-        </div>
     </div>
 </template>
 
