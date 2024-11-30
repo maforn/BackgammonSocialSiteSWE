@@ -2,6 +2,7 @@
 <div class="flex justify-evenly w-full h-full">
     <div class="w-1/2 flex flex-col justify-start items-center">
         <h3 class="text-center text-xl font-black text-black mb-3">OPEN</h3>
+		<p v-if="openTournaments?.length == 0" class="text-sm text-gray-500 italic">No open tournaments available.</p>
         <button v-for="tournament,index in openTournaments" :key="index" 
 		class="flex justify-center items-center w-5/6 px-3 py-2 mb-2 bg-green-600 text-white rounded-r-full rounded-l-full hover:bg-green-700 shadow-md"
 		@click="selectTournament(tournament)">
@@ -11,6 +12,7 @@
         
     <div class="w-1/2 flex flex-col justify-start items-center">
         <h3 class="text-center text-xl font-black text-black mb-3">CLOSED</h3>
+		<p v-if="closedTournaments?.length == 0" class="text-sm text-gray-500 italic">No closed tournaments available.</p>
         <button v-for="tournament,index in closedTournaments" :key="index" 
 		class="flex justify-center items-center w-5/6 px-3 py-2 mb-2 bg-green-600 text-white rounded-r-full rounded-l-full hover:bg-green-700 shadow-md"
 		@click="selectTournament(tournament)">
