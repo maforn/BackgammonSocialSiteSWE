@@ -6,6 +6,7 @@ import MockAdapter from 'axios-mock-adapter';
 import { createPinia, setActivePinia } from 'pinia';
 import { useGameStore } from '@/stores/gameStore'
 import { useWsStore } from '@/stores/wsStore'
+import { BoardConfiguration } from '@/models/BoardConfiguration';
 
 describe('GameView.vue', () => {
   let mock: MockAdapter;
@@ -154,29 +155,76 @@ describe('GameView.vue', () => {
   });
 
   it('should open the correct URL when share buttons are clicked', async () => {
-  const wrapper = mount(GameView, {
-    pinia,
+    const wrapper = mount(GameView, {
+      pinia,
+    });
+
+    // Set the necessary conditions for the game to be over
+    wrapper.vm.started = true;
+    wrapper.vm.status = 'player_1_won';
+    await wrapper.vm.$nextTick();
+
+    // Ensure the gameOver condition is met
+    expect(wrapper.find('#game-over').exists()).toBe(true);
+
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+    await wrapper.vm.shareOnWhatsApp()
+    expect(openSpy).toHaveBeenCalledWith(expect.stringContaining('https://wa.me/?text='), '_blank');
+
+    await wrapper.vm.shareOnTwitter()
+    expect(openSpy).toHaveBeenCalledWith(expect.stringContaining('https://twitter.com/intent/tweet?text='), '_blank');
+
+    await wrapper.vm.shareOnFacebook()
+    expect(openSpy).toHaveBeenCalledWith(expect.stringContaining('https://www.facebook.com/sharer/sharer.php?u='), '_blank');
+
+    openSpy.mockRestore();
   });
 
-  // Set the necessary conditions for the game to be over
-  wrapper.vm.started = true;
-  wrapper.vm.status = 'player_1_won';
-  await wrapper.vm.$nextTick();
+  it('calls the correct endpoint when movePiece is called', async () => {
+    const wrapper = mount(GameView);
+    const board = new BoardConfiguration();
+    const dice = 4;
+    await wrapper.vm.movePiece(board, dice);
+    expect(axiosInstance.post).toHaveBeenCalledWith('/move/piece', { board, dice });
+  });
 
-  // Ensure the gameOver condition is met
-  expect(wrapper.find('#game-over').exists()).toBe(true);
+  it('calls the correct endpoint when throwStartDice is called', async () => {
+    const wrapper = mount(GameView);
+    await wrapper.vm.throwStartDice();
+    expect(axiosInstance.get).toHaveBeenCalledWith('/throw_start_dice');
+  });
 
-  const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+  it('calls the correct endpoint when proposeDoubling is called', async () => {
+    const wrapper = mount(GameView);
+    await wrapper.vm.proposeDoubling();
+    expect(axiosInstance.post).toHaveBeenCalledWith('/game/double/propose');
+  });
 
-  await wrapper.vm.shareOnWhatsApp()
-  expect(openSpy).toHaveBeenCalledWith(expect.stringContaining('https://wa.me/?text='), '_blank');
+  it('calls the correct endpoint when acceptDoubling is called', async () => {
+    const wrapper = mount(GameView);
+    await wrapper.vm.acceptDoubling();
+    expect(axiosInstance.post).toHaveBeenCalledWith('/game/double/accept');
+  });
 
-  await wrapper.vm.shareOnTwitter()
-  expect(openSpy).toHaveBeenCalledWith(expect.stringContaining('https://twitter.com/intent/tweet?text='), '_blank');
+  it('calls the correct endpoint when rejectDoubling is called', async () => {
+    const wrapper = mount(GameView);
+    await wrapper.vm.rejectDoubling();
+    expect(axiosInstance.post).toHaveBeenCalledWith('/game/double/reject');
+  });
 
-  await wrapper.vm.shareOnFacebook()
-  expect(openSpy).toHaveBeenCalledWith(expect.stringContaining('https://www.facebook.com/sharer/sharer.php?u='), '_blank');
+  it('formatWinMessage should format the string correctly', async () => {
+    const wrapper = mount(GameView);
+    const board = new BoardConfiguration();
+    board.points = board.points.map(() => ({ player1: 0, player2: 0 }));
+    board.points[7] = { player1: 0, player2: 15 };
+    expect(wrapper.vm.formatWinMessage("player1", true, board)).toBe("player1 has won the match with a gammon!")  
 
-  openSpy.mockRestore();
-});
+    board.points[7] = { player1: 0, player2: 14 };
+    expect(wrapper.vm.formatWinMessage("player1", true, board)).toBe("player1 has won the match!")
+
+    board.points[7] = { player1: 0, player2: 0 };
+    board.bar = { player1: 0, player2: 15 };
+    expect(wrapper.vm.formatWinMessage("player1", true, board)).toBe("player1 has won the match with a backgammon!")
+  });
 });
