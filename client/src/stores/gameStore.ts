@@ -146,8 +146,6 @@ export const useGameStore = defineStore('game', {
       let newBoard = !isPlayer1 ? { ...this.boardConfiguration } : swapPlayers(this.boardConfiguration)
       move.play.forEach((piece_move, index) => {
 
-        console.log(piece_move)
-
         const srcIndex = piece_move.from === 'bar' ? 24 : piece_move.from - 1;
         const dstIndex = piece_move.to === 'off' ? -1 : piece_move.to - 1;
 
@@ -159,7 +157,8 @@ export const useGameStore = defineStore('game', {
           console.log('moved')
           usedDice = findUsedDie(this.dice.available, srcIndex, dstIndex)
           console.log('moved', usedDice)
-        } catch {
+        } catch (error: any) {
+          console.log(error)
           const randomMove = doRandomMove(newBoard, this.dice.available)
           console.log('random', randomMove)
           if (randomMove) {

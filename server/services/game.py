@@ -4,6 +4,7 @@ from models.board_configuration import Match, BoardConfiguration, StartDice, Dou
 from services.ai import ai_names, ai_rating
 from services.database import get_db
 from services.rating import new_ratings_after_match
+from services.board import is_gammon, is_backgammon
 
 
 def throw_dice():
@@ -69,9 +70,10 @@ async def check_winner(current_game: Match, manager, winner = None):
             current_game.doublingCube.proposer = 0
             await update_on_match_win(current_game, loser_username, manager, old_loser_rating, old_winner_rating,
                                       winner, winner_username)
-
-
         else:
+            # Message for round end (gammon/backgammon/normal win)
+            info_str = get_winning_info_str(current_game, winner)
+
             # Must proceed to next round
             # Reset the board configuration, turn, dice and available
             current_game.board_configuration = BoardConfiguration()
@@ -85,11 +87,11 @@ async def check_winner(current_game: Match, manager, winner = None):
             # Message for round end
             websocket_player1 = await manager.get_user(current_game.player1)
             if websocket_player1:
-                await manager.send_personal_message({"type": "round_over", "winner": winner_username},
+                await manager.send_personal_message({"type": "round_over", "winner": winner_username, "info": info_str},
                                                     websocket_player1)
             websocket_player2 = await manager.get_user(current_game.player2)
             if websocket_player2:
-                await manager.send_personal_message({"type": "round_over", "winner": winner_username},
+                await manager.send_personal_message({"type": "round_over", "winner": winner_username, "info": info_str},
                                                     websocket_player2)
                 
         print('before save', current_game) 
@@ -106,28 +108,57 @@ async def check_winner(current_game: Match, manager, winner = None):
                                                     "winsP2": current_game.winsP2}})
 
 
-async def update_rating(current_game, p1_data, p2_data, winner):
+async def update_rating(current_game: Match, p1_data, p2_data, winner):
 
-    if isinstance(current_game.doublingCube, DoublingCube):
-        doubling_value = 2**current_game.doublingCube.count
-    else:
-        doubling_value = 2**int(current_game.doublingCube['count'])
+    win_multiplier = compute_win_multiplier(current_game, winner)
 
     if winner == 1:
         # Player 1 won the current round
-        current_game.winsP1 += 1 * doubling_value
+        current_game.winsP1 += win_multiplier
         winner_username = p1_data["username"]
         loser_username = p2_data["username"]
         old_winner_rating = p1_data["rating"]
         old_loser_rating = p2_data["rating"]
     else:
         # Player 2 won the current round
-        current_game.winsP2 += 1 * doubling_value
+        current_game.winsP2 += win_multiplier
         winner_username = p2_data["username"]
         loser_username = p1_data["username"]
         old_winner_rating = p2_data["rating"]
         old_loser_rating = p1_data["rating"]
     return loser_username, old_loser_rating, old_winner_rating, winner_username
+
+
+def compute_win_multiplier(current_game: Match, winner: int) -> int:
+
+    if isinstance(current_game.doublingCube, DoublingCube):
+        doubling_value = 2**current_game.doublingCube.count
+    else:
+        doubling_value = 2**int(current_game.doublingCube['count'])
+
+    board = BoardConfiguration(**current_game.board_configuration)
+    is_player1 = winner == 1
+
+    if is_backgammon(board, is_player1):
+        return 3 * doubling_value
+    elif is_gammon(board, is_player1):
+        return 2 * doubling_value
+    else:
+        return 1 * doubling_value
+
+
+def get_winning_info_str(current_game: Match, winner: int):
+    board = BoardConfiguration(**current_game.board_configuration)
+    is_player1 = winner == 1
+
+    print(board)
+
+    if is_backgammon(board, is_player1):
+        return " with a backgammon"
+    elif is_gammon(board, is_player1):
+        return " with a gammon"
+    else:
+        return ""
 
 
 async def update_on_match_win(current_game, loser_username, manager, old_loser_rating, old_winner_rating, winner,

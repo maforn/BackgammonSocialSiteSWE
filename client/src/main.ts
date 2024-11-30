@@ -16,9 +16,9 @@ import {
 	BiCircle,
 	BiCircleFill,
 	FaMedal,
-	FaEllipsisH,
-	FaDiceD20
-} from 'oh-vue-icons/icons';
+	FaDiceD20,
+	FaEllipsisH, IoLogoWhatsapp, IoLogoFacebook, IoLogoTwitter
+} from 'oh-vue-icons/icons'
 import App from './App.vue';
 import router from './router';
 import './assets/tailwind.css';
@@ -43,7 +43,10 @@ addIcons(
 	BiCircleFill,
 	FaMedal,
 	FaEllipsisH,
-	FaDiceD20
+	FaDiceD20,
+	IoLogoWhatsapp,
+	IoLogoFacebook,
+	IoLogoTwitter
 );
 
 app.component('v-icon', OhVueIcon);

@@ -31,7 +31,23 @@
           </div>
         </div>
       </div>
-      <div id="game-over" class="bg-yellow-500 font-medium relative p-2 rounded" v-if="gameOver">{{ winnerMessage }}</div>
+      <div id="game-over" class="font-medium relative p-2 rounded" v-if="gameOver">
+        <div class="flex gap-2 mt-4">
+          <button @click="shareOnWhatsApp" class="btn-share p-2 rounded bg-blue-500 text-white cursor-pointer">
+             <v-icon name="io-logo-whatsapp" />
+            Share on Whatsapp
+          </button>
+          <button @click="shareOnTwitter" class="btn-share p-2 rounded bg-blue-500 text-white cursor-pointer">
+             <v-icon name="io-logo-twitter" />
+            Share on X
+          </button>
+          <button @click="shareOnFacebook" class="btn-share p-2 rounded bg-blue-700 text-white cursor-pointer">
+             <v-icon name="io-logo-facebook" />
+            Share on Facebook
+          </button>
+        </div>
+      </div>
+      <div id="game-over" class="bg-yellow-500 font-medium relative p-2 rounded" v-if="gameOver">{{winnerMessage}}</div>
       <div class="relative" v-if="started">
         <GameBoard :configuration="configuration" :player1="isPlayer1" :dice="availableDice" :your-turn="isYourTurn"
           @movePiece="movePiece" @noAvailableMoves="buttonShower" />
@@ -168,6 +184,7 @@ import { useGameStore } from '@/stores/gameStore'
 import { useWsStore } from '@/stores/wsStore'
 import { useAuthStore } from '@/stores/authStore'
 import { isAxiosError } from 'axios'
+import { isGammon, isBackgammon } from '@/services/gameService';
 
 export default defineComponent({
   name: 'GameView',
@@ -263,6 +280,14 @@ export default defineComponent({
     };
   },
   methods: {
+    formatWinMessage(winnerUsername: string, winnerIsPlayer1: boolean, board: BoardConfiguration) {
+      let opt = '';
+      if(isBackgammon(board, winnerIsPlayer1))
+        opt = ' with a backgammon';
+      else if(isGammon(board, winnerIsPlayer1))
+        opt = ' with a gammon';
+      return `${winnerUsername} has won the match${opt}!`;
+    },
     async diceThrow() {
       this.showPassButton = false;
       try {
@@ -285,7 +310,29 @@ export default defineComponent({
           }
         });
     },
-    startPlaying() {
+    getGameOverShareText() {
+      if (this.isPlayer1 && this.status === 'player_1_won') {
+        return `I just won a game of backgammon against ${this.player2}! 🏆 Play now!`
+      } else if (!this.isPlayer1 && this.status === 'player_2_won') {
+        return `I just won a game of backgammon against ${this.player1}! 🏆 Play now!`
+      } else if (this.isPlayer1 && this.status === 'player_2_won') {
+        return `I just lost a game of backgammon against ${this.player2}! 😢 Help me out, play now!`
+      } else {
+        return `I just lost a game of backgammon against ${this.player1}! 😢 Help me out, play now!`
+      }
+    }, async shareOnWhatsApp() {
+      const url = `https://wa.me/?text=${encodeURIComponent(this.getGameOverShareText())}`;
+      window.open(url, '_blank');
+    },
+    async shareOnTwitter() {
+      const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(this.getGameOverShareText())}`;
+      window.open(url, '_blank');
+    },
+    async shareOnFacebook() {
+      const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
+      window.open(url, '_blank');
+    },
+    startPlaying(){
       this.started = true;
     },
     throwStartDice() {
@@ -356,6 +403,14 @@ export default defineComponent({
     diceThrowAllowed() {
       return this.isYourTurn && !this.diceThrown && !this.doublingCube.proposed;
     },
+    winnerMessage(): string {
+      if (this.status === 'player_1_won') {
+          return this.formatWinMessage(this.player1, true, this.configuration);
+        } else if (this.status === 'player_2_won') {
+          return this.formatWinMessage(this.player2, false, this.configuration);
+        }
+        return '';
+    }
   },
   watch: {
     starter(newVal, oldVal) {
