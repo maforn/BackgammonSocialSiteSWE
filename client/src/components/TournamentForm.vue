@@ -17,8 +17,8 @@
 		</div>
 
         <div class="flex justify-center items-center gap-2">
-            <input type="checkbox" class="size-5" v-model="openToEveryone" @click="`participants = [${username}]`">
-            Open to everyone
+            <input name="open" id="open" type="checkbox" class="size-5" v-model="openToEveryone" @click="`participants = [${username}]`">
+            <label for="open">Open to everyone</label>
         </div>
 
 		<div id="user-search" v-if="!openToEveryone"

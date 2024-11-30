@@ -27,9 +27,10 @@
 	  <div class="flex flex-col gap-y-1 justify-around items-center">
 		<h2 class="font-black mb-1 text-lg">{{selectedTournament.name}}</h2>
 		<p>Created by: {{selectedTournament.owner}}</p>
-		<p>Participants: {{ selectedTournament.participants.join(", ") }}</p>
+		<p>{{selectedTournament.open ? "Participants" : "Invited"}}: {{ selectedTournament.participants.join(", ") }}</p>
+		<p v-if="!selectedTournament.open">Confimed participants: {{ selectedTournament.confirmed_participants.join(", ")}} </p>
 		<p>Rounds to win: {{ selectedTournament.rounds_to_win }} </p>
-		<button class="flex justify-center items-center px-3 py-2 mt-3 mb-2 bg-green-600 text-white rounded-r-full rounded-l-full hover:bg-green-700 shadow-md">{{ selectedTournament.open ? "Request participation" : "Confirm participation" }}</button>
+		<button class="flex justify-center items-center px-4 py-2 mt-3 mb-2 bg-green-600 text-white rounded-r-full rounded-l-full hover:bg-green-700 shadow-md">{{ selectedTournament.open ? "Request participation" : "Confirm participation" }}</button>
 	</div>
 	</div>
   </div>

@@ -4,8 +4,8 @@ from services.database import get_db
 
 async def get_current_tournament(username: str) -> Tournament:
     tournament_data = await get_db().tournaments.find_one({
-        "participants": {"$in": [username]},
-        "status": "started"
+        "confirmed_participants": {"$in": [username]},
+        "status": {"$in": ["pending", "started"]},
     })
     if tournament_data:
         return Tournament(**tournament_data)
@@ -33,7 +33,8 @@ async def get_available_tournaments(username: str) -> List[Tournament]:
 
 async def create_new_tournament(request: CreateTournamentRequest, owner: str):
     new_tournament = Tournament(owner=owner, 
-                                participants= [owner] if request.open else request.participants, 
+                                participants= [owner] if request.open else request.participants,
+                                confirmed_participants=[owner], 
                                 open=request.open,
                                 name=request.name,
                                 match_ids=[],
