@@ -29,3 +29,18 @@ async def test_get_top5_and_me(client: AsyncClient, token: str):
     print(data)
     assert data[-1]["username"] == "testuser"
     assert "position" in data[-1]
+
+@pytest.mark.anyio
+async def test_get_top5_and_me_google(client: AsyncClient, token: str):
+    email_list = {
+        "emails": [
+            "asd@gmail.com",
+            "testuser@example.com"
+        ]
+    }
+    response = await client.post("/users/top5_and_me_google", json=email_list, headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert data[-1]["username"] == "testuser"
+    assert "position" in data[-1]

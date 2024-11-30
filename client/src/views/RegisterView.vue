@@ -179,7 +179,7 @@
             </div>
 
             <div class="space-x-6 flex justify-center mt-6">
-              <button type="button" class="border-none outline-none">
+              <button type="button" class="border-none outline-none" @click="loginWithGoogle">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32px" class="inline" viewBox="0 0 512 512">
                   <path
                     fill="#fbbd00"
@@ -211,14 +211,6 @@
                     d="M256 120V0C187.62 0 123.333 26.629 74.98 74.98a259.849 259.849 0 0 0-22.158 25.235l86.308 86.308C162.883 146.72 206.376 120 256 120z"
                     data-original="#eb4132"
                   />
-                </svg>
-              </button>
-              <button type="button" class="border-none outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32px" fill="#007bff" viewBox="0 0 167.657 167.657">
-                  <path
-                    d="M83.829.349C37.532.349 0 37.881 0 84.178c0 41.523 30.222 75.911 69.848 82.57v-65.081H49.626v-23.42h20.222V60.978c0-20.037 12.238-30.956 30.115-30.956 8.562 0 15.92.638 18.056.919v20.944l-12.399.006c-9.72 0-11.594 4.618-11.594 11.397v14.947h23.193l-3.025 23.42H94.026v65.653c41.476-5.048 73.631-40.312 73.631-83.154 0-46.273-37.532-83.805-83.828-83.805z"
-                    data-original="#010002"
-                  ></path>
                 </svg>
               </button>
             </div>
@@ -671,7 +663,7 @@
 import { defineComponent, ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
-import { registerOrLogin } from '@/services/authService'
+import { registerOrLogin, loginWithGoogle } from '@/services/authService'
 
 export default defineComponent({
   name: 'RegisterView',
@@ -728,7 +720,8 @@ export default defineComponent({
       registerUser,
       showTerms,
       toggleTerms,
-      errorMessage
+      errorMessage,
+      loginWithGoogle
     }
   }
 })
