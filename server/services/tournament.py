@@ -34,7 +34,7 @@ async def get_available_tournaments(username: str) -> List[Tournament]:
 
 async def create_new_tournament(request: CreateTournamentRequest, owner: str):
     new_tournament = Tournament(owner=owner, 
-                                participants= [owner] if request.open else request.participants,
+                                participants= [owner] if (request.open and len(request.participants)==0 ) else request.participants,
                                 confirmed_participants=[owner], 
                                 open=request.open,
                                 name=request.name,
