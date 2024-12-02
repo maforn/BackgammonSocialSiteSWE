@@ -231,3 +231,24 @@ async def pass_turn(token: str = Depends(oauth2_scheme)):
     if websocket_player2:
         await manager.send_personal_message({"type": "pass_turn", "match": current_game.dict(by_alias=True)},
                                             websocket_player2)
+
+@router.post("/ai/suggestions")
+async def use_ai_suggestions(token: str = Depends(oauth2_scheme)):
+    user = await get_user_from_token(token)
+    current_game = await get_current_game(user.username)
+
+    if not current_game or current_game.status != "started":
+        raise HTTPException(status_code=400, detail="No ongoing game found")
+
+    if (current_game.turn % 2 == 0 and current_game.player1 != user.username) or \
+            (current_game.turn % 2 == 1 and current_game.player2 != user.username):
+        raise HTTPException(status_code=400, detail="It's not your turn")
+
+    is_player_1 = current_game.player1 == user.username
+    if current_game.ai_suggestions[is_player_1] >= 3:
+        raise HTTPException(status_code=400, detail="You have already used all your suggestions")
+
+    current_game.ai_suggestions[is_player_1] += 1
+
+    await get_db().matches.update_one({"_id": current_game.id}, {
+        "$set": {"ai_suggestions": current_game.ai_suggestions}})

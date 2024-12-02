@@ -1,4 +1,9 @@
 import { BoardConfiguration } from '@/models/BoardConfiguration';
+import axiosInstance from '@/axios'
+
+export const updateAISuggestions = async () => {
+  await axiosInstance.get('/ai/suggestions');
+}
 
 export const swapPlayers = (board: BoardConfiguration): BoardConfiguration => {
 	const newBoard = JSON.parse(JSON.stringify(board));

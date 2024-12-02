@@ -17,6 +17,7 @@ export class Match {
 	winsP2: number;
 	starter: number;
 	startDice: {roll1 : number, count1: number, roll2: number, count2: number};
+  ai_suggestions: number[];
 
 	constructor(
 		player1: string,
@@ -29,6 +30,7 @@ export class Match {
 		status: string,
 		starter: number,
 		rounds_to_win: number,
+    ai_suggestions: number[]
 	) {
 		this.player1 = player1;
 		this.player2 = player2;
@@ -43,5 +45,6 @@ export class Match {
 		this.winsP2 = 0;
 		this.starter = starter;
 		this.startDice = {roll1: 0, count1: 0, roll2: 0, count2: 0};
+    this.ai_suggestions = [0, 0];
 	}
 }

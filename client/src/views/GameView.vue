@@ -128,7 +128,7 @@
         </button>
       </div>
       <div>
-        <button v-if="isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="getAISuggestion">Get AI Suggestion</button>
+        <button v-if="isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="getAISuggestion">Get AI Suggestion {{ this.ai_suggestions }}/3</button>
       </div>
       <div>
         <button v-if="showPassButton&&isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">Pass the turn</button>
@@ -157,7 +157,7 @@ export default defineComponent({
   },
   setup() {
     const gameStore = useGameStore()
-    const { turn, dice, boardConfiguration, player1, player2, rounds_to_win, winsP1, winsP2, status, starter, startDice } = storeToRefs(gameStore)
+    const { turn, dice, boardConfiguration, player1, player2, rounds_to_win, winsP1, winsP2, status, starter, startDice, ai_suggestions } = storeToRefs(gameStore)
 
     const wsStore = useWsStore()
     const { messages } = storeToRefs(wsStore)
@@ -209,7 +209,7 @@ export default defineComponent({
     }
 
     const getAISuggestion = () => {
-      gameStore.getAISuggestions()
+      gameStore.getAISuggestions(player1.value == username)
     }
 
     return {
@@ -248,7 +248,8 @@ export default defineComponent({
         }
         return '';
       }),
-      getAISuggestion
+      getAISuggestion,
+      ai_suggestions
 		};
 	},
   methods: {

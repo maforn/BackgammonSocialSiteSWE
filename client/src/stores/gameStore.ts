@@ -5,7 +5,14 @@ import { BoardConfiguration, PointConfiguration } from '@/models/BoardConfigurat
 import { Match } from '@/models/Match'
 import '@/wasm/wasm_exec'
 import { useAuthStore } from '@/stores/authStore'
-import { doRandomMove, findUsedDie, moveOnBoard, swapPlayers } from '@/services/gameService'
+import {
+  checkMoveValidity,
+  doRandomMove,
+  findUsedDie,
+  moveOnBoard,
+  swapPlayers,
+  updateAISuggestions
+} from '@/services/gameService'
 import { useWsStore } from '@/stores/wsStore'
 
 interface GameData {
@@ -26,6 +33,7 @@ interface GameData {
   winsP2: number;
   starter: number;
   startDice: { roll1: number; count1: number; roll2: number; count2: number };
+  ai_suggestions: number[];
 }
 
 const ai_players = ['ai_hard', 'ai_medium', 'ai_easy']
@@ -46,7 +54,8 @@ export const useGameStore = defineStore('game', {
     goInstance: null,
     loaded: false,
     starter: -1,
-    startDice: { roll1: 0, count1: 0, roll2: 0, count2: 0 }
+    startDice: { roll1: 0, count1: 0, roll2: 0, count2: 0 },
+    ai_suggestions: [0, 0]
   }),
   actions: {
     async initializeWasm() {
@@ -87,9 +96,15 @@ export const useGameStore = defineStore('game', {
       this.winsP2 = data.winsP2
       this.starter = data.starter
       this.startDice = data.startDice
-      setTimeout(async () => await this.checkAITurn(), 1000)
+      this.ai_suggestions = data.ai_suggestions
+      setTimeout(async () => await this.checkAITurn(), 800)
     },
     async getAISuggestions(isPlayer1) {
+      if (this.ai_suggestions[isPlayer1] >= 3) {
+        useWsStore().addNotification('AI suggestions limit reached')
+        return
+      }
+
       const board = isPlayer1 ? swapPlayers(this.boardConfiguration) : this.boardConfiguration
 
       const input = {
@@ -114,12 +129,27 @@ export const useGameStore = defineStore('game', {
         'max-moves':
           1,
         player:
-          'o',
+          'x',
         'score-moves':
           true
       }
       const moves = await this.getMovesFromWasm(input)
-      useWsStore().addNotification(`AI suggests: ${moves[0].play.map(move => `move ${move.from} to ${move.to}`)[0]}`)
+      const validMoves = []
+      moves[0].play.forEach(move => {
+        try {
+          checkMoveValidity(board, this.dice.roll, move.from - 1, move.to - 1)
+          validMoves.push(` move ${move.from} to ${move.to}`)
+        } catch {
+          return
+        }
+      })
+      if (validMoves.length === 0) {
+        useWsStore().addNotification('No valid moves from the AI :(')
+      } else {
+        await updateAISuggestions();
+        this.ai_suggestions[isPlayer1]++
+        useWsStore().addNotification(`AI suggests:${validMoves.join(',')}.`)
+      }
     },
     async checkAITurn() {
       const isPlayer1 = this.player1 === useAuthStore().username
