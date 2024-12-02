@@ -40,9 +40,7 @@ describe('LeaderboardView.vue', () => {
       }
     });
 
-
     await flushPromises();
-
 
     expect(wrapper.find('h1').text()).toBe('LEADERBOARD');
     expect(wrapper.vm.usersData.length).toBe(6);
@@ -58,5 +56,41 @@ describe('LeaderboardView.vue', () => {
 
     await wrapper.find('#home-btn').trigger('click');
     expect(router.push).toHaveBeenCalledWith({ name: 'home' });
+  });
+
+  it('toggles to Google friends leaderboard', async () => {
+    mock.onGet('/users/top5_and_me').reply(200, [
+      { _id: '1', username: 'user1', rating: 100, position: 1 },
+      { _id: '2', username: 'user2', rating: 90, position: 2 },
+      { _id: '3', username: 'user3', rating: 80, position: 3 },
+      { _id: '4', username: 'user4', rating: 70, position: 4 },
+      { _id: '5', username: 'user5', rating: 60, position: 5 },
+      { _id: '6', username: 'myuser', rating: 50, position: 6 }
+    ]);
+
+    mock.onPost('/users/top5_and_me_google').reply(200, [
+      { _id: '1', username: 'googleuser1', rating: 100, position: 1 },
+      { _id: '2', username: 'googleuser2', rating: 90, position: 2 },
+      { _id: '3', username: 'googleuser3', rating: 80, position: 3 },
+      { _id: '4', username: 'googleuser4', rating: 70, position: 4 },
+      { _id: '5', username: 'googleuser5', rating: 60, position: 5 },
+      { _id: '6', username: 'myuser', rating: 50, position: 6 }
+    ]);
+
+    const wrapper = mount(LeaderboardView, {
+      global: {
+        plugins: [pinia]
+      }
+    });
+
+    await flushPromises();
+
+    expect(wrapper.vm.usersData[0].username).toBe('user1');
+
+    wrapper.vm.showGoogleFriends = true;
+    await wrapper.vm.toggleGoogleFriends();
+    await flushPromises();
+
+    expect(wrapper.vm.usersData[0].username).toBe('googleuser1');
   });
 });

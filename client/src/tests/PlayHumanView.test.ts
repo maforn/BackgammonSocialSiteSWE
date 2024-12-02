@@ -5,6 +5,12 @@ import MockAdapter from 'axios-mock-adapter';
 import axiosInstance from '@/axios';
 import { createPinia, setActivePinia } from 'pinia';
 
+import { getGoogleContactsEmails } from '@/services/invitesService';
+
+vi.mock('@/services/invitesService', () => ({
+  getGoogleContactsEmails: vi.fn()
+}));
+
 describe('PlayHumanView.vue', () => {
 	let mock: MockAdapter;
 	const pinia = createPinia();
@@ -74,4 +80,28 @@ describe('PlayHumanView.vue', () => {
 		await wrapper.vm.fetchUsers();
 		expect(wrapper.vm.showDropdown).toBe(false);
 	});
+
+  it('fetches Google friends when switch is toggled', async () => {
+    const wrapper = mount(PlayHumanView);
+    const mockEmails = ['friend1@gmail.com', 'friend2@gmail.com'];
+    (getGoogleContactsEmails as vi.Mock).mockResolvedValue(mockEmails);
+
+    wrapper.vm.inviteGoogleFriends = true;
+    await wrapper.vm.toggleGoogleFriends();
+
+    expect(getGoogleContactsEmails).toHaveBeenCalled();
+    expect(wrapper.vm.emails).toEqual(mockEmails);
+  });
+
+  it('selects a Google friend from the dropdown', async () => {
+    const wrapper = mount(PlayHumanView);
+    const mockEmails = ['friend1@gmail.com', 'friend2@gmail.com'];
+    await wrapper.setData({ inviteGoogleFriends: true, emails: mockEmails, searchQuery: 'friend', showDropdown: true });
+
+    wrapper.vm.selectEmail(mockEmails[0]);
+
+    expect(wrapper.vm.searchQuery).toBe(mockEmails[0]);
+    expect(wrapper.vm.showDropdown).toBe(false);
+    expect(wrapper.vm.hasSelectedOpponent).toBe(true);
+  });
 });
