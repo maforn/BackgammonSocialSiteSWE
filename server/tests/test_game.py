@@ -118,7 +118,7 @@ async def test_round_progression(client: AsyncClient, token: str):
     await clear_matches()
     await create_started_match("testuser", "testuser2")
     await get_db().matches.update_one({"player1": "testuser"}, {
-        "$set": {"turn": 20, "dice": [3, 5], "available": [3, 5], "rounds_to_win": 3, "winsP1": 0, "winsP2": 0}})
+        "$set": {"turn": 20, "dice": [3, 5], "available": [3, 5], "rounds_to_win": 3, "winsP1": 0, "winsP2": 0, "ai_suggestions": [1, 2]}})
     move_data = {
         "board": {
             "points": [{"player1": 1, "player2": 0}] + [{"player1": 0, "player2": 0} for _ in range(23)],
@@ -130,6 +130,7 @@ async def test_round_progression(client: AsyncClient, token: str):
     assert updated_game is not None
     assert updated_game["turn"] == -1
     assert updated_game["winsP2"] == 1
+    assert updated_game["ai_suggestions"] == [0, 0]
 
 
 @pytest.mark.anyio
@@ -185,3 +186,16 @@ async def test_throw_start_dice_ai(client: AsyncClient, token: str):
     assert match["startDice"]["roll2"] > 0
     assert match["startDice"]["count1"] == 1
     assert match["startDice"]["count2"] == 1
+
+@pytest.mark.anyio
+async def test_ai_suggestions(client: AsyncClient, token: str):
+    await clear_matches()
+    await create_started_match("testuser", "testuser2")
+    response = await client.post("/ai/suggestions", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    response = await client.post("/ai/suggestions", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    response = await client.post("/ai/suggestions", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    response = await client.post("/ai/suggestions", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 400
