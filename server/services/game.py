@@ -165,7 +165,12 @@ def compute_win_multiplier(current_game: Match, winner: int) -> int:
 
 
 def get_winning_info_str(current_game: Match, winner: int):
-    board = BoardConfiguration(**current_game.board_configuration)
+
+    if isinstance(current_game.board_configuration, BoardConfiguration):
+        board = current_game.board_configuration
+    else:
+        board = BoardConfiguration(**current_game.board_configuration)
+        
     is_player1 = winner == 1
 
     print(board)
