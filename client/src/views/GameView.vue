@@ -128,7 +128,7 @@
         </button>
       </div>
       <div>
-        <button v-if="isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="getAISuggestion">Get AI Suggestion {{ this.ai_suggestions }}/3</button>
+        <button v-if="isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="getAISuggestion">Get AI Suggestion {{ ai_suggestions[isPlayer1 ? 1 : 0] }}/3</button>
       </div>
       <div>
         <button v-if="showPassButton&&isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">Pass the turn</button>
@@ -162,6 +162,7 @@ export default defineComponent({
     const wsStore = useWsStore()
     const { messages } = storeToRefs(wsStore)
 
+    console.log(ai_suggestions.value)
     const username = useAuthStore().username
 
     useGameStore()

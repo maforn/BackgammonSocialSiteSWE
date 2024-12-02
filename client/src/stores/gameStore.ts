@@ -100,7 +100,7 @@ export const useGameStore = defineStore('game', {
       setTimeout(async () => await this.checkAITurn(), 800)
     },
     async getAISuggestions(isPlayer1) {
-      if (this.ai_suggestions[isPlayer1] >= 3) {
+      if (this.ai_suggestions[isPlayer1 ? 1 : 0] >= 3) {
         useWsStore().addNotification('AI suggestions limit reached')
         return
       }
@@ -140,6 +140,7 @@ export const useGameStore = defineStore('game', {
           checkMoveValidity(board, this.dice.roll, move.from - 1, move.to - 1)
           validMoves.push(` move ${move.from} to ${move.to}`)
         } catch {
+          this.ai_suggestions[isPlayer1 ? 1 : 0] = 3
           return
         }
       })
@@ -147,7 +148,7 @@ export const useGameStore = defineStore('game', {
         useWsStore().addNotification('No valid moves from the AI :(')
       } else {
         await updateAISuggestions();
-        this.ai_suggestions[isPlayer1]++
+        this.ai_suggestions[isPlayer1 ? 1 : 0]++
         useWsStore().addNotification(`AI suggests:${validMoves.join(',')}.`)
       }
     },
@@ -259,7 +260,8 @@ export const useGameStore = defineStore('game', {
         new Date(this.updated_at),
         this.status,
         this.rounds_to_win,
-        this.starter
+        this.starter,
+        this.ai_suggestions
       )
     },
     setDice(result: number[], available: number[]) {

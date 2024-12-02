@@ -96,7 +96,8 @@ async def check_winner(current_game: Match, manager):
                                                     "dice": current_game.dice,
                                                     "turn": current_game.turn,
                                                     "winsP1": current_game.winsP1,
-                                                    "winsP2": current_game.winsP2}})
+                                                    "winsP2": current_game.winsP2,
+                                                    "ai_suggestions": current_game.ai_suggestions}})
 
 
 async def update_rating(current_game, p1_data, p2_data, winner):

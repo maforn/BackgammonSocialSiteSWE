@@ -2,7 +2,7 @@ import { BoardConfiguration } from '@/models/BoardConfiguration';
 import axiosInstance from '@/axios'
 
 export const updateAISuggestions = async () => {
-  await axiosInstance.get('/ai/suggestions');
+  await axiosInstance.post('/ai/suggestions');
 }
 
 export const swapPlayers = (board: BoardConfiguration): BoardConfiguration => {
