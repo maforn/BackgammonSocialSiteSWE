@@ -23,6 +23,7 @@ async def get_all_users():
     users = await get_db().users.find().to_list(length=None)
     return [UserOnline(**user) for user in users]
 
+
 async def get_all_users_leaderboard():
     users = await get_db().users.find().to_list(length=None)
     return [UserInLeaderboard(**user) for user in users]

@@ -7,6 +7,7 @@ from services.database import get_db
 from services.game import create_started_match
 from services.invite import create_invite, get_pending_invites, accept_invite
 from services.websocket import manager
+from services.user import get_user
 
 router = APIRouter()
 
@@ -29,6 +30,13 @@ async def create_invite_endpoint(request: CreateInviteRequest, token: str = Depe
     user = await get_user_from_token(token)
     opponent_username = request.opponent_username
     rounds_to_win = request.rounds_to_win
+    if request.use_email:
+        opponent = (await get_db().users.find_one({"email": opponent_username}))
+        if opponent is None:
+            raise HTTPException(status_code=404, detail="Opponent not found")
+        opponent_username = opponent["username"]
+    elif await get_user(opponent_username) is None:
+        raise HTTPException(status_code=404, detail="Opponent not found")
 
     if user.username == opponent_username:
         raise HTTPException(status_code=400, detail="You cannot invite yourself")
@@ -46,15 +54,18 @@ async def create_invite_endpoint(request: CreateInviteRequest, token: str = Depe
         else: 
             await create_invite(user.username, opponent_username, rounds_to_win)
 
-            inviterWebsocket = await manager.get_user(user.username)
-            if inviterWebsocket:
-                await manager.send_personal_message({"type": "invite-sent", "to": opponent_username}, inviterWebsocket)
+            await websocket_invite(opponent_username, user)
 
-            invitedWebsocket = await manager.get_user(opponent_username)
-            if invitedWebsocket:
-                await manager.send_personal_message({"type": "invite", "from": user.username}, invitedWebsocket)
-                
     return JSONResponse(status_code=200, content={"message": "Invite created successfully"})
+
+
+async def websocket_invite(user1, user):
+    inviter_websocket = await manager.get_user(user.username)
+    if inviter_websocket:
+        await manager.send_personal_message({"type": "invite-sent", "to": user1}, inviter_websocket)
+    invited_websocket = await manager.get_user(user1)
+    if invited_websocket:
+        await manager.send_personal_message({"type": "invite", "from": user.username}, invited_websocket)
 
 
 @router.post("/invites/accept")

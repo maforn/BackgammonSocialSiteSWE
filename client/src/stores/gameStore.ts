@@ -207,10 +207,8 @@ export const useGameStore = defineStore('game', {
       let newBoard = !isPlayer1 ? { ...this.boardConfiguration } : swapPlayers(this.boardConfiguration)
       move.play.forEach((piece_move, index) => {
 
-        console.log(piece_move)
-
-        const srcIndex = piece_move.from === 'bar' ? 24 : piece_move.from - 1
-        const dstIndex = piece_move.to === 'off' ? -1 : piece_move.to - 1
+        const srcIndex = piece_move.from === 'bar' ? 24 : piece_move.from - 1;
+        const dstIndex = piece_move.to === 'off' ? -1 : piece_move.to - 1;
 
         let usedDice = null
 
@@ -220,7 +218,8 @@ export const useGameStore = defineStore('game', {
           console.log('moved')
           usedDice = findUsedDie(this.dice.available, srcIndex, dstIndex)
           console.log('moved', usedDice)
-        } catch {
+        } catch (error: any) {
+          console.log(error)
           const randomMove = doRandomMove(newBoard, this.dice.available)
           console.log('random', randomMove)
           if (randomMove) {
@@ -260,8 +259,7 @@ export const useGameStore = defineStore('game', {
         new Date(this.updated_at),
         this.status,
         this.rounds_to_win,
-        this.starter,
-        this.ai_suggestions
+        this.starter
       )
     },
     setDice(result: number[], available: number[]) {
@@ -269,12 +267,12 @@ export const useGameStore = defineStore('game', {
       this.dice.available = available
     },
     setStartDice(roll1: number, count1: number, roll2: number, count2: number) {
-      this.startDice = { roll1, count1, roll2, count2 }
+			this.startDice = { roll1, count1, roll2, count2 };
 
-    },
-    setStarter(starter: number, turn: number) {
-      this.starter = starter
-      this.turn = turn
-    }
+		},
+		setStarter(starter: number, turn: number) {
+			this.starter = starter;
+			this.turn = turn;
+		}
   }
 })
