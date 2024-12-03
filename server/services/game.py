@@ -29,20 +29,22 @@ async def create_started_match(player1: str, player2: str, rounds_to_win: int = 
     match_data = new_match.dict(by_alias=True)
     await get_db().matches.insert_one(match_data)
 
-async def check_timeout(match: Match, manager):
+
+async def check_timeout_condition(match: Match):
     current_time = datetime.now()
-    if current_time - match.last_updated > timedelta(seconds=30):
-        print("Timeout")
-    else:
-        print("No timeout")        
-        '''
-        if match.turn == 0:
-            await update_on_match_win(match, match.player1, manager, 0, 0, 2, match.player2)
-        else:
-            await update_on_match_win(match, match.player2, manager, 0, 0, 1, match.player1)
-        return True
-    return False
-        '''
+    return current_time - match.last_updated > timedelta(seconds=30)
+
+
+async def check_timeout_winner(current_game: Match):
+    if await check_timeout_condition(current_game):
+        if current_game.turn == 0: #Player 1's turn timed out, winner should be player 2
+            return 2
+        else: #Player 2's turn timed out, winner should be player 1
+            return 1
+
+async def manage_timeout(current_game: Match, manager):
+    await check_winner(current_game, manager, True)
+
 
 def check_win_condition(match: Match):
     player1_counter = match.board_configuration["bar"]["player1"]
@@ -57,9 +59,12 @@ def check_win_condition(match: Match):
     return {"winner": 1} if player1_counter == 0 else {"winner": 2}
 
 
-async def check_winner(current_game: Match, manager):
-    winner = check_win_condition(current_game)
-    winner = winner.get("winner")
+async def check_winner(current_game: Match, manager, isTimeout=False):
+    if isTimeout:
+        winner = check_timeout_winner(current_game)
+    else:
+        winner = check_win_condition(current_game)
+        winner = winner.get("winner")
 
     p1_data = await get_db().users.find_one({
         "username": current_game.player1
@@ -76,7 +81,7 @@ async def check_winner(current_game: Match, manager):
     if winner != 0:
         loser_username, old_loser_rating, old_winner_rating, winner_username = await update_rating(current_game,
                                                                                                    p1_data, p2_data,
-                                                                                                   winner)
+                                                                                                   winner, isTimeout)
 
         # Check if someone won the entire match (won rounds_to_win rounds)
         if current_game.winsP1 == current_game.rounds_to_win or current_game.winsP2 == current_game.rounds_to_win:
@@ -112,12 +117,12 @@ async def check_winner(current_game: Match, manager):
                                                     "dice": current_game.dice,
                                                     "turn": current_game.turn,
                                                     "winsP1": current_game.winsP1,
-                                                    "winsP2": current_game.winsP2}})
+                                                    "winsP2": current_game.winsP2}})    
 
 
-async def update_rating(current_game: Match, p1_data, p2_data, winner):
+async def update_rating(current_game: Match, p1_data, p2_data, winner, isTimeout: bool = False):
 
-    win_multiplier = compute_win_multiplier(current_game, winner)
+    win_multiplier = compute_win_multiplier(current_game, winner) if not isTimeout else 1
 
     if winner == 1:
         # Player 1 won the current round

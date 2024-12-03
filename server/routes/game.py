@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from services.ai import ai_names
 from services.auth import oauth2_scheme, get_user_from_token
 from services.database import get_db
-from services.game import throw_dice, get_current_game, check_winner, check_timeout
+from services.game import throw_dice, get_current_game, check_winner, check_timeout_condition, manage_timeout
 from services.websocket import manager
 from models.board_configuration import StartDice
 from fastapi.encoders import jsonable_encoder
@@ -244,4 +244,9 @@ async def request_timeout(token: str = Depends(oauth2_scheme)):
             (current_game.turn % 2 == 1 and current_game.player2 == user.username):
         raise HTTPException(status_code=400, detail="It's not your opponent's turn")
 
-    await check_timeout(current_game, manager)
+    isTimeout = await check_timeout_condition(current_game)
+
+    if not isTimeout:
+        raise HTTPException(status_code=400, detail="Timeout condition not met")
+    else:
+        await manage_timeout(current_game, manager)
