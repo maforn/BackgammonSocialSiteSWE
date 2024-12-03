@@ -140,6 +140,7 @@ import { useWsStore } from '@/stores/wsStore'
 import { useAuthStore } from '@/stores/authStore'
 import { isAxiosError } from 'axios'
 import QuitModal from "@/components/QuitModal.vue";
+import {useRouter} from "vue-router";
 
 export default defineComponent({
   name: 'GameView',
@@ -202,15 +203,19 @@ export default defineComponent({
     }
 
     const isModalVisible = ref(false)
-    const confirmQuit = () => {
+    const confirmQuit = async () => {
       isModalVisible.value = false
-      console.log('Partita abbandonata.')
-      //TODO: Inserisci qui la logica per abbandonare la partita
+      try {
+        await axiosInstance.post('/game/quit');
+      } catch (error) {
+        if (isAxiosError(error)) {
+          useWsStore().addError(error?.response?.data?.detail)
+        }
+      }
     }
 
     const cancelQuit = () => {
       isModalVisible.value = false
-      console.log('Abbandono annullato.')
     }
 
     return {
@@ -236,7 +241,7 @@ export default defineComponent({
       showPassButton,
       buttonShower,
       passTheTurn,
-      started: ref(started),
+      started: computed(() => starter.value > 0),
       initialText: 'Throw the die to pick the starter!',
       status,
       ai_names,
@@ -322,7 +327,23 @@ export default defineComponent({
             this.initialText = 'You start!';
           else if(newVal === 1 && !this.isPlayer1 || newVal === 2 && this.isPlayer1)
             this.initialText = `${this.player2} starts!`;
-        }
+        },
+        winsP1(newVal, oldVal) {
+          console.log('gameOver', newVal, oldVal);
+          if (newVal === this.rounds_to_win) {
+            {
+              this.$router.push({name: 'match-over', props: {player1: this.player1, player2: this.player2}});
+            }
+          }
+        },
+        winsP2(newVal, oldVal) {
+          console.log('gameOver', newVal, oldVal);
+          if (newVal === this.rounds_to_win) {
+            {
+              this.$router.push({name: 'match-over', props: {player1: this.player1, player2: this.player2}});
+            }
+          }
+        },
   },
 })
 </script>

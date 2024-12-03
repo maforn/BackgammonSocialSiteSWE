@@ -2,6 +2,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { logout } from '@/services/authService';
 import { useGameStore } from '@/stores/gameStore';
 import { useWsStore } from '@/stores/wsStore';
+import {useRouter} from "vue-router";
 
 class WebSocketService {
 	public socket: WebSocket | null = null;
@@ -73,6 +74,11 @@ class WebSocketService {
 			case 'pass_turn':
 				useGameStore().setMatch(data.match);
 				break;
+      case 'quit_game':
+        this.showMessage(data.user + " quit the game!")
+        useGameStore().setMatch(data.match);
+
+        break;
 			default:
 				console.warn('Unknown event:', data.type);
 		}
