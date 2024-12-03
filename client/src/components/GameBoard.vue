@@ -8,6 +8,7 @@
 					<PointComponent
 						v-for="(pointConf, index) in internalConfig.points.slice(12, 18)"
 						:key="index"
+            :index="index + 12"
 						:configuration="pointConf"
 						:isEven="index % 2 === 0"
 						:upperPoint="true"
@@ -21,6 +22,7 @@
 					<PointComponent
 						v-for="(pointConf, index) in internalConfig.points.slice(6, 12)"
 						:key="index"
+            :index="index + 6"
 						:configuration="pointConf"
 						:isEven="index % 2 === 0"
 						:available="allowedPointIndices.includes(index + 6)"
@@ -50,6 +52,7 @@
 					<PointComponent
 						v-for="(pointConf, index) in internalConfig.points.slice(18, 24)"
 						:key="index"
+            :index="index + 18"
 						:configuration="pointConf"
 						:isEven="index % 2 === 0"
 						:upperPoint="true"
@@ -63,6 +66,7 @@
 					<PointComponent
 						v-for="(pointConf, index) in internalConfig.points.slice(0, 6)"
 						:key="index"
+            :index="index"
 						:configuration="pointConf"
 						:isEven="index % 2 === 0"
 						:available="allowedPointIndices.includes(index)"
