@@ -69,3 +69,8 @@ async def get_top5_and_me(token: str = Depends(oauth2_scheme)):
     users.append(UserInLeaderboard(**me.dict(), position=my_position))
 
     return users
+
+@router.get("/users/get_user_rating")
+async def get_user_score(username: str):
+    user = await get_user(username)
+    return user.rating
