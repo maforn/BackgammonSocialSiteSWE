@@ -1,6 +1,4 @@
 <template>
-
-  <QuitModal v-if="isModalVisible" @confirm="confirmQuit" @cancel="cancelQuit" />
   <div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center">
     <div class="background"></div>
     <div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
@@ -35,7 +33,7 @@
       </div>
       <div id="game-over" class="font-medium relative p-2 rounded" v-if="gameOver">
         <div class="flex gap-2 mt-4">
-          <button @click="shareOnWhatsApp" class="btn-share p-2 rounded bg-green-600 text-white cursor-pointer">
+          <button @click="shareOnWhatsApp" class="btn-share p-2 rounded bg-blue-500 text-white cursor-pointer">
             <v-icon name="io-logo-whatsapp" />
             Share on Whatsapp
           </button>
@@ -142,14 +140,21 @@
           @click="isModalVisible = true">
           Quit the match
         </button>
+
+        <div>
+          <button v-if="isYourTurn&&diceThrown"
+                  class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer"
+                  @click="getAISuggestion">Get AI Suggestion {{ ai_suggestions[isPlayer1 ? 1 : 0] }}/3
+          </button>
+        </div>
         <div>
           <button v-if="showPassButton&&isYourTurn&&diceThrown"
                   class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">
             Pass the turn
           </button>
         </div>
-
       </div>
+
     </div>
   </div>
 </template>
@@ -188,7 +193,8 @@ export default defineComponent({
       winsP2,
       status,
       starter,
-      startDice
+      startDice,
+      ai_suggestions
     } = storeToRefs(gameStore)
 
     const wsStore = useWsStore()
@@ -251,6 +257,10 @@ export default defineComponent({
       isModalVisible.value = false
     }
 
+    const getAISuggestion = () => {
+      gameStore.getAISuggestions(player1.value == username)
+    }
+
     return {
       configuration: computed(() => boardConfiguration.value),
       thrower: computed(() => (turn.value % 2) + 1),
@@ -281,7 +291,9 @@ export default defineComponent({
       gameOver: computed(() => status.value === 'player_1_won' || status.value === 'player_2_won'),
       isModalVisible,
       confirmQuit,
-      cancelQuit
+      cancelQuit,
+      getAISuggestion,
+      ai_suggestions
     }
   },
   methods: {
@@ -389,10 +401,16 @@ export default defineComponent({
         this.initialText = `${this.player2} starts!`
     },
     winsP1(newVal, oldVal) {
-      (newVal === this.rounds_to_win) && this.$router.push({ name: 'match-over', props: { player1: this.player1, player2: this.player2 } })
+      (newVal === this.rounds_to_win) && this.$router.push({
+        name: 'match-over',
+        props: { player1: this.player1, player2: this.player2 }
+      })
     },
     winsP2(newVal, oldVal) {
-      (newVal === this.rounds_to_win) && this.$router.push({ name: 'match-over', props: { player1: this.player1, player2: this.player2 } })
+      (newVal === this.rounds_to_win) && this.$router.push({
+        name: 'match-over',
+        props: { player1: this.player1, player2: this.player2 }
+      })
     }
   }
 })

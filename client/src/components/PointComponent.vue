@@ -1,5 +1,6 @@
 <template>
-	<button class="point h-full" :disabled="!available" @click.stop="selectPoint">
+	<button class="point h-full relative" :disabled="!available" @click.stop="selectPoint">
+    <p :class="['absolute flex w-full justify-center items-center text-white -bottom-6', upperPoint ? ' rotate-180' : '']"><span>{{index + 1}}</span></p>
 		<div class="point-container">
 			<v-icon
 				name="io-triangle-sharp"
@@ -62,6 +63,10 @@ export default defineComponent({
 			type: Boolean,
 			default: false,
 		},
+    index: {
+      type: Number,
+      required: true,
+    },
 	},
 	data() {
 		return {};

@@ -76,6 +76,7 @@ async def check_winner(current_game: Match, manager):
             current_game.board_configuration = BoardConfiguration().dict(by_alias=True)
             current_game.available = []
             current_game.dice = []
+            current_game.ai_suggestions = [0, 0]
             current_game.turn = -1
             current_game.starter = 0
             current_game.startDice = StartDice()
@@ -97,7 +98,8 @@ async def check_winner(current_game: Match, manager):
                                                     "dice": current_game.dice,
                                                     "turn": current_game.turn,
                                                     "winsP1": current_game.winsP1,
-                                                    "winsP2": current_game.winsP2}})
+                                                    "winsP2": current_game.winsP2,
+                                                    "ai_suggestions": current_game.ai_suggestions}})
 
 
 async def update_rating(current_game: Match, p1_data, p2_data, winner):
@@ -191,7 +193,7 @@ async def quit_the_game(current_game: Match, manager, winner):
 
     current_game.board_configuration = BoardConfiguration().dict(by_alias=True)
 
-    for i in range(matches_left):
+    for _ in range(matches_left):
         loser_username, old_loser_rating, old_winner_rating, winner_username = await update_rating(current_game, p1_data, p2_data, winner)
 
     if current_game.winsP1 == current_game.rounds_to_win or current_game.winsP2 == current_game.rounds_to_win:
