@@ -69,7 +69,7 @@ class WebSocketService {
 				this.showMessage(data.loser + "'s rating: " + data.old_loser_rating + " -> " + data.new_loser_rating);
 				break;
 			case 'round_over':
-				this.showMessage(data.winner + " won the round!")
+				this.showMessage(data.winner + " won the round" + data.info + "!")
 				break;
 			case 'pass_turn':
 				useGameStore().setMatch(data.match);

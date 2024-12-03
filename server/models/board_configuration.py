@@ -1,4 +1,5 @@
 from fastapi.security import OAuth2PasswordBearer
+from copy import deepcopy
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 from typing import List
@@ -51,10 +52,12 @@ DEFAULT_POINTS: List[Point] = [
 
 
 class BoardConfiguration(BaseModel):
-    points: List[Point] = DEFAULT_POINTS
-    bar: Point = Point(player1=0, player2=0)
+    points: List[Point]
+    bar: Point
 
-    def __init__(self, points: List[Point] = DEFAULT_POINTS, bar: Point = Point(player1=0, player2=0)):
+    def __init__(self, points: List[Point] = None, bar: Point = None):
+        points = deepcopy(DEFAULT_POINTS) if points is None else points
+        bar = Point(player1=0, player2=0) if bar is None else bar
         super().__init__(points=points, bar=bar)
 
     def to_dict(self):
@@ -108,6 +111,7 @@ class Match(BaseModel):
 class CreateInviteRequest(BaseModel):
     opponent_username: str
     rounds_to_win: int
+    use_email: bool = False
 
 
 class AcceptInviteRequest(BaseModel):

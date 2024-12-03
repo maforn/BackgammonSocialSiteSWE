@@ -31,6 +31,22 @@
           </div>
         </div>
       </div>
+      <div id="game-over" class="font-medium relative p-2 rounded" v-if="gameOver">
+        <div class="flex gap-2 mt-4">
+          <button @click="shareOnWhatsApp" class="btn-share p-2 rounded bg-blue-500 text-white cursor-pointer">
+             <v-icon name="io-logo-whatsapp" />
+            Share on Whatsapp
+          </button>
+          <button @click="shareOnTwitter" class="btn-share p-2 rounded bg-blue-500 text-white cursor-pointer">
+             <v-icon name="io-logo-twitter" />
+            Share on X
+          </button>
+          <button @click="shareOnFacebook" class="btn-share p-2 rounded bg-blue-700 text-white cursor-pointer">
+             <v-icon name="io-logo-facebook" />
+            Share on Facebook
+          </button>
+        </div>
+      </div>
       <div id="game-over" class="bg-yellow-500 font-medium relative p-2 rounded" v-if="gameOver">{{winnerMessage}}</div>
       <div class="relative" v-if="started">
         <GameBoard :configuration="configuration" :player1="isPlayer1" :dice="availableDice" :your-turn="isYourTurn"
@@ -139,6 +155,7 @@ import { useGameStore } from '@/stores/gameStore'
 import { useWsStore } from '@/stores/wsStore'
 import { useAuthStore } from '@/stores/authStore'
 import { isAxiosError } from 'axios'
+import { isGammon, isBackgammon } from '@/services/gameService';
 import QuitModal from "@/components/QuitModal.vue";
 import {useRouter} from "vue-router";
 
@@ -180,11 +197,6 @@ export default defineComponent({
 
     const started = starter.value > 0
     const ai_names = ["ai_easy", "ai_normal", "ai_hard"];
-
-    console.log('started', started);
-    console.log('starter', starter.value);
-
-    console.log(startDice.value)
 
     const passTheTurn = async () => {
       showPassButton.value = false;
@@ -241,25 +253,25 @@ export default defineComponent({
       showPassButton,
       buttonShower,
       passTheTurn,
-      started: computed(() => starter.value > 0),
+      started: ref(started), //TODO: controlla se è meglio started: computed(() => starter.value > 0),
       initialText: 'Throw the die to pick the starter!',
       status,
       ai_names,
       gameOver: computed(() => status.value === 'player_1_won' || status.value === 'player_2_won'),
-      winnerMessage: computed(() => {
-        if (status.value === 'player_1_won') {
-          return `${player1.value} has won the match!`;
-        } else if (status.value === 'player_2_won') {
-          return `${player2.value} has won the match!`;
-        }
-        return '';
-      }),
       isModalVisible,
       confirmQuit,
       cancelQuit
 		};
 	},
   methods: {
+    formatWinMessage(winnerUsername: string, winnerIsPlayer1: boolean, board: BoardConfiguration) {
+      let opt = '';
+      if(isBackgammon(board, winnerIsPlayer1))
+        opt = ' with a backgammon';
+      else if(isGammon(board, winnerIsPlayer1))
+        opt = ' with a gammon';
+      return `${winnerUsername} has won the match${opt}!`;
+    },
     async diceThrow() {
       this.showPassButton = false;
       try {
@@ -282,13 +294,32 @@ export default defineComponent({
           }
         });
     },
+    getGameOverShareText() {
+      if (this.isPlayer1 && this.status === 'player_1_won') {
+        return `I just won a game of backgammon against ${this.player2}! 🏆 Play now!`
+      } else if (!this.isPlayer1 && this.status === 'player_2_won') {
+        return `I just won a game of backgammon against ${this.player1}! 🏆 Play now!`
+      } else if (this.isPlayer1 && this.status === 'player_2_won') {
+        return `I just lost a game of backgammon against ${this.player2}! 😢 Help me out, play now!`
+      } else {
+        return `I just lost a game of backgammon against ${this.player1}! 😢 Help me out, play now!`
+      }
+    }, async shareOnWhatsApp() {
+      const url = `https://wa.me/?text=${encodeURIComponent(this.getGameOverShareText())}`;
+      window.open(url, '_blank');
+    },
+    async shareOnTwitter() {
+      const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(this.getGameOverShareText())}`;
+      window.open(url, '_blank');
+    },
+    async shareOnFacebook() {
+      const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
+      window.open(url, '_blank');
+    },
     startPlaying(){
       this.started = true;
     },
     throwStartDice() {
-
-      console.log(this.startDice)
-
       axiosInstance
         .get('/throw_start_dice')
         .catch(error => {
@@ -316,6 +347,14 @@ export default defineComponent({
       return this.starter <= 0 && this.isPlayer1 && this.startDice.count1 <= this.startDice.count2
       || this.starter <= 0 && !this.isPlayer1 && this.startDice.count2 <= this.startDice.count1;
     },
+    winnerMessage(): string {
+      if (this.status === 'player_1_won') {
+          return this.formatWinMessage(this.player1, true, this.configuration);
+        } else if (this.status === 'player_2_won') {
+          return this.formatWinMessage(this.player2, false, this.configuration);
+        }
+        return '';
+    }
   },
   watch: {
         starter(newVal, oldVal) {

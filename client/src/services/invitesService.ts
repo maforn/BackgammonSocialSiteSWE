@@ -3,11 +3,12 @@ import { useAuthStore } from '@/stores/authStore';
 import axios from 'axios';
 import { useWsStore } from '@/stores/wsStore';
 
-export const sendInviteService = async (opponent_username: string, rounds_to_win: number) => {
+export const sendInviteService = async (opponent_username: string, rounds_to_win: number, use_email: boolean) => {
 	try {
 		await axiosInstance.post('/invites', {
 			opponent_username: opponent_username,
 			rounds_to_win: rounds_to_win,
+      use_email: use_email
 		});
 	} catch (error) {
 		if (axios.isAxiosError(error) && error.response) {
@@ -63,4 +64,23 @@ export const getRandomOpponentService = async () => {
 	} catch (error: Error | any) {
 		useWsStore().addError(error.message);
 	}
+}
+
+
+export const getGoogleContactsEmails = async () => {
+  const accessToken = useAuthStore().google_token;
+  if (accessToken) {
+    const response = await axios.get('https://people.googleapis.com/v1/people/me/connections', {
+      headers: {
+        Authorization: `Bearer ${useAuthStore().google_token}`
+      },
+      params: {
+        personFields: 'names,emailAddresses'
+      }
+    });
+    return response.data.connections.map((contact: any) => {
+      return contact.emailAddresses.map((email: any) => email.value);
+    }).flat();
+  }
+  return null;
 }

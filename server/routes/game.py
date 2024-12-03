@@ -7,7 +7,6 @@ from services.game import throw_dice, get_current_game, check_winner, quit_the_g
 from services.websocket import manager
 from models.board_configuration import StartDice
 from fastapi.encoders import jsonable_encoder
-from tensorflow.python.distribute.device_util import current
 
 NOT_YOUR_TURN = "It's not your turn"
 
@@ -125,21 +124,7 @@ async def start_dice_endpoint(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=400, detail="You have already thrown the start dice. Wait for the other player")
 
     result = throw_dice()
-    if is_player1:
-        old_start_dice.roll1, old_start_dice.count1 = result[0], old_start_dice.count1 + 1
-        if current_game.player2 in ai_names:
-            old_start_dice.roll2, old_start_dice.count2 = result[1], old_start_dice.count2 + 1
-    else:
-        old_start_dice.roll2, old_start_dice.count2 = result[0], old_start_dice.count2 + 1
-        if current_game.player1 in ai_names:
-            old_start_dice.roll2, old_start_dice.count2 = result[1], old_start_dice.count2 + 1
-
-    starter, turn = 0, -1
-    if old_start_dice.count1 == old_start_dice.count2:
-        if old_start_dice.roll1 > old_start_dice.roll2:
-            starter, turn = 1, 0
-        elif old_start_dice.roll2 > old_start_dice.roll1:
-            starter, turn = 2, 1
+    starter, turn = await get_dices(current_game, is_player1, old_start_dice, result)
 
     await get_db().matches.update_one({"_id": current_game.id}, {"$set": {"startDice": jsonable_encoder(old_start_dice), "starter": starter, "turn": turn}})
     websocket_player1 = await manager.get_user(current_game.player1)
@@ -148,6 +133,24 @@ async def start_dice_endpoint(token: str = Depends(oauth2_scheme)):
     websocket_player2 = await manager.get_user(current_game.player2)
     if websocket_player2:
         await manager.send_personal_message({"type": "start_dice_roll", "result": jsonable_encoder(old_start_dice), "starter": starter, "turn": turn}, websocket_player2)
+
+
+async def get_dices(current_game, is_player1, old_start_dice, result):
+    if is_player1:
+        old_start_dice.roll1, old_start_dice.count1 = result[0], old_start_dice.count1 + 1
+        if current_game.player2 in ai_names:
+            old_start_dice.roll2, old_start_dice.count2 = result[1], old_start_dice.count2 + 1
+    else:
+        old_start_dice.roll2, old_start_dice.count2 = result[0], old_start_dice.count2 + 1
+        if current_game.player1 in ai_names:
+            old_start_dice.roll2, old_start_dice.count2 = result[1], old_start_dice.count2 + 1
+    starter, turn = 0, -1
+    if old_start_dice.count1 == old_start_dice.count2:
+        if old_start_dice.roll1 > old_start_dice.roll2:
+            starter, turn = 1, 0
+        elif old_start_dice.roll2 > old_start_dice.roll1:
+            starter, turn = 2, 1
+    return starter, turn
 
 
 @router.get("/throw_dice")
@@ -211,11 +214,11 @@ async def pass_turn(token: str = Depends(oauth2_scheme)):
     current_game = await get_current_game(user.username)
 
     if not current_game or current_game.status != "started":
-        raise HTTPException(status_code=400, detail="No ongoing game found")
+        raise HTTPException(status_code=400, detail=NO_ONGOING_GAME_FOUND)
 
     if (current_game.turn % 2 == 0 and current_game.player1 != user.username) or \
             (current_game.turn % 2 == 1 and current_game.player2 != user.username):
-        raise HTTPException(status_code=400, detail="It's not your turn")
+        raise HTTPException(status_code=400, detail=NOT_YOUR_TURN)
 
     current_game.turn += 1
     current_game.dice = []
