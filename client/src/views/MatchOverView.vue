@@ -2,8 +2,25 @@
 <template>
   <div class="background"></div>
   <div class="flex justify-center items-center min-h-screen px-4">
-    <div class="flex flex-col items-center w-full p-6 space-y-8 bg-gray-100 rounded-lg shadow-lg">
 
+    <div class="flex flex-col items-center w-full p-6 space-y-8 bg-gray-100 rounded-lg shadow-lg">
+      <!-- Share Buttons -->
+      <div id="game-over" class="font-medium relative p-2 rounded" >
+        <div class="flex gap-2 mt-4">
+          <button @click="shareOnWhatsApp" class="btn-share p-2 rounded bg-green-600 text-white cursor-pointer">
+            <v-icon name="io-logo-whatsapp" />
+            Share on Whatsapp
+          </button>
+          <button @click="shareOnTwitter" class="btn-share p-2 rounded bg-blue-500 text-white cursor-pointer">
+            <v-icon name="io-logo-twitter" />
+            Share on X
+          </button>
+          <button @click="shareOnFacebook" class="btn-share p-2 rounded bg-blue-700 text-white cursor-pointer">
+            <v-icon name="io-logo-facebook" />
+            Share on Facebook
+          </button>
+        </div>
+      </div>
       <!-- Player Displays -->
       <div class="flex justify-between items-center w-full gap-6">
         <!-- Player 1 -->
@@ -87,7 +104,6 @@ import {ref} from "vue";
 import {useGameStore} from "@/stores/gameStore";
 import {storeToRefs} from "pinia";
 import {useAuthStore} from "@/stores/authStore";
-import axios from "@/axios";
 import axiosInstance from '@/axios'
 
 export default {
@@ -132,6 +148,33 @@ export default {
       matchResult.value = player2.value+" won the match"
     }
 
+    const isPlayer1 = username === player1.value
+    const getGameOverShareText= () => {
+      if (isPlayer1 && status.value === 'player_1_won') {
+        return `I just won a game of backgammon against ${player2.value}! 🏆 Play now!`
+      } else if (!isPlayer1 && status.value === 'player_2_won') {
+        return `I just won a game of backgammon against ${player1.value}! 🏆 Play now!`
+      } else if (isPlayer1 && status.value === 'player_2_won') {
+        return `I just lost a game of backgammon against ${player2.value}! 😢 Help me out, play now!`
+      } else {
+        return `I just lost a game of backgammon against ${player1.value}! 😢 Help me out, play now!`
+      }
+    }
+
+    const shareOnWhatsApp = async () =>{
+      const url = `https://wa.me/?text=${encodeURIComponent(getGameOverShareText())}`;
+      window.open(url, '_blank');
+    }
+    const shareOnTwitter = async () =>{
+      const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(getGameOverShareText())}`;
+      window.open(url, '_blank');
+    }
+
+    const shareOnFacebook = async () =>  {
+      const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
+      window.open(url, '_blank');
+    }
+
     return {
       username,
       ai_names,
@@ -143,7 +186,10 @@ export default {
       scoreP1: ratingP1,
       scoreP2: ratingP2,
       goHome,
-      matchResult
+      matchResult,
+      shareOnWhatsApp,
+      shareOnTwitter,
+      shareOnFacebook
     }
   }
 }

@@ -33,7 +33,7 @@
       </div>
       <div id="game-over" class="font-medium relative p-2 rounded" v-if="gameOver">
         <div class="flex gap-2 mt-4">
-          <button @click="shareOnWhatsApp" class="btn-share p-2 rounded bg-blue-500 text-white cursor-pointer">
+          <button @click="shareOnWhatsApp" class="btn-share p-2 rounded bg-green-600 text-white cursor-pointer">
              <v-icon name="io-logo-whatsapp" />
             Share on Whatsapp
           </button>
