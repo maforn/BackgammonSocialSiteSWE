@@ -65,7 +65,7 @@ async def check_winner(current_game: Match, manager, winner = None):
                                                                                                    winner)
 
         # Check if someone won the entire match (won rounds_to_win rounds)
-        if current_game.winsP1 == current_game.rounds_to_win or current_game.winsP2 == current_game.rounds_to_win:
+        if current_game.winsP1 >= current_game.rounds_to_win or current_game.winsP2 >= current_game.rounds_to_win:
             current_game.doublingCube.proposed = False
             current_game.doublingCube.proposer = 0
             await update_on_match_win(current_game, loser_username, manager, old_loser_rating, old_winner_rating,
