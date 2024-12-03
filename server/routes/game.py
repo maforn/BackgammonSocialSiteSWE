@@ -245,12 +245,3 @@ async def request_timeout(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=400, detail="It's not your opponent's turn")
 
     await check_timeout(current_game, manager)
-
-    websocket_player1 = await manager.get_user(current_game.player1)
-    if websocket_player1:
-        await manager.send_personal_message({"type": "timeout_request", "match": current_game.dict(by_alias=True)},
-                                            websocket_player1)
-    websocket_player2 = await manager.get_user(current_game.player2)
-    if websocket_player2:
-        await manager.send_personal_message({"type": "timeout_request", "match": current_game.dict(by_alias=True)},
-                                            websocket_player2)
