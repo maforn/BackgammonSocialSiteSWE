@@ -9,8 +9,8 @@
         <!-- Player 1 -->
         <div
           id="p1-display"
-          class="flex flex-col items-center w-1/3 p-4 text-center bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
-          :class="username === player1 ? 'ring-4 ring-yellow-300' : ''">
+          class="flex flex-col items-center w-1/3 p-4 text-center text-white rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
+          :class="username === player1 ? 'player-turn-1' : 'player-turn-2'">
           <v-icon :name="[ai_names.includes(player1) ? 'fa-robot' : 'io-person']" class="mb-2 text-3xl" />
           <h2 class="text-xl font-semibold">{{ player1 }}</h2>
           <!-- Win Circles -->
@@ -35,8 +35,8 @@
         <!-- Player 2 -->
         <div
           id="p2-display"
-          class="flex flex-col items-center w-1/3 p-4 text-center bg-gradient-to-r from-red-500 to-red-700 text-white rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
-          :class="username === player2 ? 'ring-4 ring-yellow-300' : ''">
+          class="flex flex-col items-center w-1/3 p-4 text-center  text-white rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
+          :class="username === player2 ? 'player-turn-1' : 'player-turn-2'">
           <v-icon :name="[ai_names.includes(player2) ? 'fa-robot' : 'io-person']" class="mb-2 text-3xl" />
           <h2 class="text-xl font-semibold">{{ player2 }}</h2>
           <!-- Win Circles -->
@@ -59,12 +59,12 @@
         <div class="flex justify-between items-center w-full px-6 text-gray-800">
           <div class="text-center">
             <h3 class="text-lg font-semibold">{{ player1 }}</h3>
-            <p>Wins: <span class="font-bold text-blue-500">{{ winsP1 }}</span></p>
+            <p>Wins: <span class="font-bold ">{{ winsP1 }}</span></p>
             <p>Rating: <span class="font-bold">{{ scoreP1 }}</span></p>
           </div>
           <div class="text-center">
             <h3 class="text-lg font-semibold">{{ player2 }}</h3>
-            <p>Wins: <span class="font-bold text-red-600">{{ winsP2 }}</span></p>
+            <p>Wins: <span class="font-bold ">{{ winsP2 }}</span></p>
             <p v-if="scoreP2!='AI'">Rating: <span class="font-bold">{{ scoreP2 }}</span></p>
           </div>
         </div>
@@ -127,9 +127,9 @@ export default {
 
     const matchResult = ref()
     if (status.value === 'player_1_won') {
-      matchResult.value = player1.value+" has won the match"
+      matchResult.value = player1.value+" won the match"
     } else {
-      matchResult.value = player2.value+" has won the match"
+      matchResult.value = player2.value+" won the match"
     }
 
     return {
@@ -151,7 +151,7 @@ export default {
 </script>
 
 <style scoped>
-/* Transitions for hover effects */
+
 #p1-display, #p2-display {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -160,20 +160,6 @@ export default {
   transform: scale(1.05);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
-
-/* Match Result Highlight */
-.text-yellow-500 {
-  font-size: 1.25rem;
-  font-weight: bold;
-}
-
-/* VS Section */
-.vs {
-  text-align: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
 
 .player-turn-1 {
   background-color: #d55;

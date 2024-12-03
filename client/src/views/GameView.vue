@@ -329,7 +329,6 @@ export default defineComponent({
             this.initialText = `${this.player2} starts!`;
         },
         winsP1(newVal, oldVal) {
-          console.log('gameOver', newVal, oldVal);
           if (newVal === this.rounds_to_win) {
             {
               this.$router.push({name: 'match-over', props: {player1: this.player1, player2: this.player2}});
@@ -337,7 +336,6 @@ export default defineComponent({
           }
         },
         winsP2(newVal, oldVal) {
-          console.log('gameOver', newVal, oldVal);
           if (newVal === this.rounds_to_win) {
             {
               this.$router.push({name: 'match-over', props: {player1: this.player1, player2: this.player2}});
