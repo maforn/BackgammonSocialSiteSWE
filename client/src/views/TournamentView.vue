@@ -13,8 +13,7 @@
 					@click="showCreate = true">Create</button>
 				<button :class="['px-8 py-2 flex-1', !showCreate ? 'bg-green-800' : '']" v-if="!hasCreatedTournament"
 					@click="showCreate = false">Join</button>
-				<button :class="['px-8 py-2 flex-1', 'bg-green-800']" v-if="hasCreatedTournament"
-					@click="">Active</button>
+				<div :class="['px-8 py-2 flex-1', 'bg-green-800']" v-if="hasCreatedTournament">Active</div>
 			</div>
 
 			<div
