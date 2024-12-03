@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from services.ai import ai_names
 from services.auth import oauth2_scheme, get_user_from_token
 from services.database import get_db
-from services.game import throw_dice, get_current_game, check_winner
+from services.game import throw_dice, get_current_game, check_winner, check_timeout
 from services.websocket import manager
 from models.board_configuration import StartDice
 from fastapi.encoders import jsonable_encoder
@@ -230,4 +230,27 @@ async def pass_turn(token: str = Depends(oauth2_scheme)):
     websocket_player2 = await manager.get_user(current_game.player2)
     if websocket_player2:
         await manager.send_personal_message({"type": "pass_turn", "match": current_game.dict(by_alias=True)},
+                                            websocket_player2)
+        
+@router.post("/game/request_timeout")
+async def request_timeout(token: str = Depends(oauth2_scheme)):
+    user = await get_user_from_token(token)
+    current_game = await get_current_game(user.username)
+
+    if not current_game or current_game.status != "started":
+        raise HTTPException(status_code=400, detail="No ongoing game found")
+
+    if (current_game.turn % 2 == 0 and current_game.player1 == user.username) or \
+            (current_game.turn % 2 == 1 and current_game.player2 == user.username):
+        raise HTTPException(status_code=400, detail="It's not your opponent's turn")
+
+    await check_timeout(current_game, manager)
+
+    websocket_player1 = await manager.get_user(current_game.player1)
+    if websocket_player1:
+        await manager.send_personal_message({"type": "timeout_request", "match": current_game.dict(by_alias=True)},
+                                            websocket_player1)
+    websocket_player2 = await manager.get_user(current_game.player2)
+    if websocket_player2:
+        await manager.send_personal_message({"type": "timeout_request", "match": current_game.dict(by_alias=True)},
                                             websocket_player2)

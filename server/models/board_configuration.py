@@ -1,5 +1,6 @@
 from fastapi.security import OAuth2PasswordBearer
 from copy import deepcopy
+from datetime import datetime
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 from typing import List
@@ -73,12 +74,18 @@ class Match(BaseModel):
     dice: List[int] = []
     available: List[int] = []
     turn: int = 0
+    last_updated: datetime = Field(default_factory=datetime.now)
     status: str = "pending"
     rounds_to_win: int
     winsP1: int = 0
     winsP2: int = 0
     starter: int = 0
     startDice: StartDice = StartDice()
+
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.isoformat()
+        }
 
 
 class CreateInviteRequest(BaseModel):

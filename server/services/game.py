@@ -1,5 +1,6 @@
 import random
 
+from datetime import datetime, timedelta
 from models.board_configuration import Match, BoardConfiguration, StartDice
 from services.ai import ai_names, ai_rating
 from services.database import get_db
@@ -28,6 +29,20 @@ async def create_started_match(player1: str, player2: str, rounds_to_win: int = 
     match_data = new_match.dict(by_alias=True)
     await get_db().matches.insert_one(match_data)
 
+async def check_timeout(match: Match, manager):
+    current_time = datetime.now()
+    if current_time - match.last_updated > timedelta(seconds=30):
+        print("Timeout")
+    else:
+        print("No timeout")        
+        '''
+        if match.turn == 0:
+            await update_on_match_win(match, match.player1, manager, 0, 0, 2, match.player2)
+        else:
+            await update_on_match_win(match, match.player2, manager, 0, 0, 1, match.player1)
+        return True
+    return False
+        '''
 
 def check_win_condition(match: Match):
     player1_counter = match.board_configuration["bar"]["player1"]
@@ -156,7 +171,7 @@ async def update_on_match_win(current_game, loser_username, manager, old_loser_r
                                     {"$set": {"rating": new_winner_rating}})
     await get_db().users.update_one({"username": loser_username},
                                     {"$set": {"rating": new_loser_rating}})
-    # Message for match end, US #103
+                                    
     websocket_player1 = await manager.get_user(current_game.player1)
     if websocket_player1:
         await manager.send_personal_message(

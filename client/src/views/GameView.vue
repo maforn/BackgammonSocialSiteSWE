@@ -1,15 +1,16 @@
 <template>
-	<div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center">
-		<div class="background"></div>
-		<div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
+  <div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center">
+    <div class="background"></div>
+    <div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
       <div class="flex justify-center w-full gap-4 mt-6" v-if="started">
-        <div id="p1-display" class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
-        :class="username == player1 ? 'player-turn-1' : 'player-turn-2'">
+        <div id="p1-display"
+          class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
+          :class="username == player1 ? 'player-turn-1' : 'player-turn-2'">
           <v-icon :name="[ai_names.includes(player1) ? 'fa-robot' : 'io-person']" class="text-white" />
           {{ player1 }}
           <div class="flex justify-evenly absolute bottom-1">
             <div v-for="i in rounds_to_win">
-              <v-icon :name="i <= winsP1 ? 'bi-circle-fill' : 'bi-circle'" width="0.4em" height="0.4em"/>
+              <v-icon :name="i <= winsP1 ? 'bi-circle-fill' : 'bi-circle'" width="0.4em" height="0.4em" />
             </div>
           </div>
         </div>
@@ -18,13 +19,14 @@
           VS
         </div>
 
-        <div id="p2-display" class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
-        :class="username == player2 ? 'player-turn-1' : 'player-turn-2'">
+        <div id="p2-display"
+          class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
+          :class="username == player2 ? 'player-turn-1' : 'player-turn-2'">
           <v-icon :name="[ai_names.includes(player2) ? 'fa-robot' : 'io-person']" class="text-white" />
           {{ player2 }}
           <div class="flex justify-evenly absolute bottom-1">
             <div v-for="i in rounds_to_win">
-              <v-icon :name="i <= winsP2 ? 'bi-circle-fill' : 'bi-circle'" width="0.4em" height="0.4em"/>
+              <v-icon :name="i <= winsP2 ? 'bi-circle-fill' : 'bi-circle'" width="0.4em" height="0.4em" />
             </div>
           </div>
         </div>
@@ -32,23 +34,24 @@
       <div id="game-over" class="font-medium relative p-2 rounded" v-if="gameOver">
         <div class="flex gap-2 mt-4">
           <button @click="shareOnWhatsApp" class="btn-share p-2 rounded bg-blue-500 text-white cursor-pointer">
-             <v-icon name="io-logo-whatsapp" />
+            <v-icon name="io-logo-whatsapp" />
             Share on Whatsapp
           </button>
           <button @click="shareOnTwitter" class="btn-share p-2 rounded bg-blue-500 text-white cursor-pointer">
-             <v-icon name="io-logo-twitter" />
+            <v-icon name="io-logo-twitter" />
             Share on X
           </button>
           <button @click="shareOnFacebook" class="btn-share p-2 rounded bg-blue-700 text-white cursor-pointer">
-             <v-icon name="io-logo-facebook" />
+            <v-icon name="io-logo-facebook" />
             Share on Facebook
           </button>
         </div>
       </div>
-      <div id="game-over" class="bg-yellow-500 font-medium relative p-2 rounded" v-if="gameOver">{{winnerMessage}}</div>
+      <div id="game-over" class="bg-yellow-500 font-medium relative p-2 rounded" v-if="gameOver">{{ winnerMessage }}
+      </div>
       <div class="relative" v-if="started">
         <GameBoard :configuration="configuration" :player1="isPlayer1" :dice="availableDice" :your-turn="isYourTurn"
-          @movePiece="movePiece" @noAvailableMoves="buttonShower"/>
+          @movePiece="movePiece" @noAvailableMoves="buttonShower" />
         <button v-if="!diceThrown && isYourTurn" class="dice-button p-2 w-10 sm:w-16 lg:w-20" @click.stop="diceThrow">
           <v-icon name="gi-rolling-dices" width="100%" height="100%" />
         </button>
@@ -77,10 +80,13 @@
             {{ player2 }}
           </div>
         </div>
-        <button class="start-button start-pulse p-2 w-10 sm:w-16 lg:w-20 mt-12" @click.stop="throwStartDice" v-if="startDiceThrowAllowed">
+        <button class="start-button start-pulse p-2 w-10 sm:w-16 lg:w-20 mt-12" @click.stop="throwStartDice"
+          v-if="startDiceThrowAllowed">
           <v-icon name="gi-rolling-dices" width="100%" height="100%" />
         </button>
-        <button v-if="starter > 0" class="px-6 py-2 mt-12 text-white font-bold text-lg shadow-md rounded-r-full rounded-l-full bg-slate-500 start-pulse" @click.stop="startPlaying">
+        <button v-if="starter > 0"
+          class="px-6 py-2 mt-12 text-white font-bold text-lg shadow-md rounded-r-full rounded-l-full bg-slate-500 start-pulse"
+          @click.stop="startPlaying">
           Start playing!
         </button>
       </div>
@@ -99,6 +105,7 @@
         ]">
           {{ isYourTurn ? 'Your turn' : 'Opponent\'s turn' }}
         </div>
+        <button class="bg-red-300 text-white" @click="requestTimeout">Request victory by timeout</button>
         <div v-if="diceThrown" :class="[
           'dice-container',
           'flex',
@@ -128,7 +135,9 @@
         </button>
       </div>
       <div>
-        <button v-if="showPassButton&&isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">Pass the turn</button>
+        <button v-if="showPassButton && isYourTurn && diceThrown"
+          class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">Pass the
+          turn</button>
       </div>
     </div>
   </div>
@@ -197,8 +206,18 @@ export default defineComponent({
     }
 
     const showPassButton = ref()
-    const buttonShower = () =>{
+    const buttonShower = () => {
       showPassButton.value = true;
+    }
+
+    const requestTimeout = async () => {
+      try {
+        await axiosInstance.post('/game/request_timeout')
+      } catch (error) {
+        if (isAxiosError(error)) {
+          useWsStore().addError(error?.response?.data?.detail)
+        }
+      }
     }
 
     return {
@@ -222,6 +241,7 @@ export default defineComponent({
       preformedMessages,
       sendPreformedMessage,
       showPassButton,
+      requestTimeout,
       buttonShower,
       passTheTurn,
       started: ref(started),
@@ -229,14 +249,14 @@ export default defineComponent({
       status,
       ai_names,
       gameOver: computed(() => status.value === 'player_1_won' || status.value === 'player_2_won'),
-		};
-	},
+    };
+  },
   methods: {
     formatWinMessage(winnerUsername: string, winnerIsPlayer1: boolean, board: BoardConfiguration) {
       let opt = '';
-      if(isBackgammon(board, winnerIsPlayer1))
+      if (isBackgammon(board, winnerIsPlayer1))
         opt = ' with a backgammon';
-      else if(isGammon(board, winnerIsPlayer1))
+      else if (isGammon(board, winnerIsPlayer1))
         opt = ' with a gammon';
       return `${winnerUsername} has won the match${opt}!`;
     },
@@ -284,7 +304,7 @@ export default defineComponent({
       const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
       window.open(url, '_blank');
     },
-    startPlaying(){
+    startPlaying() {
       this.started = true;
     },
     throwStartDice() {
@@ -313,28 +333,28 @@ export default defineComponent({
     },
     startDiceThrowAllowed(): boolean {
       return this.starter <= 0 && this.isPlayer1 && this.startDice.count1 <= this.startDice.count2
-      || this.starter <= 0 && !this.isPlayer1 && this.startDice.count2 <= this.startDice.count1;
+        || this.starter <= 0 && !this.isPlayer1 && this.startDice.count2 <= this.startDice.count1;
     },
     winnerMessage(): string {
       if (this.status === 'player_1_won') {
-          return this.formatWinMessage(this.player1, true, this.configuration);
-        } else if (this.status === 'player_2_won') {
-          return this.formatWinMessage(this.player2, false, this.configuration);
-        }
-        return '';
+        return this.formatWinMessage(this.player1, true, this.configuration);
+      } else if (this.status === 'player_2_won') {
+        return this.formatWinMessage(this.player2, false, this.configuration);
+      }
+      return '';
     }
   },
   watch: {
-        starter(newVal, oldVal) {
-          console.log('started', newVal, oldVal);
+    starter(newVal, oldVal) {
+      console.log('started', newVal, oldVal);
 
-          if(oldVal === -1 && newVal > 0)
-            this.started = true;
-          else if(newVal === 1 && this.isPlayer1 || newVal === 2 && !this.isPlayer1)
-            this.initialText = 'You start!';
-          else if(newVal === 1 && !this.isPlayer1 || newVal === 2 && this.isPlayer1)
-            this.initialText = `${this.player2} starts!`;
-        },
+      if (oldVal === -1 && newVal > 0)
+        this.started = true;
+      else if (newVal === 1 && this.isPlayer1 || newVal === 2 && !this.isPlayer1)
+        this.initialText = 'You start!';
+      else if (newVal === 1 && !this.isPlayer1 || newVal === 2 && this.isPlayer1)
+        this.initialText = `${this.player2} starts!`;
+    },
   },
 })
 </script>
@@ -428,14 +448,14 @@ export default defineComponent({
 
 @keyframes start-pulse {
 
-0%,
-100% {
-  transform: scale(1);
-}
+  0%,
+  100% {
+    transform: scale(1);
+  }
 
-50% {
-  transform: scale(1.25);
-}
+  50% {
+    transform: scale(1.25);
+  }
 }
 
 .dice-container {
