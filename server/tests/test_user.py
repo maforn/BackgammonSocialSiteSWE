@@ -29,3 +29,11 @@ async def test_get_top5_and_me(client: AsyncClient, token: str):
     print(data)
     assert data[-1]["username"] == "testuser"
     assert "position" in data[-1]
+
+@pytest.mark.anyio
+async def test_get_user_rating(client: AsyncClient, token: str):
+    response = await client.get("/users/get_user_rating", params={"username": "testuser"}, headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    assert isinstance(response.json(), int)
+    response = await client.get("/users/get_user_rating", params={"username": "not_existing_user"}, headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 404

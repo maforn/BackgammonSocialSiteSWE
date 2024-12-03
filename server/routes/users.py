@@ -73,4 +73,6 @@ async def get_top5_and_me(token: str = Depends(oauth2_scheme)):
 @router.get("/users/get_user_rating")
 async def get_user_score(username: str):
     user = await get_user(username)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
     return user.rating
