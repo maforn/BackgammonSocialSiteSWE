@@ -166,27 +166,37 @@ export default defineComponent({
       if (this.isThereAWinner()) {
         return;
       }
-			if (this.internalConfig.bar.player1 > 0) {
-				this.movePiece(24, index); // Move piece from bar to point
-			} else if (this.srcPointIndex === null) {
-				this.srcPointIndex = index;
-			} else {
-				this.movePiece(this.srcPointIndex, index); // Move piece from one point to another
-			}
-		},
-		/**
-		 * Deselects the currently selected point.
-		 */
-		deselectPoint() {
-			this.srcPointIndex = null;
-		},
-		/**
-		 * Moves a piece from one point to another.
-		 * @param srcPointIndex Index of the source point (24 for the bar).
-		 * @param dstPointIndex Index of the destination point.
-		 */
-		movePiece(srcPointIndex: number, dstPointIndex: number) {
-			// TODO: Possibly replace all this code with a single API call to move a piece
+      if (this.internalConfig.bar.player1 > 0) {
+        this.movePiece(24, index) // Move piece from bar to point
+      } else if (this.srcPointIndex === null) {
+        this.srcPointIndex = index
+      } else {
+        this.movePiece(this.srcPointIndex, index) // Move piece from one point to another
+      }
+    },
+    /**
+     * Deselects the currently selected point.
+     */
+    deselectPoint() {
+      this.srcPointIndex = null
+    },
+    checkDices(usedDice: number) {
+      if (usedDice === Infinity || usedDice === undefined) {
+        throw new Error('No valid dice')
+      } else {
+        const diceIndex = this.availableDice?.indexOf(usedDice)
+        if (diceIndex !== -1 && diceIndex !== undefined) {
+          this.availableDice?.splice(diceIndex, 1)
+        }
+      }
+    },
+    /**
+     * Moves a piece from one point to another.
+     * @param srcPointIndex Index of the source point (24 for the bar).
+     * @param dstPointIndex Index of the destination point.
+     */
+    movePiece(srcPointIndex: number, dstPointIndex: number) {
+      // TODO: Possibly replace all this code with a single API call to move a piece
 
 			this.checkMoveValidity(srcPointIndex, dstPointIndex);
 
@@ -215,14 +225,7 @@ export default defineComponent({
 				return min;
 			}, Infinity);
 
-			if (usedDice === Infinity || usedDice === undefined) {
-				throw new Error('No valid dice');
-			} else {
-				const diceIndex = this.availableDice?.indexOf(usedDice);
-				if (diceIndex !== -1 && diceIndex !== undefined) {
-					this.availableDice?.splice(diceIndex, 1);
-				}
-			}
+      this.checkDices(usedDice)
 
 			this.srcPointIndex = null;
 

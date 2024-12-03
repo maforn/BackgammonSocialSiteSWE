@@ -55,7 +55,7 @@ export const moveOnBoard = (
 };
 
 export const findUsedDie = (dice: number[], srcPointIndex: number, dstPointIndex: number) => {
-	let usedDice = dice.reduce((min, die) => {
+	const usedDice = dice.reduce((min, die) => {
 		if (srcPointIndex - die <= dstPointIndex && die < min) {
 			return die;
 		}
