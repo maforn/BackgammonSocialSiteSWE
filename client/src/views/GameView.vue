@@ -128,6 +128,9 @@
         </button>
       </div>
       <div>
+        <button v-if="isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="getAISuggestion">Get AI Suggestion {{ ai_suggestions[isPlayer1 ? 1 : 0] }}/3</button>
+      </div>
+      <div>
         <button v-if="showPassButton&&isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">Pass the turn</button>
       </div>
     </div>
@@ -155,7 +158,7 @@ export default defineComponent({
   },
   setup() {
     const gameStore = useGameStore()
-    const { turn, dice, boardConfiguration, player1, player2, rounds_to_win, winsP1, winsP2, status, starter, startDice } = storeToRefs(gameStore)
+    const { turn, dice, boardConfiguration, player1, player2, rounds_to_win, winsP1, winsP2, status, starter, startDice, ai_suggestions } = storeToRefs(gameStore)
 
     const wsStore = useWsStore()
     const { messages } = storeToRefs(wsStore)
@@ -201,6 +204,10 @@ export default defineComponent({
       showPassButton.value = true;
     }
 
+    const getAISuggestion = () => {
+      gameStore.getAISuggestions(player1.value == username)
+    }
+
     return {
       configuration: computed(() => boardConfiguration.value),
       thrower: computed(() => (turn.value % 2) + 1),
@@ -229,6 +236,8 @@ export default defineComponent({
       status,
       ai_names,
       gameOver: computed(() => status.value === 'player_1_won' || status.value === 'player_2_won'),
+      getAISuggestion,
+      ai_suggestions
 		};
 	},
   methods: {

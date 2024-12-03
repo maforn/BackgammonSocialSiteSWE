@@ -76,6 +76,7 @@ async def check_winner(current_game: Match, manager):
             current_game.board_configuration = BoardConfiguration().dict(by_alias=True)
             current_game.available = []
             current_game.dice = []
+            current_game.ai_suggestions = [0, 0]
             current_game.turn = -1
             current_game.starter = 0
             current_game.startDice = StartDice()
@@ -97,7 +98,8 @@ async def check_winner(current_game: Match, manager):
                                                     "dice": current_game.dice,
                                                     "turn": current_game.turn,
                                                     "winsP1": current_game.winsP1,
-                                                    "winsP2": current_game.winsP2}})
+                                                    "winsP2": current_game.winsP2,
+                                                    "ai_suggestions": current_game.ai_suggestions}})
 
 
 async def update_rating(current_game: Match, p1_data, p2_data, winner):

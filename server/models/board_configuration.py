@@ -79,6 +79,7 @@ class Match(BaseModel):
     winsP2: int = 0
     starter: int = 0
     startDice: StartDice = StartDice()
+    ai_suggestions: List[int] = [0, 0]
 
 
 class CreateInviteRequest(BaseModel):
