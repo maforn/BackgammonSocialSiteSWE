@@ -15,7 +15,6 @@ class Point(BaseModel):
     def __init__(self, player1: int = 0, player2: int = 0):
         super().__init__(player1=player1, player2=player2)
 
-
 # Starting configuration of the board
 DEFAULT_POINTS: List[Point] = [
     Point(0, 2),  # Point 1
@@ -44,7 +43,6 @@ DEFAULT_POINTS: List[Point] = [
     Point(2, 0)  # Point 24
 ]
 
-
 class BoardConfiguration(BaseModel):
     points: List[Point]
     bar: Point
@@ -53,7 +51,6 @@ class BoardConfiguration(BaseModel):
         points = deepcopy(DEFAULT_POINTS) if points is None else points
         bar = Point(player1=0, player2=0) if bar is None else bar
         super().__init__(points=points, bar=bar)
-
 
 class StartDice(BaseModel):
     roll1: int
@@ -81,12 +78,10 @@ class Match(BaseModel):
     startDice: StartDice = StartDice()
     ai_suggestions: List[int] = [0, 0]
 
-
 class CreateInviteRequest(BaseModel):
     opponent_username: str
     rounds_to_win: int
     use_email: bool = False
-
 
 class AcceptInviteRequest(BaseModel):
     invite_id: str

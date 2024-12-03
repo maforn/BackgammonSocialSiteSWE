@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from services.ai import ai_names
 from services.auth import oauth2_scheme, get_user_from_token
 from services.database import get_db
-from services.game import throw_dice, get_current_game, check_winner
+from services.game import throw_dice, get_current_game, check_winner, quit_the_game
 from services.websocket import manager
 from models.board_configuration import StartDice
 from fastapi.encoders import jsonable_encoder
@@ -256,3 +256,25 @@ async def use_ai_suggestions(token: str = Depends(oauth2_scheme)):
 
     await get_db().matches.update_one({"_id": current_game.id}, {
         "$set": {"ai_suggestions": current_game.ai_suggestions}})
+
+@router.post("/game/quit")
+async def quit_game(token: str = Depends(oauth2_scheme)):
+    user = await get_user_from_token(token)
+    current_game = await get_current_game(user.username)
+
+    if not current_game or current_game.status != "started":
+        raise HTTPException(status_code=400, detail="No ongoing game found")
+
+    if current_game.player1 == user.username:
+        winner = 2
+    else:
+        winner = 1
+
+    await quit_the_game(current_game, manager, winner)
+
+    websocket_player1 = await manager.get_user(current_game.player1)
+    if websocket_player1:
+        await manager.send_personal_message({"type": "quit_game", "winner": winner, "match": current_game.dict(by_alias=True)}, websocket_player1)
+    websocket_player2 = await manager.get_user(current_game.player2)
+    if websocket_player2:
+        await manager.send_personal_message({"type": "quit_game", "winner": winner, "match": current_game.dict(by_alias=True)}, websocket_player2)

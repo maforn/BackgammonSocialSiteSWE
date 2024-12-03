@@ -184,3 +184,14 @@ async def test_ai_suggestions(client: AsyncClient, token: str):
     assert response.status_code == 200
     response = await client.post("/ai/suggestions", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 400
+
+@pytest.mark.anyio
+async def test_quit_game(client: AsyncClient, token: str):
+    await clear_matches()
+    await create_started_match("testuser", "testuser2")
+    response = await client.post("/game/quit", headers = {"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    ended_match = await get_db().matches.find_one({"player1": "testuser"})
+    assert ended_match["status"] == "player_2_won"
+    assert ended_match["winsP2"] == ended_match["rounds_to_win"]
+

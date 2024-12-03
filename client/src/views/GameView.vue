@@ -1,15 +1,17 @@
 <template>
-	<div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center">
-		<div class="background"></div>
-		<div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
+  <QuitModal v-if="isModalVisible" @confirm="confirmQuit" @cancel="cancelQuit" />
+  <div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center">
+    <div class="background"></div>
+    <div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
       <div class="flex justify-center w-full gap-4 mt-6" v-if="started">
-        <div id="p1-display" class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
-        :class="username == player1 ? 'player-turn-1' : 'player-turn-2'">
+        <div id="p1-display"
+             class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
+             :class="username == player1 ? 'player-turn-1' : 'player-turn-2'">
           <v-icon :name="[ai_names.includes(player1) ? 'fa-robot' : 'io-person']" class="text-white" />
           {{ player1 }}
           <div class="flex justify-evenly absolute bottom-1">
             <div v-for="i in rounds_to_win">
-              <v-icon :name="i <= winsP1 ? 'bi-circle-fill' : 'bi-circle'" width="0.4em" height="0.4em"/>
+              <v-icon :name="i <= winsP1 ? 'bi-circle-fill' : 'bi-circle'" width="0.4em" height="0.4em" />
             </div>
           </div>
         </div>
@@ -18,37 +20,39 @@
           VS
         </div>
 
-        <div id="p2-display" class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
-        :class="username == player2 ? 'player-turn-1' : 'player-turn-2'">
+        <div id="p2-display"
+             class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
+             :class="username == player2 ? 'player-turn-1' : 'player-turn-2'">
           <v-icon :name="[ai_names.includes(player2) ? 'fa-robot' : 'io-person']" class="text-white" />
           {{ player2 }}
           <div class="flex justify-evenly absolute bottom-1">
             <div v-for="i in rounds_to_win">
-              <v-icon :name="i <= winsP2 ? 'bi-circle-fill' : 'bi-circle'" width="0.4em" height="0.4em"/>
+              <v-icon :name="i <= winsP2 ? 'bi-circle-fill' : 'bi-circle'" width="0.4em" height="0.4em" />
             </div>
           </div>
         </div>
       </div>
       <div id="game-over" class="font-medium relative p-2 rounded" v-if="gameOver">
         <div class="flex gap-2 mt-4">
-          <button @click="shareOnWhatsApp" class="btn-share p-2 rounded bg-blue-500 text-white cursor-pointer">
-             <v-icon name="io-logo-whatsapp" />
+          <button @click="shareOnWhatsApp" class="btn-share p-2 rounded bg-green-600 text-white cursor-pointer">
+            <v-icon name="io-logo-whatsapp" />
             Share on Whatsapp
           </button>
           <button @click="shareOnTwitter" class="btn-share p-2 rounded bg-blue-500 text-white cursor-pointer">
-             <v-icon name="io-logo-twitter" />
+            <v-icon name="io-logo-twitter" />
             Share on X
           </button>
           <button @click="shareOnFacebook" class="btn-share p-2 rounded bg-blue-700 text-white cursor-pointer">
-             <v-icon name="io-logo-facebook" />
+            <v-icon name="io-logo-facebook" />
             Share on Facebook
           </button>
         </div>
       </div>
-      <div id="game-over" class="bg-yellow-500 font-medium relative p-2 rounded" v-if="gameOver">{{winnerMessage}}</div>
+      <div id="game-over" class="bg-yellow-500 font-medium relative p-2 rounded" v-if="gameOver">{{ winnerMessage }}
+      </div>
       <div class="relative" v-if="started">
         <GameBoard :configuration="configuration" :player1="isPlayer1" :dice="availableDice" :your-turn="isYourTurn"
-          @movePiece="movePiece" @noAvailableMoves="buttonShower"/>
+                   @movePiece="movePiece" @noAvailableMoves="buttonShower" />
         <button v-if="!diceThrown && isYourTurn" class="dice-button p-2 w-10 sm:w-16 lg:w-20" @click.stop="diceThrow">
           <v-icon name="gi-rolling-dices" width="100%" height="100%" />
         </button>
@@ -69,18 +73,21 @@
             <DieFace :value="startDice.roll2" />
           </div>
           <div class="text-center px-4 py-2 text-white rounded-r-full rounded-l-full shadow-md font-medium"
-            :class="username == player1 ? 'player-turn-1' : 'player-turn-2'">
+               :class="username == player1 ? 'player-turn-1' : 'player-turn-2'">
             {{ player1 }}
           </div>
           <div class="text-center px-4 py-2 text-white rounded-r-full rounded-l-full shadow-md font-medium"
-            :class="username == player2 ? 'player-turn-1' : 'player-turn-2'">
+               :class="username == player2 ? 'player-turn-1' : 'player-turn-2'">
             {{ player2 }}
           </div>
         </div>
-        <button class="start-button start-pulse p-2 w-10 sm:w-16 lg:w-20 mt-12" @click.stop="throwStartDice" v-if="startDiceThrowAllowed">
+        <button class="start-button start-pulse p-2 w-10 sm:w-16 lg:w-20 mt-12" @click.stop="throwStartDice"
+                v-if="startDiceThrowAllowed">
           <v-icon name="gi-rolling-dices" width="100%" height="100%" />
         </button>
-        <button v-if="starter > 0" class="px-6 py-2 mt-12 text-white font-bold text-lg shadow-md rounded-r-full rounded-l-full bg-slate-500 start-pulse" @click.stop="startPlaying">
+        <button v-if="starter > 0"
+                class="px-6 py-2 mt-12 text-white font-bold text-lg shadow-md rounded-r-full rounded-l-full bg-slate-500 start-pulse"
+                @click.stop="startPlaying">
           Start playing!
         </button>
       </div>
@@ -117,21 +124,35 @@
       </div>
       <div class="messages absolute p-8 flex flex-col-reverse" v-if="started">
         <div v-for="message in messages" :key="message.id"
-          :class="['message', message.user === username ? 'your-message' : 'opponent-message']">
+             :class="['message', message.user === username ? 'your-message' : 'opponent-message']">
           {{ message.message }}
         </div>
       </div>
       <div class="flex gap-2 mt-4 flex-wrap" v-if="configuration && started">
         <button v-for="msg in preformedMessages" :key="msg"
-          class="btn-preformed p-2 rounded bg-blue-500 text-white cursor-pointer" @click="sendPreformedMessage(msg)">
+                class="btn-preformed p-2 rounded bg-blue-500 text-white cursor-pointer"
+                @click="sendPreformedMessage(msg)">
           {{ msg }}
         </button>
       </div>
-      <div>
-        <button v-if="isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="getAISuggestion">Get AI Suggestion {{ ai_suggestions[isPlayer1 ? 1 : 0] }}/3</button>
-      </div>
-      <div>
-        <button v-if="showPassButton&&isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">Pass the turn</button>
+      <div class="flex gap-2 mt-4 flex-wrap" v-if="configuration && started">
+        <button
+          class="p-2 mb-2 bg-red-500 text-white rounded shadow-md hover:bg-red-600"
+          @click="isModalVisible = true">
+          Quit the match
+        </button>
+
+        <button v-if="isYourTurn&&diceThrown"
+                class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer"
+                @click="getAISuggestion">Get AI Suggestion {{ ai_suggestions[isPlayer1 ? 1 : 0] }}/3
+        </button>
+        <div>
+          <button v-if="showPassButton&&isYourTurn&&diceThrown"
+                  class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">
+            Pass the turn
+          </button>
+        </div>
+
       </div>
     </div>
   </div>
@@ -142,23 +163,38 @@ import DieFace from '@/components/DieFace.vue'
 import { computed, defineComponent, ref } from 'vue'
 import axiosInstance from '@/axios'
 import GameBoard from '@/components/GameBoard.vue'
-import { BoardConfiguration } from '@/models/BoardConfiguration';
+import { BoardConfiguration } from '@/models/BoardConfiguration'
 import { storeToRefs } from 'pinia'
 import { useGameStore } from '@/stores/gameStore'
 import { useWsStore } from '@/stores/wsStore'
 import { useAuthStore } from '@/stores/authStore'
 import { isAxiosError } from 'axios'
-import { isGammon, isBackgammon } from '@/services/gameService';
+import { isBackgammon, isGammon } from '@/services/gameService'
+import QuitModal from '@/components/QuitModal.vue'
 
 export default defineComponent({
   name: 'GameView',
   components: {
+    QuitModal,
     GameBoard,
     DieFace
   },
   setup() {
     const gameStore = useGameStore()
-    const { turn, dice, boardConfiguration, player1, player2, rounds_to_win, winsP1, winsP2, status, starter, startDice, ai_suggestions } = storeToRefs(gameStore)
+    const {
+      turn,
+      dice,
+      boardConfiguration,
+      player1,
+      player2,
+      rounds_to_win,
+      winsP1,
+      winsP2,
+      status,
+      starter,
+      startDice,
+      ai_suggestions
+    } = storeToRefs(gameStore)
 
     const wsStore = useWsStore()
     const { messages } = storeToRefs(wsStore)
@@ -186,10 +222,10 @@ export default defineComponent({
     }
 
     const started = starter.value > 0
-    const ai_names = ["ai_easy", "ai_normal", "ai_hard"];
+    const ai_names = ['ai_easy', 'ai_normal', 'ai_hard']
 
     const passTheTurn = async () => {
-      showPassButton.value = false;
+      showPassButton.value = false
       try {
         await axiosInstance.post('/game/pass_turn')
       } catch (error) {
@@ -200,8 +236,24 @@ export default defineComponent({
     }
 
     const showPassButton = ref()
-    const buttonShower = () =>{
-      showPassButton.value = true;
+    const buttonShower = () => {
+      showPassButton.value = true
+    }
+
+    const isModalVisible = ref(false)
+    const confirmQuit = async () => {
+      isModalVisible.value = false
+      try {
+        await axiosInstance.post('/game/quit')
+      } catch (error) {
+        if (isAxiosError(error)) {
+          useWsStore().addError(error?.response?.data?.detail)
+        }
+      }
+    }
+
+    const cancelQuit = () => {
+      isModalVisible.value = false
     }
 
     const getAISuggestion = () => {
@@ -231,26 +283,29 @@ export default defineComponent({
       showPassButton,
       buttonShower,
       passTheTurn,
-      started: ref(started),
+      started: ref(started), //TODO: controlla se è meglio started: computed(() => starter.value > 0),
       initialText: 'Throw the die to pick the starter!',
       status,
       ai_names,
       gameOver: computed(() => status.value === 'player_1_won' || status.value === 'player_2_won'),
+      isModalVisible,
+      confirmQuit,
+      cancelQuit,
       getAISuggestion,
       ai_suggestions
-		};
-	},
+    }
+  },
   methods: {
     formatWinMessage(winnerUsername: string, winnerIsPlayer1: boolean, board: BoardConfiguration) {
-      let opt = '';
-      if(isBackgammon(board, winnerIsPlayer1))
-        opt = ' with a backgammon';
-      else if(isGammon(board, winnerIsPlayer1))
-        opt = ' with a gammon';
-      return `${winnerUsername} has won the match${opt}!`;
+      let opt = ''
+      if (isBackgammon(board, winnerIsPlayer1))
+        opt = ' with a backgammon'
+      else if (isGammon(board, winnerIsPlayer1))
+        opt = ' with a gammon'
+      return `${winnerUsername} has won the match${opt}!`
     },
     async diceThrow() {
-      this.showPassButton = false;
+      this.showPassButton = false
       try {
         await axiosInstance.get('/throw_dice')
       } catch (error) {
@@ -263,13 +318,13 @@ export default defineComponent({
       axiosInstance
         .post('/move/piece', {
           board,
-          dice,
+          dice
         })
         .catch(error => {
           if (isAxiosError(error)) {
-            useWsStore().addError(error?.response?.data?.detail);
+            useWsStore().addError(error?.response?.data?.detail)
           }
-        });
+        })
     },
     getGameOverShareText() {
       if (this.isPlayer1 && this.status === 'player_1_won') {
@@ -282,69 +337,81 @@ export default defineComponent({
         return `I just lost a game of backgammon against ${this.player1}! 😢 Help me out, play now!`
       }
     }, async shareOnWhatsApp() {
-      const url = `https://wa.me/?text=${encodeURIComponent(this.getGameOverShareText())}`;
-      window.open(url, '_blank');
+      const url = `https://wa.me/?text=${encodeURIComponent(this.getGameOverShareText())}`
+      window.open(url, '_blank')
     },
     async shareOnTwitter() {
-      const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(this.getGameOverShareText())}`;
-      window.open(url, '_blank');
+      const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(this.getGameOverShareText())}`
+      window.open(url, '_blank')
     },
     async shareOnFacebook() {
-      const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
-      window.open(url, '_blank');
+      const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`
+      window.open(url, '_blank')
     },
-    startPlaying(){
-      this.started = true;
+    startPlaying() {
+      this.started = true
     },
     throwStartDice() {
       axiosInstance
         .get('/throw_start_dice')
         .catch(error => {
           if (isAxiosError(error)) {
-            useWsStore().addError(error?.response?.data?.detail);
+            useWsStore().addError(error?.response?.data?.detail)
           }
-        });
-    },
+        })
+    }
   },
   computed: {
     isYourTurn(): boolean {
       if ((this.turn % 2 === 0 && this.isPlayer1) || (this.turn % 2 === 1 && !this.isPlayer1)) {
-        return true;
+        return true
       } else {
-        return false;
+        return false
       }
     },
     diceThrown(): boolean {
-      return this.diceResult.die1.value !== null && this.diceResult.die2.value !== null;
+      return this.diceResult.die1.value !== null && this.diceResult.die2.value !== null
     },
     isPlayer1(): boolean {
-      return this.username === this.player1;
+      return this.username === this.player1
     },
     startDiceThrowAllowed(): boolean {
       return this.starter <= 0 && this.isPlayer1 && this.startDice.count1 <= this.startDice.count2
-      || this.starter <= 0 && !this.isPlayer1 && this.startDice.count2 <= this.startDice.count1;
+        || this.starter <= 0 && !this.isPlayer1 && this.startDice.count2 <= this.startDice.count1
     },
     winnerMessage(): string {
       if (this.status === 'player_1_won') {
-          return this.formatWinMessage(this.player1, true, this.configuration);
-        } else if (this.status === 'player_2_won') {
-          return this.formatWinMessage(this.player2, false, this.configuration);
-        }
-        return '';
+        return this.formatWinMessage(this.player1, true, this.configuration)
+      } else if (this.status === 'player_2_won') {
+        return this.formatWinMessage(this.player2, false, this.configuration)
+      }
+      return ''
     }
   },
   watch: {
-        starter(newVal, oldVal) {
-          console.log('started', newVal, oldVal);
+    starter(newVal, oldVal) {
+      console.log('started', newVal, oldVal)
 
-          if(oldVal === -1 && newVal > 0)
-            this.started = true;
-          else if(newVal === 1 && this.isPlayer1 || newVal === 2 && !this.isPlayer1)
-            this.initialText = 'You start!';
-          else if(newVal === 1 && !this.isPlayer1 || newVal === 2 && this.isPlayer1)
-            this.initialText = `${this.player2} starts!`;
-        },
-  },
+      if (oldVal === -1 && newVal > 0)
+        this.started = true
+      else if (newVal === 1 && this.isPlayer1 || newVal === 2 && !this.isPlayer1)
+        this.initialText = 'You start!'
+      else if (newVal === 1 && !this.isPlayer1 || newVal === 2 && this.isPlayer1)
+        this.initialText = `${this.player2} starts!`
+    },
+    winsP1(newVal, oldVal) {
+      (newVal === this.rounds_to_win) && this.$router.push({
+        name: 'match-over',
+        props: { player1: this.player1, player2: this.player2 }
+      })
+    },
+    winsP2(newVal, oldVal) {
+      (newVal === this.rounds_to_win) && this.$router.push({
+        name: 'match-over',
+        props: { player1: this.player1, player2: this.player2 }
+      })
+    }
+  }
 })
 </script>
 
@@ -437,14 +504,14 @@ export default defineComponent({
 
 @keyframes start-pulse {
 
-0%,
-100% {
-  transform: scale(1);
-}
+  0%,
+  100% {
+    transform: scale(1);
+  }
 
-50% {
-  transform: scale(1.25);
-}
+  50% {
+    transform: scale(1.25);
+  }
 }
 
 .dice-container {
