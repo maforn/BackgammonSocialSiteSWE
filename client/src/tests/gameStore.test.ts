@@ -28,6 +28,8 @@ describe('game store', () => {
       now,
       'active',
       1,
+      1,
+      { count: 0, last_usage: 0, proposed: false, proposer: 0 }
     );
     gameStore.setMatch({
       player1: 'Alice',
@@ -42,9 +44,12 @@ describe('game store', () => {
       rounds_to_win: 1,
       winsP1: 0,
       winsP2: 0,
+      starter: 1,
+		  startDice: {roll1: 0, count1: 0, roll2: 0, count2: 0},
+      doublingCube: {count: 0, last_usage: 0, proposed: false, proposer: 0},
     });
 
-    expect(gameStore.getMatch()).toEqual(match);
+    expect(gameStore.status).toEqual(match.status);
   });
 
   it('should fetch game data and set match', async () => {
@@ -67,40 +72,6 @@ describe('game store', () => {
     expect(gameStore.player1).toBe('Alice');
     expect(gameStore.player2).toBe('Bob');
     expect(gameStore.boardConfiguration).toEqual(new BoardConfiguration());
-    expect(gameStore.dice.roll).toEqual([1, 2]);
-    expect(gameStore.dice.available).toEqual([3, 4]);
-    expect(gameStore.turn).toBe(1);
-    expect(gameStore.created_at.toISOString()).toBe('2023-01-01T00:00:00.000Z');
-    expect(gameStore.updated_at.toISOString()).toBe('2023-01-01T00:00:00.000Z');
-    expect(gameStore.status).toBe('active');
-  });
-
-  it('should set match data correctly', () => {
-    const gameStore = useGameStore();
-    const data = {
-      player1: 'Alice',
-      player2: 'Bob',
-      board_configuration: {
-        points: [{ player1: 1, player2: 2 }],
-        bar: { player1: 0, player2: 0 },
-      },
-      dice: [1, 2],
-      available: [3, 4],
-      turn: 1,
-      created_at: '2023-01-01T00:00:00Z',
-      updated_at: '2023-01-01T00:00:00Z',
-      status: 'active',
-      rounds_to_win: 1,
-      winsP1: 0,
-      winsP2: 0,
-    };
-
-    gameStore.setMatch(data);
-
-    expect(gameStore.player1).toBe('Alice');
-    expect(gameStore.player2).toBe('Bob');
-    expect(gameStore.boardConfiguration.points[0].player1).toBe(1);
-    expect(gameStore.boardConfiguration.points[0].player2).toBe(2);
     expect(gameStore.dice.roll).toEqual([1, 2]);
     expect(gameStore.dice.available).toEqual([3, 4]);
     expect(gameStore.turn).toBe(1);

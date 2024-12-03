@@ -30,6 +30,7 @@ export class Match {
 		status: string,
 		starter: number,
 		rounds_to_win: number,
+    doublingCube: {count: number, last_usage: number, proposed: boolean, proposer: number}
 	) {
 		this.player1 = player1;
 		this.player2 = player2;

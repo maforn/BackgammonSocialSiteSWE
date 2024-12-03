@@ -11,6 +11,17 @@ vi.mock('@/router', () => ({
   default: { push: vi.fn() }
 }));
 
+function setup(mock) {
+  mock.onGet('/users/top5_and_me').reply(200, [
+    { _id: '1', username: 'user1', rating: 100, position: 1 },
+    { _id: '2', username: 'user2', rating: 90, position: 2 },
+    { _id: '3', username: 'user3', rating: 80, position: 3 },
+    { _id: '4', username: 'user4', rating: 70, position: 4 },
+    { _id: '5', username: 'user5', rating: 60, position: 5 },
+    { _id: '6', username: 'myuser', rating: 50, position: 6 }
+  ])
+}
+
 describe('LeaderboardView.vue', () => {
   let mock: MockAdapter;
   const pinia = createPinia();
@@ -25,14 +36,7 @@ describe('LeaderboardView.vue', () => {
   });
 
   it('renders correctly with initial data', async () => {
-    mock.onGet('/users/top5_and_me').reply(200, [
-      { _id: '1', username: 'user1', rating: 100, position: 1 },
-      { _id: '2', username: 'user2', rating: 90, position: 2 },
-      { _id: '3', username: 'user3', rating: 80, position: 3 },
-      { _id: '4', username: 'user4', rating: 70, position: 4 },
-      { _id: '5', username: 'user5', rating: 60, position: 5 },
-      { _id: '6', username: 'myuser', rating: 50, position: 6 }
-    ]);
+    setup(mock)
 
     const wrapper = mount(LeaderboardView, {
       global: {
@@ -59,14 +63,7 @@ describe('LeaderboardView.vue', () => {
   });
 
   it('toggles to Google friends leaderboard', async () => {
-    mock.onGet('/users/top5_and_me').reply(200, [
-      { _id: '1', username: 'user1', rating: 100, position: 1 },
-      { _id: '2', username: 'user2', rating: 90, position: 2 },
-      { _id: '3', username: 'user3', rating: 80, position: 3 },
-      { _id: '4', username: 'user4', rating: 70, position: 4 },
-      { _id: '5', username: 'user5', rating: 60, position: 5 },
-      { _id: '6', username: 'myuser', rating: 50, position: 6 }
-    ]);
+    setup(mock)
 
     mock.onPost('/users/top5_and_me_google').reply(200, [
       { _id: '1', username: 'googleuser1', rating: 100, position: 1 },

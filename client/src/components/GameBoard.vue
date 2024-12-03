@@ -132,7 +132,7 @@ export default defineComponent({
 			srcPointIndex: null as number | null,
 
 			/* The number of pieces per player */
-			piecesPerPlayer: 15,
+			piecesPerPlayer: 15
 		};
 	},
 	created() {

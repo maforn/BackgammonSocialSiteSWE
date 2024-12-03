@@ -25,7 +25,7 @@ interface GameData {
 	winsP2: number;
 	starter: number;
 	startDice: { roll1: number; count1: number; roll2: number; count2: number };
-  doublingCube: { value: number; lastUsage: number };
+  doublingCube: { count: number; last_usage: number, proposed: boolean, proposer: number };
 }
 
 const ai_players = ['ai_hard', 'ai_medium', 'ai_easy']
@@ -47,7 +47,7 @@ export const useGameStore = defineStore('game', {
     loaded: false,
     starter: -1,
 		startDice: { roll1: 0, count1: 0, roll2: 0, count2: 0 },
-    doublingCube: { count: 0, lastUsage: 0 }
+    doublingCube: { count: 0, last_usage: 0, proposed: false, proposer: 0 }
   }),
   actions: {
     async initializeWasm() {
@@ -88,8 +88,26 @@ export const useGameStore = defineStore('game', {
 			this.winsP2 = data.winsP2;
       this.starter = data.starter;
       this.startDice = data.startDice;
-      this.doublingCube = data.doublingCube;
+      this.doublingCube = data.doublingCube
       setTimeout(async () => await this.checkAITurn(), 1000)
+    },
+    getBoardConfig(board) {
+      return {
+        o: {
+          ...board.points.reduce((acc, point, index) => {
+            if (point.player2 > 0) acc[index + 1] = point.player2
+            return acc
+          }, {}),
+          bar: board.bar.player2
+        },
+        x: {
+          ...board.points.reduce((acc, point, index) => {
+            if (point.player1 > 0) acc[index + 1] = point.player1
+            return acc
+          }, {}),
+          bar: board.bar.player1
+        }
+      }
     },
     async checkAITurn() {
       const isPlayer1 = this.player1 === useAuthStore().username
@@ -101,23 +119,10 @@ export const useGameStore = defineStore('game', {
 
         const board = isPlayer1 ? swapPlayers(this.boardConfiguration) : this.boardConfiguration
 
+        const boardConfig = this.getBoardConfig(board)
+
         const input = {
-          board: {
-            o: {
-              ...board.points.reduce((acc, point, index) => {
-                if (point.player2 > 0) acc[index + 1] = point.player2
-                return acc
-              }, {}),
-              bar: board.bar.player2
-            },
-            x: {
-              ...board.points.reduce((acc, point, index) => {
-                if (point.player1 > 0) acc[index + 1] = point.player1
-                return acc
-              }, {}),
-              bar: board.bar.player1
-            }
-          },
+          board: boardConfig,
           cubeful: false,
           dice: diceRoll,
           'max-moves':
@@ -141,31 +146,34 @@ export const useGameStore = defineStore('game', {
         }
       }
     },
+    getUsedDice(newBoard, srcIndex: number, dstIndex: number) {
+      let usedDice = null
+      try {
+        console.log('moving')
+        moveOnBoard(newBoard, this.dice.available, srcIndex, dstIndex)
+        console.log('moved')
+        usedDice = findUsedDie(this.dice.available, srcIndex, dstIndex)
+        console.log('moved', usedDice)
+      } catch (error: any) {
+        console.log(error)
+        const randomMove = doRandomMove(newBoard, this.dice.available)
+        console.log('random', randomMove)
+        if (randomMove) {
+          usedDice = findUsedDie(this.dice.available, randomMove.src, randomMove.dst)
+        }
+        console.log('random', usedDice)
+        return usedDice
+      }
+    },
     makeAIMove(move: any) {
       const isPlayer1 = this.player1 === useAuthStore().username
-      let newBoard = !isPlayer1 ? { ...this.boardConfiguration } : swapPlayers(this.boardConfiguration)
+      const newBoard = !isPlayer1 ? { ...this.boardConfiguration } : swapPlayers(this.boardConfiguration)
       move.play.forEach((piece_move, index) => {
 
-        const srcIndex = piece_move.from === 'bar' ? 24 : piece_move.from - 1;
-        const dstIndex = piece_move.to === 'off' ? -1 : piece_move.to - 1;
+        const srcIndex = piece_move.from === 'bar' ? 24 : piece_move.from - 1
+        const dstIndex = piece_move.to === 'off' ? -1 : piece_move.to - 1
 
-        let usedDice = null
-
-        try {
-          console.log('moving')
-          moveOnBoard(newBoard, this.dice.available, srcIndex, dstIndex)
-          console.log('moved')
-          usedDice = findUsedDie(this.dice.available, srcIndex, dstIndex)
-          console.log('moved', usedDice)
-        } catch (error: any) {
-          console.log(error)
-          const randomMove = doRandomMove(newBoard, this.dice.available)
-          console.log('random', randomMove)
-          if (randomMove) {
-            usedDice = findUsedDie(this.dice.available, randomMove.src, randomMove.dst)
-          }
-          console.log('random', usedDice)
-        }
+        const usedDice = this.getUsedDice(newBoard, srcIndex, dstIndex)
 
         if (usedDice) {
           const diceIndex = this.dice.available.indexOf(usedDice)
@@ -186,20 +194,6 @@ export const useGameStore = defineStore('game', {
       console.log(JSON.stringify(input))
       const output = globalThis.wasm_get_moves(JSON.stringify(input))
       return JSON.parse(output)
-    },
-    getMatch(): Match {
-      return new Match(
-        this.player1,
-        this.player2,
-        this.boardConfiguration,
-        this.dice,
-        this.turn,
-        new Date(this.created_at),
-        new Date(this.updated_at),
-        this.status,
-        this.rounds_to_win,
-        this.starter
-      )
     },
     setDice(result: number[], available: number[]) {
       this.dice.roll = result
