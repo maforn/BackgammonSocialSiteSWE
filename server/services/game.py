@@ -122,7 +122,7 @@ async def update_rating(current_game: Match, p1_data, p2_data, winner):
 
 
 def compute_win_multiplier(current_game: Match, winner: int) -> int:
-    board = BoardConfiguration(**current_game.board_configuration)
+    board = BoardConfiguration(**current_game.board_configuration.to_dict())
     is_player1 = winner == 1
 
     if is_backgammon(board, is_player1):

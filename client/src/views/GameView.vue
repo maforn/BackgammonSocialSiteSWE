@@ -133,10 +133,10 @@
         <button
           class="p-2 mb-2 bg-red-500 text-white rounded shadow-md hover:bg-red-600"
           @click="isModalVisible = true">
-          Abbandona
+          Quit the match
         </button>
         <div>
-          <button v-if="showPassButton&&isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">Passa il turno</button>
+          <button v-if="showPassButton&&isYourTurn&&diceThrown" class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">Pass the turn</button>
         </div>
 
       </div>

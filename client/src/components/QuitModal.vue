@@ -2,18 +2,17 @@
 <template>
   <div class="modal-overlay">
     <div class="modal">
-      <p>Se abbandoni, perderai la partita.</p>
-      <p>Sei sicuro di voler abbandonare?</p>
+      <p>If you quit, you will lose the match.</p>
+      <p>Are you sure you want to quit?</p>
       <div class="modal-actions">
-        <button @click="confirmQuit" class="btn-confirm">Sì, abbandona</button>
-        <button @click="cancelQuit" class="btn-cancel">No, torna indietro</button>
+        <button @click="confirmQuit" class="btn-confirm">Yes, quit</button>
+        <button @click="cancelQuit" class="btn-cancel">No, go back</button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref } from "vue";
 
 export default {
   setup(_, { emit }) {
