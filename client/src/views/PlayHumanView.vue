@@ -138,7 +138,11 @@ export default defineComponent({
     }) {
       this.hasSelectedOpponent = false
       if (this.searchQuery.length >= 2) {
-        this.inviteGoogleFriends ? this.showDropdown = true : this.fetchUsers()
+        if (this.inviteGoogleFriends) {
+          this.showDropdown = true
+        } else {
+          this.fetchUsers()
+        }
       } else {
         this.showDropdown = false
       }

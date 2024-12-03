@@ -7,11 +7,14 @@ from tests.conftest import clear_matches
 from services.game import check_win_condition, get_current_game
 
 
+MOVE_PIECE_URL = "/move/piece"
+THROW_START_DICE_URL = "/throw_start_dice"
+
 @pytest.mark.anyio
 async def test_throw_start_dice(client: AsyncClient, token: str):
     await clear_matches()
     await create_started_match("testuser", "testuser2")
-    response = await client.get("/throw_start_dice", headers={"Authorization": f"Bearer {token}"})
+    response = await client.get(THROW_START_DICE_URL, headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     match = await get_db().matches.find_one({"player1": "testuser"})
     assert match is not None
@@ -29,24 +32,6 @@ async def test_throw_dice(client: AsyncClient, token: str):
     response = await client.get("/throw_dice", headers={"Authorization": f"Bearer {token}"})
     updated_match = await get_db().matches.find_one({"player1": "testuser"})
     assert updated_match != old_match
-    assert updated_match["dice"] != []
-    assert response.status_code == 200
-
-
-@pytest.mark.anyio
-async def test_move_piece(client: AsyncClient, token: str):
-    await clear_matches()
-    await create_started_match("testuser", "testuser2")
-    await get_db().matches.update_one({"player1": "testuser"}, {"$set": {"dice": [3, 5], "available": [3, 5]}})
-    move_data = {
-        "board": {
-            "points": [{"player1": 1, "player2": 0} for _ in range(24)],
-            "bar": {"player1": 0, "player2": 0}
-        },
-        "dice": 3
-    }
-    response = await client.post("/move/piece", json=move_data, headers={"Authorization": f"Bearer {token}"})
-    updated_match = await get_db().matches.find_one({"player1": "testuser"})
     assert updated_match["dice"] != []
     assert response.status_code == 200
 
@@ -72,7 +57,7 @@ async def test_move_piece(client: AsyncClient, token: str):
         },
         "dice": 3
     }
-    response = await client.post("/move/piece", json=move_data, headers={"Authorization": f"Bearer {token}"})
+    response = await client.post(MOVE_PIECE_URL, json=move_data, headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     updated_game = await get_db().matches.find_one({"player1": "testuser"})
     assert updated_game is not None
@@ -125,7 +110,7 @@ async def test_round_progression(client: AsyncClient, token: str):
             "bar": {"player1": 0, "player2": 0}
         }
     }
-    await client.post("/move/piece", json=move_data, headers={"Authorization": f"Bearer {token}"})
+    await client.post(MOVE_PIECE_URL, json=move_data, headers={"Authorization": f"Bearer {token}"})
     updated_game = await get_db().matches.find_one({"player1": "testuser"})
     assert updated_game is not None
     assert updated_game["turn"] == -1
@@ -153,10 +138,10 @@ async def test_throw_start_dice_already_thrown(client: AsyncClient, token: str):
     await clear_matches()
     await create_started_match("testuser", "testuser2")
 
-    response = await client.get("/throw_start_dice", headers={"Authorization": f"Bearer {token}"})
+    response = await client.get(THROW_START_DICE_URL, headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
 
-    response = await client.get("/throw_start_dice", headers={"Authorization": f"Bearer {token}"})
+    response = await client.get(THROW_START_DICE_URL, headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 400
     assert response.json()["detail"] == "You have already thrown the start dice. Wait for the other player"
 
@@ -164,7 +149,7 @@ async def test_throw_start_dice_already_thrown(client: AsyncClient, token: str):
 async def test_throw_start_dice_player2(client: AsyncClient, token: str):
     await clear_matches()
     await create_started_match("testuser2", "testuser")
-    response = await client.get("/throw_start_dice", headers={"Authorization": f"Bearer {token}"})
+    response = await client.get(THROW_START_DICE_URL, headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     match = await get_db().matches.find_one({"player2": "testuser"})
     assert match is not None
@@ -177,7 +162,7 @@ async def test_throw_start_dice_player2(client: AsyncClient, token: str):
 async def test_throw_start_dice_ai(client: AsyncClient, token: str):
     await clear_matches()
     await create_started_match("testuser", "ai_easy")
-    response = await client.get("/throw_start_dice", headers={"Authorization": f"Bearer {token}"})
+    response = await client.get(THROW_START_DICE_URL, headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     match = await get_db().matches.find_one({"player1": "testuser"})
     assert match is not None
