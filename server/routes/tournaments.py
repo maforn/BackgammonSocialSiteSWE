@@ -18,7 +18,6 @@ async def create_tournament_endpoint(request: CreateTournamentRequest, token: st
     else:
         user = await get_user_from_token(token)
         created_tournament = await create_new_tournament(request=request, owner=user.username)
-        print(created_tournament)
         return JSONResponse(status_code=200, content={"tournament": jsonable_encoder(created_tournament)})
 
 
@@ -47,6 +46,7 @@ async def game(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=404, detail="No started tournament found")
     print(current_tournament)
     return current_tournament.model_dump(by_alias=True)
+
 
 @router.get("/tournaments/available")
 async def available_tournaments(token: str = Depends(oauth2_scheme)):

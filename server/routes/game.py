@@ -63,6 +63,8 @@ async def move(move_data: dict, token: str = Depends(oauth2_scheme)):
         "$set": {"board_configuration": current_game.board_configuration, "available": current_game.available,
                  "dice": current_game.dice,
                  "turn": current_game.turn}})
+    
+
 
     websocket_player1 = await manager.get_user(current_game.player1)
     if websocket_player1:

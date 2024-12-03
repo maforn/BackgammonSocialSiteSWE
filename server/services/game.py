@@ -64,9 +64,13 @@ async def check_winner(current_game: Match, manager):
                                                                                                    winner)
 
         # Check if someone won the entire match (won rounds_to_win rounds)
-        if current_game.winsP1 == current_game.rounds_to_win or current_game.winsP2 == current_game.rounds_to_win:
+        if current_game.winsP1 >= current_game.rounds_to_win or current_game.winsP2 >= current_game.rounds_to_win:
             await update_on_match_win(current_game, loser_username, manager, old_loser_rating, old_winner_rating,
                                       winner, winner_username)
+            
+            from services.tournament import update_tournament_of_game
+            print("Updating tournament stats")
+            await update_tournament_of_game(current_game, winner_username, loser_username)
         else:
             # Message for round end (gammon/backgammon/normal win)
             info_str = get_winning_info_str(current_game, winner)
