@@ -374,11 +374,7 @@ export default defineComponent({
   },
   computed: {
     isYourTurn(): boolean {
-      if ((this.turn % 2 === 0 && this.isPlayer1) || (this.turn % 2 === 1 && !this.isPlayer1)) {
-        return true;
-      } else {
-        return false;
-      }
+      return (this.turn % 2 === 0 && this.isPlayer1) || (this.turn % 2 === 1 && !this.isPlayer1);
     },
     diceThrown(): boolean {
       return this.diceResult.die1.value !== null && this.diceResult.die2.value !== null;
@@ -397,7 +393,7 @@ export default defineComponent({
 
       console.log(this.doublingCube.last_usage);
 
-      return this.isYourTurn && !this.diceThrown && this.doublingCube.last_usage != playerNumber && this.doublingCube.count < maxDouble 
+      return this.isYourTurn && !this.diceThrown && this.doublingCube.last_usage != playerNumber && this.doublingCube.count < maxDouble
              && !this.doublingCube.proposed && !this.ai_names.includes(opponentUsername);
     },
     diceThrowAllowed() {
