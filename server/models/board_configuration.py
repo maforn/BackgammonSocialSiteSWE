@@ -15,13 +15,6 @@ class Point(BaseModel):
     def __init__(self, player1: int = 0, player2: int = 0):
         super().__init__(player1=player1, player2=player2)
 
-    def to_dict(self):
-            return {
-                "player1": self.player1,
-                "player2": self.player2
-            }
-
-
 # Starting configuration of the board
 DEFAULT_POINTS: List[Point] = [
     Point(0, 2),  # Point 1
@@ -50,7 +43,6 @@ DEFAULT_POINTS: List[Point] = [
     Point(2, 0)  # Point 24
 ]
 
-
 class BoardConfiguration(BaseModel):
     points: List[Point]
     bar: Point
@@ -59,13 +51,6 @@ class BoardConfiguration(BaseModel):
         points = deepcopy(DEFAULT_POINTS) if points is None else points
         bar = Point(player1=0, player2=0) if bar is None else bar
         super().__init__(points=points, bar=bar)
-
-    def to_dict(self):
-            return {
-                "points": [point.to_dict() for point in self.points],
-                "bar": self.bar.to_dict()
-            }
-
 
 class StartDice(BaseModel):
     roll1: int
@@ -92,27 +77,10 @@ class Match(BaseModel):
     starter: int = 0
     startDice: StartDice = StartDice()
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "board_configuration": self.board_configuration.to_dict(),
-            "dice": self.dice,
-            "available": self.available,
-            "turn": self.turn,
-            "status": self.status,
-            "rounds_to_win": self.rounds_to_win,
-            "winsP1": self.winsP1,
-            "winsP2": self.winsP2,
-            "starter": self.starter,
-            "startDice": self.startDice.dict(by_alias=True)
-        }
-
-
 class CreateInviteRequest(BaseModel):
     opponent_username: str
     rounds_to_win: int
     use_email: bool = False
-
 
 class AcceptInviteRequest(BaseModel):
     invite_id: str

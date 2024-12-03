@@ -122,7 +122,7 @@ async def update_rating(current_game: Match, p1_data, p2_data, winner):
 
 
 def compute_win_multiplier(current_game: Match, winner: int) -> int:
-    board = BoardConfiguration(**current_game.board_configuration.to_dict())
+    board = BoardConfiguration(**current_game.board_configuration)
     is_player1 = winner == 1
 
     if is_backgammon(board, is_player1):
@@ -184,11 +184,12 @@ async def quit_the_game(current_game: Match, manager, winner):
         p2_data["username"] = current_game.player2
         p2_data["rating"] = ai_rating[ai_names.index(current_game.player2)]
 
-
     if (winner == 1 ):
         matches_left = current_game.rounds_to_win - current_game.winsP1
     else:
         matches_left = current_game.rounds_to_win - current_game.winsP2
+
+    current_game.board_configuration = BoardConfiguration().dict(by_alias=True)
 
     for i in range(matches_left):
         loser_username, old_loser_rating, old_winner_rating, winner_username = await update_rating(current_game, p1_data, p2_data, winner)
@@ -197,26 +198,8 @@ async def quit_the_game(current_game: Match, manager, winner):
         await update_on_match_win(current_game, loser_username, manager, old_loser_rating, old_winner_rating,
                                   winner, winner_username)
 
-
-    else:
-        current_game.board_configuration = BoardConfiguration()
-        current_game.available = []
-        current_game.dice = []
-        current_game.turn = 0
-        current_game.starter = 0
-        current_game.startDice = StartDice()
-
-        websocket_player1 = await manager.get_user(current_game.player1)
-        if websocket_player1:
-            await manager.send_personal_message({"type": "round_over", "winner": winner_username},
-                                                websocket_player1)
-        websocket_player2 = await manager.get_user(current_game.player2)
-        if websocket_player2:
-            await manager.send_personal_message({"type": "round_over", "winner": winner_username},
-                                                websocket_player2)
-
     await get_db().matches.update_one({"_id": current_game.id},
-                                      {"$set": {"board_configuration": current_game.board_configuration.to_dict(),
+                                      {"$set": {"board_configuration": current_game.board_configuration,
                                                 "status": 'player_' + str(winner) + '_won',
                                                 "available": current_game.available,
                                                 "dice": current_game.dice,
