@@ -12,25 +12,33 @@ mock_request_data = CreateTournamentRequest(
     name="test", 
     open=True, 
     participants=["testuser"], 
-    rounds_to_win=2)
+    rounds_to_win=2,
+    type="round_robin"
+)
 
 mock_request_data_closed = CreateTournamentRequest(
     name="test", 
     open=False, 
     participants=["testuser", "testuser2", "testuser3", "newuser"], 
-    rounds_to_win=2)
+    rounds_to_win=2,
+    type="round_robin"
+)
 
 mock_request_data_open_full = CreateTournamentRequest(
     name="test", 
     open=True, 
     participants=["testuser", "testuser2", "testuser3", "testuser4"], 
-    rounds_to_win=2)
+    rounds_to_win=2,
+    type="round_robin"
+)
 
 mock_request_data_closed_not_invited = CreateTournamentRequest(
     name="test", 
     open=False, 
     participants=["testuser", "testuser2", "testuser3", "testuser4"], 
-    rounds_to_win=2)
+    rounds_to_win=2,
+    type="round_robin"
+)
 
 tournaments_route = "/tournaments"
 
@@ -138,3 +146,4 @@ async def test_add_participant_to_closed_tournament_not_invited():
         await add_participant_to_tournament(tournament["_id"], "newuser")
     assert exc_info.value.status_code == 400
     await clear_tournaments()
+

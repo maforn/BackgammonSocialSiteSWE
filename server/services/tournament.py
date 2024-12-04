@@ -50,7 +50,7 @@ async def create_new_tournament(request: CreateTournamentRequest, owner: str):
                                 name=request.name,
                                 match_ids=[],
                                 status="pending",
-                                type="round_robin", # TODO: Add support for other tournament types
+                                type=request.type, # TODO: Add support for other tournament types
                                 rounds_to_win=request.rounds_to_win,
                                 stats=[]
                             )

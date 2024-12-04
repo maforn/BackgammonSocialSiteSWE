@@ -2,10 +2,10 @@ import axiosInstance from '@/axios';
 import axios from 'axios';
 import { useWsStore } from '@/stores/wsStore';
 
-export const createTournament = async (name: string, open: boolean, participants: string[], rounds_to_win: number) => {
+export const createTournament = async (name: string, open: boolean, participants: string[], rounds_to_win: number, type: string) => {
 	try {
 		const response = await axiosInstance.post('/tournaments', {
-			name, open, participants, rounds_to_win
+			name, open, participants, rounds_to_win, type
 		});
 		return response.data.tournament;
 	} catch (error) {

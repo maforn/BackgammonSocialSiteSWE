@@ -93,7 +93,8 @@ export default defineComponent({
 		}, 300),
         async createTournament(event: Event){
 			event.preventDefault();
-			const tournament = await createTournament(this.tournamentName, this.openToEveryone, this.participants, this.roundsToWin);
+			// TODO: add support for other types of tournaments
+			const tournament = await createTournament(this.tournamentName, this.openToEveryone, this.participants, this.roundsToWin, 'round_robin');
             this.$emit('createdTournament', tournament);
 		},
 		async fetchUsers() {
