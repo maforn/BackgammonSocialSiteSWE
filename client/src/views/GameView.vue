@@ -123,7 +123,7 @@
           {{ isYourTurn ? 'Your turn' : 'Opponent\'s turn' }} | Remaining time:
           00:{{ remainingTime.toString().padStart(2, '0') }}
         </div>
-        <button class="bg-blue-300 rounded-full px-8 h-12 py-3 itemsCenter" v-if="!isYourTurn"
+        <button class="bg-blue-300 rounded-full px-8 h-12 py-3 flex items-center" v-if="!isYourTurn"
                 @click="requestTimeout">Request victory by timeout
         </button>
         <div v-if="diceThrown" :class="[
