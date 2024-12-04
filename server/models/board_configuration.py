@@ -15,6 +15,7 @@ class Point(BaseModel):
     def __init__(self, player1: int = 0, player2: int = 0):
         super().__init__(player1=player1, player2=player2)
 
+
 # Starting configuration of the board
 DEFAULT_POINTS: List[Point] = [
     Point(0, 2),  # Point 1
@@ -43,6 +44,7 @@ DEFAULT_POINTS: List[Point] = [
     Point(2, 0)  # Point 24
 ]
 
+
 class BoardConfiguration(BaseModel):
     points: List[Point]
     bar: Point
@@ -52,6 +54,7 @@ class BoardConfiguration(BaseModel):
         bar = Point(player1=0, player2=0) if bar is None else bar
         super().__init__(points=points, bar=bar)
 
+
 class StartDice(BaseModel):
     roll1: int
     count1: int
@@ -60,6 +63,16 @@ class StartDice(BaseModel):
 
     def __init__(self, roll1: int = 0, count1: int = 0, roll2: int = 0, count2: int = 0):
         super().__init__(roll1=roll1, count1=count1, roll2=roll2, count2=count2)
+
+
+class DoublingCube(BaseModel):
+    count: int
+    last_usage: int
+    proposed: bool
+    proposer: int
+
+    def __init__(self, count: int = 0, last_usage: int = 0, proposed: bool = False, proposer: int = 0):
+        super().__init__(count=count, last_usage=last_usage, proposed=proposed, proposer=proposer)
 
 
 class Match(BaseModel):
@@ -77,11 +90,14 @@ class Match(BaseModel):
     starter: int = 0
     startDice: StartDice = StartDice()
     ai_suggestions: List[int] = [0, 0]
+    doublingCube: DoublingCube = DoublingCube()
+
 
 class CreateInviteRequest(BaseModel):
     opponent_username: str
     rounds_to_win: int
     use_email: bool = False
+
 
 class AcceptInviteRequest(BaseModel):
     invite_id: str

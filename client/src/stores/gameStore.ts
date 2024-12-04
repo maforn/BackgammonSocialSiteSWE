@@ -34,6 +34,7 @@ interface GameData {
   starter: number;
   startDice: { roll1: number; count1: number; roll2: number; count2: number };
   ai_suggestions: number[];
+  doublingCube: { count: number; last_usage: number, proposed: boolean, proposer: number };
 }
 
 const ai_players = ['ai_hard', 'ai_medium', 'ai_easy']
@@ -55,7 +56,8 @@ export const useGameStore = defineStore('game', {
     loaded: false,
     starter: -1,
     startDice: { roll1: 0, count1: 0, roll2: 0, count2: 0 },
-    ai_suggestions: [0, 0]
+    ai_suggestions: [0, 0],
+		doublingCube: { count: 0, last_usage: 0, proposed: false, proposer: 0 }
   }),
   actions: {
     async initializeWasm() {
@@ -92,14 +94,15 @@ export const useGameStore = defineStore('game', {
       this.updated_at = new Date(data.updated_at)
       this.status = data.status
       this.rounds_to_win = data.rounds_to_win
-      this.winsP1 = data.winsP1
-      this.winsP2 = data.winsP2
-      this.starter = data.starter
-      this.startDice = data.startDice
-      this.ai_suggestions = data.ai_suggestions
-      setTimeout(async () => await this.checkAITurn(), 800)
+			this.winsP1 = data.winsP1;
+			this.winsP2 = data.winsP2;
+      this.starter = data.starter;
+      this.startDice = data.startDice;
+      this.doublingCube = data.doublingCube;
+      this.ai_suggestions = data.ai_suggestions;
+      setTimeout(async () => await this.checkAITurn(), 1000)
     },
-    async getAISuggestions(isPlayer1) {
+    async getAISuggestions(isPlayer1: boolean) {
       if (this.ai_suggestions[isPlayer1 ? 1 : 0] >= 3) {
         useWsStore().addNotification('AI suggestions limit reached')
         return
@@ -242,32 +245,17 @@ export const useGameStore = defineStore('game', {
       const output = globalThis.wasm_get_moves(JSON.stringify(input))
       return JSON.parse(output)
     },
-    getMatch(): Match {
-      return new Match(
-        this.player1,
-        this.player2,
-        this.boardConfiguration,
-        this.dice,
-        this.turn,
-        new Date(this.created_at),
-        new Date(this.updated_at),
-        this.status,
-        this.rounds_to_win,
-        this.starter,
-        this.ai_suggestions
-      )
-    },
     setDice(result: number[], available: number[]) {
       this.dice.roll = result
       this.dice.available = available
     },
     setStartDice(roll1: number, count1: number, roll2: number, count2: number) {
-      this.startDice = { roll1, count1, roll2, count2 }
+			this.startDice = { roll1, count1, roll2, count2 };
 
-    },
-    setStarter(starter: number, turn: number) {
-      this.starter = starter
-      this.turn = turn
-    }
+		},
+		setStarter(starter: number, turn: number) {
+			this.starter = starter;
+			this.turn = turn;
+		}
   }
 })

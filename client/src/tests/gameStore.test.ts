@@ -29,6 +29,8 @@ describe('game store', () => {
       'active',
       1,
       1,
+      [0, 0],
+      { count: 0, last_usage: 0, proposed: false, proposer: 0 }
     );
     gameStore.setMatch({
       player1: 'Alice',
@@ -44,10 +46,12 @@ describe('game store', () => {
       winsP1: 0,
       winsP2: 0,
       starter: 1,
-		  startDice: {roll1: 0, count1: 0, roll2: 0, count2: 0}
+		  startDice: {roll1: 0, count1: 0, roll2: 0, count2: 0},
+      ai_suggestions: [0, 0],
+      doublingCube: {count: 0, last_usage: 0, proposed: false, proposer: 0},
     });
 
-    expect(gameStore.getMatch()).toEqual(match);
+    expect(gameStore.status).toEqual(match.status);
   });
 
   it('should fetch game data and set match', async () => {

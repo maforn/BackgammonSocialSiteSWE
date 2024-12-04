@@ -1,6 +1,6 @@
 <template>
-  <QuitModal v-if="isModalVisible" @confirm="confirmQuit" @cancel="cancelQuit" />
   <div class="h-full flex flex-col lg:flex-row gap-6 xl:gap-8 justify-center">
+    <QuitModal v-if="isModalVisible" @confirm="confirmQuit" @cancel="cancelQuit" />
     <div class="background"></div>
     <div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
       <div class="flex justify-center w-full gap-4 mt-6" v-if="started">
@@ -53,7 +53,7 @@
       <div class="relative" v-if="started">
         <GameBoard :configuration="configuration" :player1="isPlayer1" :dice="availableDice" :your-turn="isYourTurn"
                    @movePiece="movePiece" @noAvailableMoves="buttonShower" />
-        <button v-if="!diceThrown && isYourTurn" class="dice-button p-2 w-10 sm:w-16 lg:w-20" @click.stop="diceThrow">
+        <button v-if="diceThrowAllowed" class="dice-button p-2 w-10 sm:w-16 lg:w-20" @click.stop="diceThrow">
           <v-icon name="gi-rolling-dices" width="100%" height="100%" />
         </button>
       </div>
@@ -92,6 +92,22 @@
         </button>
       </div>
       <div class="flex gap-2" v-if="started">
+        <div :class="[
+          'flex',
+          'items-center',
+          'px-8',
+          'h-12',
+          'py-3',
+          'text-white',
+          'rounded-r-full',
+          'rounded-l-full',
+          'shadow-md',
+          isYourTurn ? 'player-turn-1' : 'player-turn-2',
+        ]">
+          <span class="text-lg font-semibold">x{{ Math.pow(2, doublingCube.count) }} <v-icon name="fa-dice-d20" />
+          </span>
+          <button class="start-pulse ml-4 font-semibold" v-if="canDouble" @click="proposeDoubling">Double</button>
+        </div>
         <div :class="[
           'flex',
           'items-center',
@@ -147,14 +163,38 @@
                 @click="getAISuggestion">Get AI Suggestion {{ ai_suggestions[isPlayer1 ? 1 : 0] }}/3
         </button>
         <div>
-          <button v-if="showPassButton&&isYourTurn&&diceThrown"
+          <button v-if="showPassButton && isYourTurn&&diceThrown"
                   class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">
             Pass the turn
           </button>
         </div>
-
       </div>
     </div>
+    <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" v-if="doublingCube.proposed">
+      <div class="bg-white p-10 rounded-lg shadow-lg">
+      <span v-if="isYourTurn" class="text-lg font-semibold text-gray-600">
+        Waiting for opponent to accept or reject the double...
+      </span>
+        <div v-else>
+        <span class="text-lg font-semibold text-gray-600">
+        The opponent has proposed a double. Do you accept?
+      </span>
+          <div class="flex w-full justify-center items-center gap-2 mt-8">
+            <button class="btn-accept px-6 py-2 rounded bg-green-600 text-white cursor-pointer"
+                    @click.stop="acceptDoubling">Accept
+            </button>
+            <button class="btn-reject px-6 py-2 rounded bg-red-600 text-white cursor-pointer"
+                    @click.stop="rejectDoubling">Reject
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button @click="goHome" id="home-btn"
+            class="absolute top-4 left-4 px-4 py-2 bg-white text-black rounded-md hover:bg-gray-400">
+      <v-icon
+        name="io-home-sharp" />
+    </button>
   </div>
 </template>
 
@@ -193,7 +233,8 @@ export default defineComponent({
       status,
       starter,
       startDice,
-      ai_suggestions
+      ai_suggestions,
+      doublingCube
     } = storeToRefs(gameStore)
 
     const wsStore = useWsStore()
@@ -283,7 +324,7 @@ export default defineComponent({
       showPassButton,
       buttonShower,
       passTheTurn,
-      started: ref(started), //TODO: controlla se è meglio started: computed(() => starter.value > 0),
+      started: ref(started),
       initialText: 'Throw the die to pick the starter!',
       status,
       ai_names,
@@ -292,7 +333,8 @@ export default defineComponent({
       confirmQuit,
       cancelQuit,
       getAISuggestion,
-      ai_suggestions
+      ai_suggestions,
+      doublingCube
     }
   },
   methods: {
@@ -303,6 +345,9 @@ export default defineComponent({
       else if (isGammon(board, winnerIsPlayer1))
         opt = ' with a gammon'
       return `${winnerUsername} has won the match${opt}!`
+    },
+    goHome() {
+      this.$router.push({ name: 'home' })
     },
     async diceThrow() {
       this.showPassButton = false
@@ -359,15 +404,38 @@ export default defineComponent({
             useWsStore().addError(error?.response?.data?.detail)
           }
         })
+    },
+    proposeDoubling() {
+      axiosInstance
+        .post('/game/double/propose')
+        .catch(error => {
+          if (isAxiosError(error)) {
+            useWsStore().addError(error?.response?.data?.detail)
+          }
+        })
+    },
+    acceptDoubling() {
+      axiosInstance
+        .post('/game/double/accept')
+        .catch(error => {
+          if (isAxiosError(error)) {
+            useWsStore().addError(error?.response?.data?.detail)
+          }
+        })
+    },
+    rejectDoubling() {
+      axiosInstance
+        .post('/game/double/reject')
+        .catch(error => {
+          if (isAxiosError(error)) {
+            useWsStore().addError(error?.response?.data?.detail)
+          }
+        })
     }
   },
   computed: {
     isYourTurn(): boolean {
-      if ((this.turn % 2 === 0 && this.isPlayer1) || (this.turn % 2 === 1 && !this.isPlayer1)) {
-        return true
-      } else {
-        return false
-      }
+      return (this.turn % 2 === 0 && this.isPlayer1) || (this.turn % 2 === 1 && !this.isPlayer1)
     },
     diceThrown(): boolean {
       return this.diceResult.die1.value !== null && this.diceResult.die2.value !== null
@@ -378,6 +446,19 @@ export default defineComponent({
     startDiceThrowAllowed(): boolean {
       return this.starter <= 0 && this.isPlayer1 && this.startDice.count1 <= this.startDice.count2
         || this.starter <= 0 && !this.isPlayer1 && this.startDice.count2 <= this.startDice.count1
+    },
+    canDouble() {
+      const maxDouble = 3
+      const playerNumber = this.isPlayer1 ? 1 : 2
+      const opponentUsername = this.isPlayer1 ? this.player2 : this.player1
+
+      console.log(this.doublingCube.last_usage)
+
+      return this.isYourTurn && !this.diceThrown && this.doublingCube.last_usage != playerNumber && this.doublingCube.count < maxDouble
+        && !this.doublingCube.proposed && !this.ai_names.includes(opponentUsername)
+    },
+    diceThrowAllowed() {
+      return this.isYourTurn && !this.diceThrown && !this.doublingCube.proposed
     },
     winnerMessage(): string {
       if (this.status === 'player_1_won') {
@@ -390,8 +471,6 @@ export default defineComponent({
   },
   watch: {
     starter(newVal, oldVal) {
-      console.log('started', newVal, oldVal)
-
       if (oldVal === -1 && newVal > 0)
         this.started = true
       else if (newVal === 1 && this.isPlayer1 || newVal === 2 && !this.isPlayer1)

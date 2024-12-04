@@ -42,7 +42,8 @@ async def move(move_data: dict, token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=400, detail=NO_ONGOING_GAME_FOUND)
 
     if (current_game.turn % 2 == 0 and current_game.player1 != user.username) or \
-            (current_game.turn % 2 == 1 and current_game.player2 != user.username):
+            (current_game.turn % 2 == 1 and current_game.player2 != user.username) or \
+                current_game.doublingCube.proposed:
         raise HTTPException(status_code=400, detail=NOT_YOUR_TURN)
 
     board_value = move_data.get("board")
@@ -274,7 +275,97 @@ async def quit_game(token: str = Depends(oauth2_scheme)):
 
     websocket_player1 = await manager.get_user(current_game.player1)
     if websocket_player1:
-        await manager.send_personal_message({"type": "quit_game", "winner": winner, "match": current_game.dict(by_alias=True)}, websocket_player1)
+        await manager.send_personal_message({"type": "quit_game", "winner": winner, "user": user.username, "match": current_game.dict(by_alias=True)}, websocket_player1)
     websocket_player2 = await manager.get_user(current_game.player2)
     if websocket_player2:
-        await manager.send_personal_message({"type": "quit_game", "winner": winner, "match": current_game.dict(by_alias=True)}, websocket_player2)
+        await manager.send_personal_message({"type": "quit_game", "winner": winner, "user": user.username, "match": current_game.dict(by_alias=True)}, websocket_player2)
+
+
+@router.post("/game/double/propose")
+async def propose_double(token: str = Depends(oauth2_scheme)):
+    user = await get_user_from_token(token)
+    current_game = await get_current_game(user.username)
+    player_number = 1 if current_game.player1 == user.username else 2
+
+    if not current_game or current_game.status != "started":
+        raise HTTPException(status_code=400, detail=NO_ONGOING_GAME_FOUND)
+
+    if (current_game.turn % 2 == 0 and current_game.player1 != user.username) or \
+            (current_game.turn % 2 == 1 and current_game.player2 != user.username):
+        raise HTTPException(status_code=400, detail=NOT_YOUR_TURN)
+
+    if current_game.doublingCube.proposed or current_game.doublingCube.last_usage == player_number:
+        raise HTTPException(status_code=400, detail="Doubling already proposed or cube in posses of the other player")
+
+    if current_game.doublingCube.count >= 3:
+        raise HTTPException(status_code=400, detail="Doubling cube already reached maximum value")
+
+    current_game.doublingCube.proposed = True
+    current_game.doublingCube.proposer = player_number
+
+    await get_db().matches.update_one({"_id": current_game.id}, {
+        "$set": {"doublingCube": current_game.doublingCube.model_dump(by_alias=True)}})
+
+    websocket_player1 = await manager.get_user(current_game.player1)
+    if websocket_player1:
+        await manager.send_personal_message({"type": "double_proposed", "match": current_game.model_dump(by_alias=True)},
+                                            websocket_player1)
+    websocket_player2 = await manager.get_user(current_game.player2)
+    if websocket_player2:
+        await manager.send_personal_message({"type": "double_proposed", "match": current_game.model_dump(by_alias=True)},
+                                            websocket_player2)
+
+
+@router.post("/game/double/accept")
+async def accept_double(token: str = Depends(oauth2_scheme)):
+    user = await get_user_from_token(token)
+    current_game = await get_current_game(user.username)
+    player_number = 1 if current_game.player1 == user.username else 2
+
+    if not current_game or current_game.status != "started":
+        raise HTTPException(status_code=400, detail=NO_ONGOING_GAME_FOUND)
+
+    if not current_game.doublingCube.proposed or current_game.doublingCube.proposer == player_number:
+        raise HTTPException(status_code=400, detail="No doubling cube proposed to you")
+
+    current_game.doublingCube.count += 1
+    current_game.doublingCube.proposed = False
+    current_game.doublingCube.last_usage = current_game.doublingCube.proposer
+    current_game.doublingCube.proposer = 0
+
+    await get_db().matches.update_one({"_id": current_game.id}, {
+        "$set": {"doublingCube": current_game.doublingCube.model_dump(by_alias=True)}})
+
+    websocket_player1 = await manager.get_user(current_game.player1)
+    if websocket_player1:
+        await manager.send_personal_message({"type": "double_accepted", "match": current_game.model_dump(by_alias=True)},
+                                            websocket_player1)
+    websocket_player2 = await manager.get_user(current_game.player2)
+    if websocket_player2:
+        await manager.send_personal_message({"type": "double_accepted", "match": current_game.model_dump(by_alias=True)},
+                                            websocket_player2)
+
+
+@router.post("/game/double/reject")
+async def reject_double(token: str = Depends(oauth2_scheme)):
+    user = await get_user_from_token(token)
+    current_game = await get_current_game(user.username)
+    player_number = 1 if current_game.player1 == user.username else 2
+
+    if not current_game or current_game.status != "started":
+        raise HTTPException(status_code=400, detail=NO_ONGOING_GAME_FOUND)
+
+    if not current_game.doublingCube.proposed or current_game.doublingCube.proposer == player_number:
+        raise HTTPException(status_code=400, detail="No doubling cube proposed to you")
+
+    winner = 1 if player_number == 2 else 2
+    await check_winner(current_game, manager, winner=winner)
+
+    websocket_player1 = await manager.get_user(current_game.player1)
+    if websocket_player1:
+        await manager.send_personal_message({"type": "double_rejected", "match": current_game.dict(by_alias=True)},
+                                            websocket_player1)
+    websocket_player2 = await manager.get_user(current_game.player2)
+    if websocket_player2:
+        await manager.send_personal_message({"type": "double_rejected", "match": current_game.dict(by_alias=True)},
+                                            websocket_player2)
