@@ -6,6 +6,7 @@ import MockAdapter from 'axios-mock-adapter'
 import { createPinia, setActivePinia } from 'pinia'
 import { useGameStore } from '@/stores/gameStore'
 import { useWsStore } from '@/stores/wsStore'
+import { BoardConfiguration } from '@/models/BoardConfiguration'
 
 describe('GameView.vue', () => {
   let mock: MockAdapter
@@ -180,7 +181,7 @@ describe('GameView.vue', () => {
     openSpy.mockRestore()
   })
 
-  it("should display the timer", async () => {
+  it('should display the timer', async () => {
     const wrapper = mount(GameView, {
       pinia
     })
@@ -189,13 +190,60 @@ describe('GameView.vue', () => {
     wrapper.vm.status = 'started'
     wrapper.vm.last_updated = new Date()
     await wrapper.vm.$nextTick()
-
     const timer = wrapper.vm.remainingTime
     await wrapper.vm.$nextTick()
-    expect(timer).greaterThan(10);
+    expect(timer).greaterThan(10)
   })
 
-  it("should call the requestTimeout method", async () => {
+
+  it('calls the correct endpoint when movePiece is called', async () => {
+    const wrapper = mount(GameView)
+    const board = new BoardConfiguration()
+    const dice = 4
+    await wrapper.vm.movePiece(board, dice)
+    expect(axiosInstance.post).toHaveBeenCalledWith('/move/piece', { board, dice })
+  })
+
+  it('calls the correct endpoint when throwStartDice is called', async () => {
+    const wrapper = mount(GameView)
+    await wrapper.vm.throwStartDice()
+    expect(axiosInstance.get).toHaveBeenCalledWith('/throw_start_dice')
+  })
+
+  it('calls the correct endpoint when proposeDoubling is called', async () => {
+    const wrapper = mount(GameView)
+    await wrapper.vm.proposeDoubling()
+    expect(axiosInstance.post).toHaveBeenCalledWith('/game/double/propose')
+  })
+
+  it('calls the correct endpoint when acceptDoubling is called', async () => {
+    const wrapper = mount(GameView)
+    await wrapper.vm.acceptDoubling()
+    expect(axiosInstance.post).toHaveBeenCalledWith('/game/double/accept')
+  })
+
+  it('calls the correct endpoint when rejectDoubling is called', async () => {
+    const wrapper = mount(GameView)
+    await wrapper.vm.rejectDoubling()
+    expect(axiosInstance.post).toHaveBeenCalledWith('/game/double/reject')
+  })
+
+  it('formatWinMessage should format the string correctly', async () => {
+    const wrapper = mount(GameView)
+    const board = new BoardConfiguration()
+    board.points = board.points.map(() => ({ player1: 0, player2: 0 }))
+    board.points[7] = { player1: 0, player2: 15 }
+    expect(wrapper.vm.formatWinMessage('player1', true, board)).toBe('player1 has won the match with a gammon!')
+
+    board.points[7] = { player1: 0, player2: 14 }
+    expect(wrapper.vm.formatWinMessage('player1', true, board)).toBe('player1 has won the match!')
+
+    board.points[7] = { player1: 0, player2: 0 }
+    board.bar = { player1: 0, player2: 15 }
+    expect(wrapper.vm.formatWinMessage('player1', true, board)).toBe('player1 has won the match with a backgammon!')
+  })
+
+  it('should call the requestTimeout method', async () => {
     const wrapper = mount(GameView, {
       pinia
     })
