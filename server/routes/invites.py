@@ -14,6 +14,7 @@ router = APIRouter()
 
 def serialize_invite(invite):
     invite["_id"] = str(invite["_id"])
+    invite["last_updated"] = invite["last_updated"].isoformat()
     return invite
 
 
