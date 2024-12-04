@@ -74,7 +74,7 @@ class Match(BaseModel):
     dice: List[int] = []
     available: List[int] = []
     turn: int = 0
-    last_updated: datetime = Field(default_factory=datetime.now)
+    last_updated: str = Field(default_factory=lambda: datetime.now().replace(microsecond=0).isoformat()) #ISO format without microseconds
     status: str = "pending"
     rounds_to_win: int
     winsP1: int = 0

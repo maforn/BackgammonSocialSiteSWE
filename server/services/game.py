@@ -1,5 +1,6 @@
 import random
 
+from time import strptime
 from datetime import datetime, timedelta
 from models.board_configuration import Match, BoardConfiguration, StartDice
 from services.ai import ai_names, ai_rating
@@ -31,8 +32,13 @@ async def create_started_match(player1: str, player2: str, rounds_to_win: int = 
 
 
 async def check_timeout_condition(match: Match):
-    current_time = datetime.now()
-    return current_time - match.last_updated > timedelta(seconds=30)
+    current_time = datetime.now().replace(microsecond=0) #Remove microseconds from current time
+
+    print("current_time: ", current_time)
+    print("dt(strptime) out: ", datetime(*strptime(match.last_updated,"%Y-%m-%dT%H:%M:%S")[:6]))
+    
+    #Convert last_updated to tuple, then to datetime object and compare with current time
+    return current_time - datetime(*strptime(match.last_updated,"%Y-%m-%dT%H:%M:%S")[:6]) > timedelta(seconds=30)
 
 
 async def check_timeout_winner(current_game: Match):
@@ -41,9 +47,12 @@ async def check_timeout_winner(current_game: Match):
             return 2
         else: #Player 2's turn timed out, winner should be player 1
             return 1
+    else:
+        return 0
+    
 
 async def manage_timeout(current_game: Match, manager):
-    await check_winner(current_game, manager, True)
+    await check_winner(current_game, manager, isTimeout=True)
 
 
 def check_win_condition(match: Match):
@@ -122,7 +131,7 @@ async def check_winner(current_game: Match, manager, isTimeout=False):
 
 async def update_rating(current_game: Match, p1_data, p2_data, winner, isTimeout: bool = False):
 
-    win_multiplier = compute_win_multiplier(current_game, winner) if not isTimeout else 1
+    win_multiplier = 1 if isTimeout else compute_win_multiplier(current_game, winner)
 
     if winner == 1:
         # Player 1 won the current round
