@@ -171,12 +171,14 @@ export default defineComponent({
         return;
       }
       if (this.internalConfig.bar.player1 > 0) {
-        this.movePiece(24, index) // Move piece from bar to point
-      } else if (this.srcPointIndex === null) {
-        this.srcPointIndex = index
-      } else {
-        this.movePiece(this.srcPointIndex, index) // Move piece from one point to another
-      }
+				this.movePiece(24, index); // Move piece from bar to point
+			} else if (this.srcPointIndex === null) {
+				this.srcPointIndex = index;
+			} else if (index === this.srcPointIndex) {
+				this.deselectPoint(); // Deselect the point
+			} else {
+				this.movePiece(this.srcPointIndex, index); // Move piece from one point to another
+			}
     },
     /**
      * Deselects the currently selected point.
@@ -311,6 +313,8 @@ export default defineComponent({
         const allowedIndices = availableDice
           .map(dice => (srcPointIndex ?? 24) - dice)
           .filter(index => index <= 23 && index >= 0 && boardConfig.points[index].player2 <= 1)
+
+        allowedIndices.push(srcPointIndex) // Currently selected point can be clicked onto again to deselect it
 
         // If the player has all pieces in base, allow moving pieces to the bear-off area
         if (
