@@ -9,6 +9,7 @@ import TournamentView from '@/views/TournamentView.vue';
 import PasswordRecoveryView from '@/views/PasswordRecoveryView.vue'
 import PasswordResetView from '@/views/PasswordResetView.vue'
 import LeaderboardView from '@/views/LeaderboardView.vue';
+import MatchOverView from "@/views/MatchOverView.vue";
 
 const routes = [
 	{
@@ -60,7 +61,13 @@ const routes = [
 		path: '/leaderboard',
 		name: 'leaderboard',
 		component: LeaderboardView,
-	}
+	},
+  {
+    meta: { requiresAuth: true },
+    path: '/match-over',
+    name: 'match-over',
+    component: MatchOverView,
+  }
 ];
 
 const router = createRouter({

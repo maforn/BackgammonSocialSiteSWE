@@ -15,4 +15,4 @@ async def get_pending_invites(username: str):
 
 
 async def accept_invite(invite_id: str):
-    await get_db().matches.update_one({"_id": invite_id}, {"$set": {"status": "started"}})
+    await get_db().matches.update_one({"_id": invite_id}, {"$set": {"status": "started", "turn": -1}})

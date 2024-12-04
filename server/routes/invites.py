@@ -35,7 +35,7 @@ async def create_invite_endpoint(request: CreateInviteRequest, token: str = Depe
         if opponent is None:
             raise HTTPException(status_code=404, detail="Opponent not found")
         opponent_username = opponent["username"]
-    elif await get_user(opponent_username) is None:
+    elif await get_user(opponent_username) is None and not is_ai(opponent_username):
         raise HTTPException(status_code=404, detail="Opponent not found")
 
     if user.username == opponent_username:

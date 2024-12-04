@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from services.ai import ai_names
 from services.auth import oauth2_scheme, get_user_from_token
 from services.database import get_db
-from services.game import throw_dice, get_current_game, check_winner
+from services.game import throw_dice, get_current_game, check_winner, quit_the_game
 from services.websocket import manager
 from models.board_configuration import StartDice
 from fastapi.encoders import jsonable_encoder
@@ -236,8 +236,51 @@ async def pass_turn(token: str = Depends(oauth2_scheme)):
     if websocket_player2:
         await manager.send_personal_message({"type": "pass_turn", "match": current_game.dict(by_alias=True)},
                                             websocket_player2)
-        
-    
+
+@router.post("/ai/suggestions")
+async def use_ai_suggestions(token: str = Depends(oauth2_scheme)):
+    user = await get_user_from_token(token)
+    current_game = await get_current_game(user.username)
+
+    if not current_game or current_game.status != "started":
+        raise HTTPException(status_code=400, detail="No ongoing game found")
+
+    if (current_game.turn % 2 == 0 and current_game.player1 != user.username) or \
+            (current_game.turn % 2 == 1 and current_game.player2 != user.username):
+        raise HTTPException(status_code=400, detail="It's not your turn")
+
+    is_player_1 = current_game.player1 == user.username
+    if current_game.ai_suggestions[is_player_1] >= 3:
+        raise HTTPException(status_code=400, detail="You have already used all your suggestions")
+
+    current_game.ai_suggestions[is_player_1] += 1
+
+    await get_db().matches.update_one({"_id": current_game.id}, {
+        "$set": {"ai_suggestions": current_game.ai_suggestions}})
+
+@router.post("/game/quit")
+async def quit_game(token: str = Depends(oauth2_scheme)):
+    user = await get_user_from_token(token)
+    current_game = await get_current_game(user.username)
+
+    if not current_game or current_game.status != "started":
+        raise HTTPException(status_code=400, detail="No ongoing game found")
+
+    if current_game.player1 == user.username:
+        winner = 2
+    else:
+        winner = 1
+
+    await quit_the_game(current_game, manager, winner)
+
+    websocket_player1 = await manager.get_user(current_game.player1)
+    if websocket_player1:
+        await manager.send_personal_message({"type": "quit_game", "winner": winner, "user": user.username, "match": current_game.dict(by_alias=True)}, websocket_player1)
+    websocket_player2 = await manager.get_user(current_game.player2)
+    if websocket_player2:
+        await manager.send_personal_message({"type": "quit_game", "winner": winner, "user": user.username, "match": current_game.dict(by_alias=True)}, websocket_player2)
+
+
 @router.post("/game/double/propose")
 async def propose_double(token: str = Depends(oauth2_scheme)):
     user = await get_user_from_token(token)
@@ -250,7 +293,7 @@ async def propose_double(token: str = Depends(oauth2_scheme)):
     if (current_game.turn % 2 == 0 and current_game.player1 != user.username) or \
             (current_game.turn % 2 == 1 and current_game.player2 != user.username):
         raise HTTPException(status_code=400, detail=NOT_YOUR_TURN)
-    
+
     if current_game.doublingCube.proposed or current_game.doublingCube.last_usage == player_number:
         raise HTTPException(status_code=400, detail="Doubling already proposed or cube in posses of the other player")
 
@@ -271,7 +314,7 @@ async def propose_double(token: str = Depends(oauth2_scheme)):
     if websocket_player2:
         await manager.send_personal_message({"type": "double_proposed", "match": current_game.model_dump(by_alias=True)},
                                             websocket_player2)
-        
+
 
 @router.post("/game/double/accept")
 async def accept_double(token: str = Depends(oauth2_scheme)):
@@ -301,7 +344,7 @@ async def accept_double(token: str = Depends(oauth2_scheme)):
     if websocket_player2:
         await manager.send_personal_message({"type": "double_accepted", "match": current_game.model_dump(by_alias=True)},
                                             websocket_player2)
-        
+
 
 @router.post("/game/double/reject")
 async def reject_double(token: str = Depends(oauth2_scheme)):

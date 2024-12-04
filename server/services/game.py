@@ -47,16 +47,7 @@ async def check_winner(current_game: Match, manager, winner = None):
         winner = check_win_condition(current_game)
         winner = winner.get("winner")
 
-    p1_data = await get_db().users.find_one({
-        "username": current_game.player1
-    })
-    p2_data = await get_db().users.find_one({
-        "username": current_game.player2
-    })
-    p2_data = p2_data or {}
-    if current_game.player2 in ai_names:
-        p2_data["username"] = current_game.player2
-        p2_data["rating"] = ai_rating[ai_names.index(current_game.player2)]
+    p1_data, p2_data = await get_players_data(current_game)
 
     # Check if someone won the current round
     if winner != 0:
@@ -79,7 +70,8 @@ async def check_winner(current_game: Match, manager, winner = None):
             current_game.board_configuration = BoardConfiguration()
             current_game.available = []
             current_game.dice = []
-            current_game.turn = -1
+            current_game.ai_suggestions = [0, 0]
+            current_game.turn = int(winner_username == current_game.player2)
             current_game.starter = 0
             current_game.startDice = StartDice()
             current_game.doublingCube = DoublingCube()
@@ -105,7 +97,22 @@ async def check_winner(current_game: Match, manager, winner = None):
                                                     "startDice": current_game.startDice,
                                                     "doublingCube": current_game.doublingCube,
                                                     "winsP1": current_game.winsP1,
-                                                    "winsP2": current_game.winsP2}})
+                                                    "winsP2": current_game.winsP2,
+                                                    "ai_suggestions": current_game.ai_suggestions}})
+
+
+async def get_players_data(current_game):
+    p1_data = await get_db().users.find_one({
+        "username": current_game.player1
+    })
+    p2_data = await get_db().users.find_one({
+        "username": current_game.player2
+    })
+    p2_data = p2_data or {}
+    if current_game.player2 in ai_names:
+        p2_data["username"] = current_game.player2
+        p2_data["rating"] = ai_rating[ai_names.index(current_game.player2)]
+    return p1_data, p2_data
 
 
 def game_fields_to_dict(game: Match):
@@ -206,3 +213,30 @@ async def update_on_match_win(current_game, loser_username, manager, old_loser_r
             {"type": "match_over", "winner": winner_username, "loser": loser_username,
              "old_winner_rating": old_winner_rating, "new_winner_rating": new_winner_rating,
              "old_loser_rating": old_loser_rating, "new_loser_rating": new_loser_rating}, websocket_player2)
+
+
+async def quit_the_game(current_game: Match, manager, winner):
+    p1_data, p2_data = await get_players_data(current_game)
+
+    if winner == 1:
+        matches_left = current_game.rounds_to_win - current_game.winsP1
+    else:
+        matches_left = current_game.rounds_to_win - current_game.winsP2
+
+    current_game.board_configuration = BoardConfiguration().dict(by_alias=True)
+
+    for _ in range(matches_left):
+        loser_username, old_loser_rating, old_winner_rating, winner_username = await update_rating(current_game, p1_data, p2_data, winner)
+
+    if current_game.winsP1 == current_game.rounds_to_win or current_game.winsP2 == current_game.rounds_to_win:
+        await update_on_match_win(current_game, loser_username, manager, old_loser_rating, old_winner_rating,
+                                  winner, winner_username)
+
+    await get_db().matches.update_one({"_id": current_game.id},
+                                      {"$set": {"board_configuration": current_game.board_configuration,
+                                                "status": 'player_' + str(winner) + '_won',
+                                                "available": current_game.available,
+                                                "dice": current_game.dice,
+                                                "turn": current_game.turn,
+                                                "winsP1": current_game.winsP1,
+                                                "winsP2": current_game.winsP2}})

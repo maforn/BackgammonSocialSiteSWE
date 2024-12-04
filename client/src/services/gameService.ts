@@ -1,4 +1,9 @@
 import { BoardConfiguration } from '@/models/BoardConfiguration';
+import axiosInstance from '@/axios'
+
+export const updateAISuggestions = async () => {
+  await axiosInstance.post('/ai/suggestions');
+}
 
 export const NUMBER_OF_PLAYER_PIECES = 15;
 
@@ -50,7 +55,7 @@ export const moveOnBoard = (
 };
 
 export const findUsedDie = (dice: number[], srcPointIndex: number, dstPointIndex: number) => {
-	let usedDice = dice.reduce((min, die) => {
+	const usedDice = dice.reduce((min, die) => {
 		if (srcPointIndex - die <= dstPointIndex && die < min) {
 			return die;
 		}
