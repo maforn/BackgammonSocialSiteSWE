@@ -25,6 +25,7 @@ interface GameData {
 	winsP2: number;
 	starter: number;
 	startDice: { roll1: number; count1: number; roll2: number; count2: number };
+  last_updated: string;
 }
 
 const ai_players = ['ai_hard', 'ai_medium', 'ai_easy']
@@ -46,6 +47,7 @@ export const useGameStore = defineStore('game', {
     loaded: false,
     starter: -1,
 		startDice: { roll1: 0, count1: 0, roll2: 0, count2: 0 },
+    last_updated: new Date()
   }),
   actions: {
     async initializeWasm() {
@@ -86,6 +88,7 @@ export const useGameStore = defineStore('game', {
 			this.winsP2 = data.winsP2;
       this.starter = data.starter;
       this.startDice = data.startDice;
+      this.last_updated = new Date(data.last_updated)
       setTimeout(async () => await this.checkAITurn(), 1000)
     },
     async checkAITurn() {
@@ -140,7 +143,7 @@ export const useGameStore = defineStore('game', {
     },
     makeAIMove(move: any) {
       const isPlayer1 = this.player1 === useAuthStore().username
-      let newBoard = !isPlayer1 ? { ...this.boardConfiguration } : swapPlayers(this.boardConfiguration)
+      const newBoard = !isPlayer1 ? { ...this.boardConfiguration } : swapPlayers(this.boardConfiguration)
       move.play.forEach((piece_move, index) => {
 
         const srcIndex = piece_move.from === 'bar' ? 24 : piece_move.from - 1;
@@ -195,7 +198,8 @@ export const useGameStore = defineStore('game', {
         new Date(this.updated_at),
         this.status,
         this.rounds_to_win,
-        this.starter
+        this.starter,
+        this.last_updated
       )
     },
     setDice(result: number[], available: number[]) {
