@@ -258,7 +258,7 @@ async def quit_the_game(current_game: Match, manager, winner):
     current_game.board_configuration = BoardConfiguration().dict(by_alias=True)
 
     for _ in range(matches_left):
-        loser_username, old_loser_rating, old_winner_rating, winner_username = await update_rating(current_game,
+        loser_username, old_loser_rating, old_winner_rating, winner_username, _ = await update_rating(current_game,
                                                                                                    p1_data, p2_data,
                                                                                                    winner)
 
