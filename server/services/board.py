@@ -64,6 +64,4 @@ def get_pieces_summary(board_config: BoardConfiguration, is_player1: bool) -> tu
         on_bar = board_config.bar.player2
         on_opponent_base = sum(point.player2 for point in board_config.points[0: 6])
         
-        print(board_config)
-
         return on_board, on_bar, on_opponent_base

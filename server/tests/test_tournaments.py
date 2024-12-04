@@ -379,6 +379,8 @@ async def test_update_tournament_stats():
 @pytest.mark.anyio
 async def test_update_tournament_of_game():
     await clear_tournaments()
+    await clear_matches()
+
     await create_new_tournament(mock_request_data, owner="testuser")
     tournament = await get_db().tournaments.find_one({"owner": "testuser"})
     tournament_id = tournament["_id"]
@@ -391,7 +393,7 @@ async def test_update_tournament_of_game():
     m1 = await get_match_as_class_object(m1_id)
     m2 = await get_match_as_class_object(m2_id)
 
-    await clear_matches()
+    await get_db().matches.update_one({"player1": m1.player1}, {"$set": {"status": "won_player_1"}})
     await update_tournament_of_game(m1, m1.player1, m1.player2, 3)
     tournament = await get_tournament_as_class_object("testuser")
     tot_w_after = sum(stat.wins for stat in tournament.stats)
@@ -404,7 +406,7 @@ async def test_update_tournament_of_game():
     assert tot_m_after == 2
     assert tot_p_after == 3
 
-    await clear_matches()
+    await get_db().matches.update_one({"player1": m2.player1}, {"$set": {"status": "won_player_1"}})
     await update_tournament_of_game(m2, m2.player1, m2.player2, 4)
     tournament = await get_tournament_as_class_object("testuser")
     tot_w_after = sum(stat.wins for stat in tournament.stats)
@@ -420,3 +422,4 @@ async def test_update_tournament_of_game():
     m1_id_new, m2_id_new = tournament.match_ids
     assert m1_id != m1_id_new
     assert m2_id != m2_id_new
+    assert m1_id_new != m2_id_new

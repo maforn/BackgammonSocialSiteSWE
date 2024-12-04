@@ -139,9 +139,7 @@ def compute_win_multiplier(current_game: Match, winner: int) -> int:
 def get_winning_info_str(current_game: Match, winner: int):
     board = BoardConfiguration(**current_game.board_configuration)
     is_player1 = winner == 1
-
-    print(board)
-
+    
     if is_backgammon(board, is_player1):
         return " with a backgammon"
     elif is_gammon(board, is_player1):
@@ -153,6 +151,11 @@ def get_winning_info_str(current_game: Match, winner: int):
 async def update_on_match_win(current_game, loser_username, manager, old_loser_rating, old_winner_rating, winner,
                               winner_username):
     current_game.status = "player_" + str(winner) + "_won"
+
+    await get_db().matches.update_one({"_id": current_game.id},
+                                      {"$set": {"status": current_game.status}}
+                                      )
+
     # Logic for player ratings update and match end
     (new_winner_rating, new_loser_rating) = new_ratings_after_match(old_winner_rating, old_loser_rating)
     await get_db().users.update_one({"username": winner_username},

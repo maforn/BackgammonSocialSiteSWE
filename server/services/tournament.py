@@ -56,7 +56,6 @@ async def create_new_tournament(request: CreateTournamentRequest, owner: str):
                             )
     tournament_data = new_tournament.model_dump(by_alias=True)
     await get_db().tournaments.insert_one(tournament_data)
-    print(new_tournament)
     return new_tournament
 
 
