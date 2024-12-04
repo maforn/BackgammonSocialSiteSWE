@@ -1,4 +1,4 @@
-class TournamentStats {
+export class TournamentStats {
     username: string;
     wins: number;
     losses: number;
