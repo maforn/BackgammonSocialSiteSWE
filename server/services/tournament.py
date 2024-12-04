@@ -161,11 +161,10 @@ async def create_round_robin_tournament_round(tournament_id: str, round: int):
 
 
 async def get_tournament_of_game(game_id: str):
-    game = await get_db().matches.find_one({"_id": game_id})
-    tournament = await get_current_tournament(game["player1"])
-    if not tournament:
-        return None
-    return tournament
+    tournament = await get_db().tournaments.find_one({"match_ids": game_id})
+    if tournament:
+        return Tournament(**tournament)
+    return None
 
 
 async def update_tournament_of_game(game: Match, winner_username: str, loser_username: str, gained_points: int):
