@@ -105,7 +105,7 @@
         ]">
           {{ isYourTurn ? 'Your turn' : 'Opponent\'s turn' }}
         </div>
-        <button class="bg-red-300 text-white" @click="requestTimeout">Request victory by timeout</button>
+        <button class="bg-blue-300 text-white rounded-full px-8 h-12 py-3 itemsCenter" v-if="!isYourTurn" @click="requestTimeout">Request victory by timeout</button>
         <div v-if="diceThrown" :class="[
           'dice-container',
           'flex',

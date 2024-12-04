@@ -9,6 +9,11 @@ from services.rating import new_ratings_after_match
 from services.board import is_gammon, is_backgammon
 
 
+async def update_match(selector, data):
+    data["$set"]["last_updated"] = datetime.now().replace(microsecond=0).isoformat()
+    await get_db().matches.update_one(selector, data)
+
+
 def throw_dice():
     die1 = random.randint(1, 6)
     die2 = random.randint(1, 6)
@@ -49,10 +54,6 @@ async def check_timeout_winner(current_game: Match):
             return 1
     else:
         return 0
-    
-
-async def manage_timeout(current_game: Match, manager):
-    await check_winner(current_game, manager, isTimeout=True)
 
 
 def check_win_condition(match: Match):
@@ -68,9 +69,9 @@ def check_win_condition(match: Match):
     return {"winner": 1} if player1_counter == 0 else {"winner": 2}
 
 
-async def check_winner(current_game: Match, manager, isTimeout=False):
-    if isTimeout:
-        winner = check_timeout_winner(current_game)
+async def check_winner(current_game: Match, manager, is_timeout=False):
+    if is_timeout:
+        winner = await check_timeout_winner(current_game)
     else:
         winner = check_win_condition(current_game)
         winner = winner.get("winner")
@@ -90,7 +91,7 @@ async def check_winner(current_game: Match, manager, isTimeout=False):
     if winner != 0:
         loser_username, old_loser_rating, old_winner_rating, winner_username = await update_rating(current_game,
                                                                                                    p1_data, p2_data,
-                                                                                                   winner, isTimeout)
+                                                                                                   winner, is_timeout)
 
         # Check if someone won the entire match (won rounds_to_win rounds)
         if current_game.winsP1 == current_game.rounds_to_win or current_game.winsP2 == current_game.rounds_to_win:
@@ -98,14 +99,14 @@ async def check_winner(current_game: Match, manager, isTimeout=False):
                                       winner, winner_username)
         else:
             # Message for round end (gammon/backgammon/normal win)
-            info_str = get_winning_info_str(current_game, winner)
+            info_str = get_winning_info_str(current_game, winner) if not is_timeout else " due to timeout"
 
             # Must proceed to next round
             # Reset the board configuration, turn, dice and available
             current_game.board_configuration = BoardConfiguration().dict(by_alias=True)
             current_game.available = []
             current_game.dice = []
-            current_game.turn = -1
+            current_game.turn = 0
             current_game.starter = 0
             current_game.startDice = StartDice()
 
@@ -119,7 +120,8 @@ async def check_winner(current_game: Match, manager, isTimeout=False):
                 await manager.send_personal_message({"type": "round_over", "winner": winner_username, "info": info_str},
                                                     websocket_player2)
 
-        await get_db().matches.update_one({"_id": current_game.id},
+        print(current_game)
+        await update_match({"_id": current_game.id},
                                           {"$set": {"board_configuration": current_game.board_configuration,
                                                     "status": current_game.status,
                                                     "available": current_game.available,
@@ -129,9 +131,9 @@ async def check_winner(current_game: Match, manager, isTimeout=False):
                                                     "winsP2": current_game.winsP2}})    
 
 
-async def update_rating(current_game: Match, p1_data, p2_data, winner, isTimeout: bool = False):
+async def update_rating(current_game: Match, p1_data, p2_data, winner, is_timeout: bool = False):
 
-    win_multiplier = 1 if isTimeout else compute_win_multiplier(current_game, winner)
+    win_multiplier = 1 if is_timeout else compute_win_multiplier(current_game, winner)
 
     if winner == 1:
         # Player 1 won the current round

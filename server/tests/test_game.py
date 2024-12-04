@@ -1,10 +1,9 @@
 import pytest
 from httpx import AsyncClient
 from services.database import get_db
-from services.game import create_started_match
+from services.game import create_started_match, update_match
 
 from tests.conftest import clear_matches
-from services.game import check_win_condition, get_current_game
 
 
 @pytest.mark.anyio
@@ -25,6 +24,7 @@ async def test_throw_start_dice(client: AsyncClient, token: str):
 async def test_throw_dice(client: AsyncClient, token: str):
     await clear_matches()
     await create_started_match("testuser", "testuser2")
+    await update_match({"player1": "testuser"}, {"$set": {"turn": 0}})
     old_match = await get_db().matches.find_one({"player1": "testuser"})
     response = await client.get("/throw_dice", headers={"Authorization": f"Bearer {token}"})
     updated_match = await get_db().matches.find_one({"player1": "testuser"})
@@ -37,7 +37,7 @@ async def test_throw_dice(client: AsyncClient, token: str):
 async def test_move_piece(client: AsyncClient, token: str):
     await clear_matches()
     await create_started_match("testuser", "testuser2")
-    await get_db().matches.update_one({"player1": "testuser"}, {"$set": {"dice": [3, 5], "available": [3, 5]}})
+    await update_match({"player1": "testuser"}, {"$set": {"dice": [3, 5], "available": [3, 5], "turn": 0}})
     move_data = {
         "board": {
             "points": [{"player1": 1, "player2": 0} for _ in range(24)],
@@ -64,7 +64,7 @@ async def test_game(client: AsyncClient, token: str):
 async def test_move_piece(client: AsyncClient, token: str):
     await clear_matches()
     await create_started_match("testuser", "testuser2")
-    await get_db().matches.update_one({"player1": "testuser"}, {"$set": {"dice": [3, 5], "available": [3, 5]}})
+    await update_match({"player1": "testuser"}, {"$set": {"dice": [3, 5], "available": [3, 5], "turn": 0}})
     move_data = {
         "board": {
             "points": [{"player1": 1, "player2": 0} for _ in range(24)],
@@ -98,7 +98,7 @@ async def test_send_in_game_message(client: AsyncClient, token: str):
 async def test_move_ai(client: AsyncClient, token: str):
     await clear_matches()
     await create_started_match("testuser", "ai_easy")
-    await get_db().matches.update_one({"player1": "testuser"}, {"$set": {"dice": [3, 5], "available": [3, 5]}})
+    await update_match({"player1": "testuser"}, {"$set": {"dice": [3, 5], "available": [3, 5], "turn": 0}})
     move_data = {
         "board": {
             "points": [{"player1": 1, "player2": 0} for _ in range(24)],
@@ -117,7 +117,7 @@ async def test_move_ai(client: AsyncClient, token: str):
 async def test_round_progression(client: AsyncClient, token: str):
     await clear_matches()
     await create_started_match("testuser", "testuser2")
-    await get_db().matches.update_one({"player1": "testuser"}, {
+    await update_match({"player1": "testuser"}, {
         "$set": {"turn": 20, "dice": [3, 5], "available": [3, 5], "rounds_to_win": 3, "winsP1": 0, "winsP2": 0}})
     move_data = {
         "board": {
@@ -128,7 +128,7 @@ async def test_round_progression(client: AsyncClient, token: str):
     await client.post("/move/piece", json=move_data, headers={"Authorization": f"Bearer {token}"})
     updated_game = await get_db().matches.find_one({"player1": "testuser"})
     assert updated_game is not None
-    assert updated_game["turn"] == -1
+    assert updated_game["turn"] == 0
     assert updated_game["winsP2"] == 1
 
 
@@ -136,7 +136,7 @@ async def test_round_progression(client: AsyncClient, token: str):
 async def test_pass_turn(client: AsyncClient, token: str):
     await clear_matches()
     await create_started_match("testuser", "testuser2")
-    await get_db().matches.update_one({"player1": "testuser"},
+    await update_match({"player1": "testuser"},
                                       {"$set": {"turn": 0, "dice": [3, 5], "available": [3, 5]}})
 
     response = await client.post("/game/pass_turn", headers={"Authorization": f"Bearer {token}"})
