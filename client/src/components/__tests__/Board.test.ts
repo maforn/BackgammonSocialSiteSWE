@@ -252,6 +252,14 @@ describe('Board component point selection tests', () => {
 
 		expect(wrapper.vm.srcPointIndex).toBe(null);
 	});
+
+	it('Deselects point when the same point is clicked again', () => {
+		wrapper.vm.srcPointIndex = 3;
+
+		wrapper.vm.selectPoint(3);
+
+		expect(wrapper.vm.srcPointIndex).toBe(null);
+	});
 });
 
 describe('Board component movePiece method tests', () => {
