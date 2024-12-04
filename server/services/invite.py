@@ -1,6 +1,7 @@
 from bson import ObjectId
 from models.board_configuration import Match
 from services.database import get_db
+from services.game import update_match
 
 
 async def create_invite(player1: str, player2: str, rounds_to_win: int):
@@ -15,4 +16,4 @@ async def get_pending_invites(username: str):
 
 
 async def accept_invite(invite_id: str):
-    await get_db().matches.update_one({"_id": invite_id}, {"$set": {"status": "started"}})
+    await update_match({"_id": invite_id}, {"$set": {"status": "started", "turn": -1}})

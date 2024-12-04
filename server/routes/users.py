@@ -101,3 +101,10 @@ async def get_top5_and_me_google(email_list: EmailList, token: str = Depends(oau
     users.append(UserInLeaderboard(**me.dict(), position=my_position))
 
     return users
+
+@router.get("/users/get_user_rating")
+async def get_user_score(username: str):
+    user = await get_user(username)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user.rating

@@ -39,7 +39,7 @@ async def get_available_tournaments(username: str) -> List[Tournament] | None:
     }).to_list(length=None)
     if tournament_data:
         return [Tournament(**tournament) for tournament in tournament_data]
-    return None
+    return []
 
 
 async def create_new_tournament(request: CreateTournamentRequest, owner: str):
