@@ -1,5 +1,6 @@
 from fastapi.security import OAuth2PasswordBearer
 from copy import deepcopy
+from datetime import datetime
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 from typing import List
@@ -82,15 +83,29 @@ class Match(BaseModel):
     board_configuration: BoardConfiguration = BoardConfiguration()
     dice: List[int] = []
     available: List[int] = []
-    turn: int = 0
+    turn: int = -1
+    last_updated: str = Field(default_factory=lambda: datetime.now().replace(microsecond=0).isoformat()) #ISO format without microseconds
     status: str = "pending"
     rounds_to_win: int
     winsP1: int = 0
     winsP2: int = 0
     starter: int = 0
     startDice: StartDice = StartDice()
-    ai_suggestions: List[int] = [0, 0]
+    ai_suggestions: List[int] = Field(default_factory=lambda: [0, 0])
     doublingCube: DoublingCube = DoublingCube()
+
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.isoformat()
+        }
+
+    def __setattr__(self, name, value):
+        if name != "last_updated":
+            super().__setattr__("last_updated", datetime.now().replace(microsecond=0).isoformat())
+        super().__setattr__(name, value)
+
+    def get_last_modified_time(self) -> str:
+        return self.last_updated
 
 
 class CreateInviteRequest(BaseModel):

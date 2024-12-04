@@ -19,6 +19,7 @@ export class Match {
 	startDice: {roll1 : number, count1: number, roll2: number, count2: number};
   ai_suggestions: number[];
 	doublingCube: {count: number, last_usage: number, proposed: boolean, proposer: number};
+  last_updated: Date;
 
 	constructor(
 		player1: string,
@@ -31,8 +32,9 @@ export class Match {
 		status: string,
 		starter: number,
 		rounds_to_win: number,
+    last_updated: Date,
     ai_suggestions: number[],
-    doublingCube: {count: number, last_usage: number, proposed: boolean, proposer: number}
+    doublingCube: {count: number, last_usage: number, proposed: boolean, proposer: number},
 	) {
 		this.player1 = player1;
 		this.player2 = player2;
@@ -49,5 +51,6 @@ export class Match {
 		this.startDice = {roll1: 0, count1: 0, roll2: 0, count2: 0};
 		this.doublingCube = {count: 0, last_usage: 0, proposed: false, proposer: 0};
     this.ai_suggestions = [0, 0];
+    this.last_updated = last_updated;
 	}
 }

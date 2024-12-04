@@ -120,8 +120,12 @@
           'shadow-md',
           isYourTurn ? 'player-turn-1' : 'player-turn-2',
         ]">
-          {{ isYourTurn ? 'Your turn' : 'Opponent\'s turn' }}
+          {{ isYourTurn ? 'Your turn' : 'Opponent\'s turn' }} | Remaining time:
+          00:{{ remainingTime.toString().padStart(2, '0') }}
         </div>
+        <button class="bg-blue-300 rounded-full px-8 h-12 py-3 flex items-center" v-if="!isYourTurn"
+                @click="requestTimeout">Request victory by timeout
+        </button>
         <div v-if="diceThrown" :class="[
           'dice-container',
           'flex',
@@ -234,7 +238,8 @@ export default defineComponent({
       starter,
       startDice,
       ai_suggestions,
-      doublingCube
+      doublingCube,
+      last_updated
     } = storeToRefs(gameStore)
 
     const wsStore = useWsStore()
@@ -281,6 +286,30 @@ export default defineComponent({
       showPassButton.value = true
     }
 
+    const requestTimeout = async () => {
+      try {
+        await axiosInstance.post('/game/request_timeout')
+      } catch (error) {
+        if (isAxiosError(error)) {
+          useWsStore().addError(error?.response?.data?.detail)
+        }
+      }
+    }
+
+    const remainingTime = ref(30)
+
+    const updateRemainingTime = () => {
+      const lastUpdated = new Date(last_updated.value)
+      const currentTime = new Date()
+      const timeoutDuration = 30 * 1000 // 30 seconds
+      const timeElapsed = currentTime.getTime() - lastUpdated.getTime()
+      const timeLeft = timeoutDuration - timeElapsed
+      remainingTime.value = timeLeft > 0 ? Math.ceil(timeLeft / 1000) : 0
+      if (remainingTime.value > 0) {
+        setTimeout(updateRemainingTime, 1000)
+      }
+    }
+
     const isModalVisible = ref(false)
     const confirmQuit = async () => {
       isModalVisible.value = false
@@ -322,6 +351,7 @@ export default defineComponent({
       preformedMessages,
       sendPreformedMessage,
       showPassButton,
+      requestTimeout,
       buttonShower,
       passTheTurn,
       started: ref(started),
@@ -334,7 +364,10 @@ export default defineComponent({
       cancelQuit,
       getAISuggestion,
       ai_suggestions,
-      doublingCube
+      doublingCube,
+      remainingTime,
+      last_updated,
+      updateRemainingTime
     }
   },
   methods: {
@@ -489,6 +522,9 @@ export default defineComponent({
         name: 'match-over',
         props: { player1: this.player1, player2: this.player2 }
       })
+    },
+    last_updated() {
+      this.updateRemainingTime()
     }
   }
 })

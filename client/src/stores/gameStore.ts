@@ -35,6 +35,7 @@ interface GameData {
   startDice: { roll1: number; count1: number; roll2: number; count2: number };
   ai_suggestions: number[];
   doublingCube: { count: number; last_usage: number, proposed: boolean, proposer: number };
+  last_updated: string;
 }
 
 const ai_players = ['ai_hard', 'ai_medium', 'ai_easy']
@@ -57,7 +58,8 @@ export const useGameStore = defineStore('game', {
     starter: -1,
     startDice: { roll1: 0, count1: 0, roll2: 0, count2: 0 },
     ai_suggestions: [0, 0],
-		doublingCube: { count: 0, last_usage: 0, proposed: false, proposer: 0 }
+		doublingCube: { count: 0, last_usage: 0, proposed: false, proposer: 0 },
+		last_updated: new Date(),
   }),
   actions: {
     async initializeWasm() {
@@ -100,6 +102,7 @@ export const useGameStore = defineStore('game', {
       this.startDice = data.startDice;
       this.doublingCube = data.doublingCube;
       this.ai_suggestions = data.ai_suggestions;
+      this.last_updated = new Date(data.last_updated)
       setTimeout(async () => await this.checkAITurn(), 1000)
     },
     async getAISuggestions(isPlayer1: boolean) {

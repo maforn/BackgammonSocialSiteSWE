@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.encoders import jsonable_encoder
+from models.board_configuration import Match, oauth2_scheme
 from pydantic import BaseModel
 from services.ai import ai_names
-from services.auth import oauth2_scheme, get_user_from_token
+from services.auth import get_user_from_token
 from services.database import get_db
-from services.game import throw_dice, get_current_game, check_winner, quit_the_game
+from services.game import throw_dice, get_current_game, check_winner, quit_the_game, check_timeout_condition, \
+    update_match
 from services.websocket import manager
-from models.board_configuration import StartDice
-from fastapi.encoders import jsonable_encoder
 
 NOT_YOUR_TURN = "It's not your turn"
 
@@ -35,16 +36,7 @@ async def game_exists(token: str = Depends(oauth2_scheme)):
 
 @router.post("/move/piece")
 async def move(move_data: dict, token: str = Depends(oauth2_scheme)):
-    user = await get_user_from_token(token)
-    current_game = await get_current_game(user.username)
-
-    if not current_game or current_game.status != "started":
-        raise HTTPException(status_code=400, detail=NO_ONGOING_GAME_FOUND)
-
-    if (current_game.turn % 2 == 0 and current_game.player1 != user.username) or \
-            (current_game.turn % 2 == 1 and current_game.player2 != user.username) or \
-                current_game.doublingCube.proposed:
-        raise HTTPException(status_code=400, detail=NOT_YOUR_TURN)
+    current_game = await get_user_and_check(token)
 
     board_value = move_data.get("board")
     dice_value = move_data.get("dice")
@@ -60,7 +52,7 @@ async def move(move_data: dict, token: str = Depends(oauth2_scheme)):
 
     await check_winner(current_game, manager)
 
-    await get_db().matches.update_one({"_id": current_game.id}, {
+    await update_match({"_id": current_game.id}, {
         "$set": {"board_configuration": current_game.board_configuration, "available": current_game.available,
                  "dice": current_game.dice,
                  "turn": current_game.turn}})
@@ -96,7 +88,7 @@ async def move(move_data: dict, token: str = Depends(oauth2_scheme)):
 
     await check_winner(current_game, manager)
 
-    await get_db().matches.update_one({"_id": current_game.id}, {
+    await update_match({"_id": current_game.id}, {
         "$set": {"board_configuration": current_game.board_configuration, "available": current_game.available,
                  "dice": current_game.dice,
                  "turn": current_game.turn}})
@@ -127,13 +119,18 @@ async def start_dice_endpoint(token: str = Depends(oauth2_scheme)):
     result = throw_dice()
     starter, turn = await get_dices(current_game, is_player1, old_start_dice, result)
 
-    await get_db().matches.update_one({"_id": current_game.id}, {"$set": {"startDice": jsonable_encoder(old_start_dice), "starter": starter, "turn": turn}})
+    await update_match({"_id": current_game.id},
+                       {"$set": {"startDice": jsonable_encoder(old_start_dice), "starter": starter, "turn": turn}})
     websocket_player1 = await manager.get_user(current_game.player1)
     if websocket_player1:
-        await manager.send_personal_message({"type": "start_dice_roll", "result": jsonable_encoder(old_start_dice), "starter": starter, "turn": turn}, websocket_player1)
+        await manager.send_personal_message(
+            {"type": "start_dice_roll", "result": jsonable_encoder(old_start_dice), "starter": starter, "turn": turn},
+            websocket_player1)
     websocket_player2 = await manager.get_user(current_game.player2)
     if websocket_player2:
-        await manager.send_personal_message({"type": "start_dice_roll", "result": jsonable_encoder(old_start_dice), "starter": starter, "turn": turn}, websocket_player2)
+        await manager.send_personal_message(
+            {"type": "start_dice_roll", "result": jsonable_encoder(old_start_dice), "starter": starter, "turn": turn},
+            websocket_player2)
 
 
 async def get_dices(current_game, is_player1, old_start_dice, result):
@@ -145,6 +142,7 @@ async def get_dices(current_game, is_player1, old_start_dice, result):
         old_start_dice.roll2, old_start_dice.count2 = result[0], old_start_dice.count2 + 1
         if current_game.player1 in ai_names:
             old_start_dice.roll2, old_start_dice.count2 = result[1], old_start_dice.count2 + 1
+
     starter, turn = 0, -1
     if old_start_dice.count1 == old_start_dice.count2:
         if old_start_dice.roll1 > old_start_dice.roll2:
@@ -156,15 +154,7 @@ async def get_dices(current_game, is_player1, old_start_dice, result):
 
 @router.get("/throw_dice")
 async def dice_endpoint(token: str = Depends(oauth2_scheme)):
-    user = await get_user_from_token(token)
-    current_game = await get_current_game(user.username)
-
-    if not current_game or current_game.status != "started":
-        raise HTTPException(status_code=400, detail="No started game found")
-
-    if (current_game.turn % 2 == 0 and current_game.player1 != user.username) or \
-            (current_game.turn % 2 == 1 and current_game.player2 != user.username):
-        raise HTTPException(status_code=400, detail=NOT_YOUR_TURN)
+    current_game = await get_user_and_check(token)
 
     if current_game.dice:
         raise HTTPException(status_code=400, detail="Dice already thrown")
@@ -176,8 +166,8 @@ async def dice_endpoint(token: str = Depends(oauth2_scheme)):
     else:
         current_game.available = result
 
-    await get_db().matches.update_one({"_id": current_game.id},
-                                      {"$set": {"dice": result, "available": current_game.available}})
+    await update_match({"_id": current_game.id},
+                       {"$set": {"dice": result, "available": current_game.available}})
     websocket_player1 = await manager.get_user(current_game.player1)
     if websocket_player1:
         await manager.send_personal_message(
@@ -209,8 +199,69 @@ async def send_in_game_message(request: InGameMessageRequest, token: str = Depen
         await manager.send_personal_message({"type": "in_game_msg", "msg": request.message, "user": user.username},
                                             websocket_player2)
 
+
 @router.post("/game/pass_turn")
 async def pass_turn(token: str = Depends(oauth2_scheme)):
+    current_game = await get_user_and_check(token)
+
+    current_game.turn += 1
+    current_game.dice = []
+    current_game.available = []
+
+    await update_match({"_id": current_game.id}, {
+        "$set": {"dice": current_game.dice, "available": current_game.available, "turn": current_game.turn}})
+
+    await send_move_with_ws(current_game)
+
+
+async def send_move_with_ws(current_game):
+    websocket_player1 = await manager.get_user(current_game.player1)
+    if websocket_player1:
+        await manager.send_personal_message({"type": "pass_turn", "match": current_game.dict(by_alias=True)},
+                                            websocket_player1)
+    websocket_player2 = await manager.get_user(current_game.player2)
+    if websocket_player2:
+        await manager.send_personal_message({"type": "pass_turn", "match": current_game.dict(by_alias=True)},
+                                            websocket_player2)
+
+
+async def get_user_and_check(token):
+    user = await get_user_from_token(token)
+    current_game = await get_current_game(user.username)
+    if not current_game or current_game.status != "started":
+        raise HTTPException(status_code=400, detail=NO_ONGOING_GAME_FOUND)
+    if (current_game.turn % 2 == 0 and current_game.player1 != user.username) or \
+            (current_game.turn % 2 == 1 and current_game.player2 != user.username) \
+            or current_game.doublingCube.proposed:
+        raise HTTPException(status_code=400, detail=NOT_YOUR_TURN)
+    return current_game
+
+
+@router.post("/game/request_timeout")
+async def request_timeout(token: str = Depends(oauth2_scheme)):
+    user = await get_user_from_token(token)
+    current_game = await get_current_game(user.username)
+
+    if not current_game or current_game.status != "started":
+        raise HTTPException(status_code=400, detail=NO_ONGOING_GAME_FOUND)
+
+    if (current_game.turn % 2 == 0 and current_game.player1 == user.username) or \
+            (current_game.turn % 2 == 1 and current_game.player2 == user.username):
+        raise HTTPException(status_code=400, detail="It's not your opponent's turn")
+
+    is_timeout = await check_timeout_condition(current_game)
+
+    if not is_timeout:
+        raise HTTPException(status_code=400, detail="Timeout condition not met")
+    else:
+        await check_winner(current_game, manager, is_timeout=True)
+
+    new_current_game = await get_db().matches.find_one({"_id": current_game.id})
+    await send_move_with_ws(Match(**new_current_game))
+
+
+@router.post("/ai/suggestions")
+async def use_ai_suggestions(token: str = Depends(oauth2_scheme)):
     user = await get_user_from_token(token)
     current_game = await get_current_game(user.username)
 
@@ -221,34 +272,6 @@ async def pass_turn(token: str = Depends(oauth2_scheme)):
             (current_game.turn % 2 == 1 and current_game.player2 != user.username):
         raise HTTPException(status_code=400, detail=NOT_YOUR_TURN)
 
-    current_game.turn += 1
-    current_game.dice = []
-    current_game.available = []
-
-    await get_db().matches.update_one({"_id": current_game.id}, {
-        "$set": {"dice": current_game.dice, "available": current_game.available, "turn": current_game.turn}})
-
-    websocket_player1 = await manager.get_user(current_game.player1)
-    if websocket_player1:
-        await manager.send_personal_message({"type": "pass_turn", "match": current_game.dict(by_alias=True)},
-                                            websocket_player1)
-    websocket_player2 = await manager.get_user(current_game.player2)
-    if websocket_player2:
-        await manager.send_personal_message({"type": "pass_turn", "match": current_game.dict(by_alias=True)},
-                                            websocket_player2)
-
-@router.post("/ai/suggestions")
-async def use_ai_suggestions(token: str = Depends(oauth2_scheme)):
-    user = await get_user_from_token(token)
-    current_game = await get_current_game(user.username)
-
-    if not current_game or current_game.status != "started":
-        raise HTTPException(status_code=400, detail="No ongoing game found")
-
-    if (current_game.turn % 2 == 0 and current_game.player1 != user.username) or \
-            (current_game.turn % 2 == 1 and current_game.player2 != user.username):
-        raise HTTPException(status_code=400, detail="It's not your turn")
-
     is_player_1 = current_game.player1 == user.username
     if current_game.ai_suggestions[is_player_1] >= 3:
         raise HTTPException(status_code=400, detail="You have already used all your suggestions")
@@ -258,13 +281,14 @@ async def use_ai_suggestions(token: str = Depends(oauth2_scheme)):
     await get_db().matches.update_one({"_id": current_game.id}, {
         "$set": {"ai_suggestions": current_game.ai_suggestions}})
 
+
 @router.post("/game/quit")
 async def quit_game(token: str = Depends(oauth2_scheme)):
     user = await get_user_from_token(token)
     current_game = await get_current_game(user.username)
 
     if not current_game or current_game.status != "started":
-        raise HTTPException(status_code=400, detail="No ongoing game found")
+        raise HTTPException(status_code=400, detail=NO_ONGOING_GAME_FOUND)
 
     if current_game.player1 == user.username:
         winner = 2
@@ -275,10 +299,14 @@ async def quit_game(token: str = Depends(oauth2_scheme)):
 
     websocket_player1 = await manager.get_user(current_game.player1)
     if websocket_player1:
-        await manager.send_personal_message({"type": "quit_game", "winner": winner, "user": user.username, "match": current_game.dict(by_alias=True)}, websocket_player1)
+        await manager.send_personal_message(
+            {"type": "quit_game", "winner": winner, "user": user.username, "match": current_game.dict(by_alias=True)},
+            websocket_player1)
     websocket_player2 = await manager.get_user(current_game.player2)
     if websocket_player2:
-        await manager.send_personal_message({"type": "quit_game", "winner": winner, "user": user.username, "match": current_game.dict(by_alias=True)}, websocket_player2)
+        await manager.send_personal_message(
+            {"type": "quit_game", "winner": winner, "user": user.username, "match": current_game.dict(by_alias=True)},
+            websocket_player2)
 
 
 @router.post("/game/double/propose")
@@ -308,12 +336,14 @@ async def propose_double(token: str = Depends(oauth2_scheme)):
 
     websocket_player1 = await manager.get_user(current_game.player1)
     if websocket_player1:
-        await manager.send_personal_message({"type": "double_proposed", "match": current_game.model_dump(by_alias=True)},
-                                            websocket_player1)
+        await manager.send_personal_message(
+            {"type": "double_proposed", "match": current_game.model_dump(by_alias=True)},
+            websocket_player1)
     websocket_player2 = await manager.get_user(current_game.player2)
     if websocket_player2:
-        await manager.send_personal_message({"type": "double_proposed", "match": current_game.model_dump(by_alias=True)},
-                                            websocket_player2)
+        await manager.send_personal_message(
+            {"type": "double_proposed", "match": current_game.model_dump(by_alias=True)},
+            websocket_player2)
 
 
 @router.post("/game/double/accept")
@@ -338,12 +368,14 @@ async def accept_double(token: str = Depends(oauth2_scheme)):
 
     websocket_player1 = await manager.get_user(current_game.player1)
     if websocket_player1:
-        await manager.send_personal_message({"type": "double_accepted", "match": current_game.model_dump(by_alias=True)},
-                                            websocket_player1)
+        await manager.send_personal_message(
+            {"type": "double_accepted", "match": current_game.model_dump(by_alias=True)},
+            websocket_player1)
     websocket_player2 = await manager.get_user(current_game.player2)
     if websocket_player2:
-        await manager.send_personal_message({"type": "double_accepted", "match": current_game.model_dump(by_alias=True)},
-                                            websocket_player2)
+        await manager.send_personal_message(
+            {"type": "double_accepted", "match": current_game.model_dump(by_alias=True)},
+            websocket_player2)
 
 
 @router.post("/game/double/reject")

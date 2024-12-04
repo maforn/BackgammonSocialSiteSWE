@@ -7,6 +7,7 @@ __pycache__
 
 # Reports
 coverage
+**/.coverage
 
 # Environment
 ./**/.env

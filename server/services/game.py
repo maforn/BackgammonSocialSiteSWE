@@ -1,10 +1,17 @@
 import random
 
+from time import strptime
+from datetime import datetime, timedelta
 from models.board_configuration import Match, BoardConfiguration, StartDice, DoublingCube
 from services.ai import ai_names, ai_rating
 from services.database import get_db
 from services.rating import new_ratings_after_match
 from services.board import is_gammon, is_backgammon
+
+
+async def update_match(selector, data):
+    data["$set"]["last_updated"] = datetime.now().replace(microsecond=0).isoformat()
+    await get_db().matches.update_one(selector, data)
 
 
 def throw_dice():
@@ -29,6 +36,26 @@ async def create_started_match(player1: str, player2: str, rounds_to_win: int = 
     await get_db().matches.insert_one(match_data)
 
 
+async def check_timeout_condition(match: Match):
+    current_time = datetime.now().replace(microsecond=0)  # Remove microseconds from current time
+
+    print("current_time: ", current_time)
+    print("dt(strptime) out: ", datetime(*strptime(match.last_updated, "%Y-%m-%dT%H:%M:%S")[:6]))
+
+    # Convert last_updated to tuple, then to datetime object and compare with current time
+    return current_time - datetime(*strptime(match.last_updated, "%Y-%m-%dT%H:%M:%S")[:6]) > timedelta(seconds=30)
+
+
+async def check_timeout_winner(current_game: Match):
+    if await check_timeout_condition(current_game):
+        if current_game.turn == 0:  # Player 1's turn timed out, winner should be player 2
+            return 2
+        else:  # Player 2's turn timed out, winner should be player 1
+            return 1
+    else:
+        return 0
+
+
 def check_win_condition(match: Match):
     player1_counter = match.board_configuration["bar"]["player1"]
     player2_counter = match.board_configuration["bar"]["player2"]
@@ -42,8 +69,10 @@ def check_win_condition(match: Match):
     return {"winner": 1} if player1_counter == 0 else {"winner": 2}
 
 
-async def check_winner(current_game: Match, manager, winner = None):
-    if winner is None:
+async def check_winner(current_game: Match, manager, winner = None, is_timeout=False):
+    if is_timeout:
+        winner = await check_timeout_winner(current_game)
+    elif winner is None:
         winner = check_win_condition(current_game)
         winner = winner.get("winner")
 
@@ -63,11 +92,11 @@ async def check_winner(current_game: Match, manager, winner = None):
                                       winner, winner_username)
         else:
             # Message for round end (gammon/backgammon/normal win)
-            info_str = get_winning_info_str(current_game, winner)
+            info_str = get_winning_info_str(current_game, winner) if not is_timeout else " due to timeout"
 
             # Must proceed to next round
             # Reset the board configuration, turn, dice and available
-            current_game.board_configuration = BoardConfiguration()
+            current_game.board_configuration = BoardConfiguration().dict(by_alias=True)
             current_game.available = []
             current_game.dice = []
             current_game.ai_suggestions = [0, 0]
@@ -85,20 +114,20 @@ async def check_winner(current_game: Match, manager, winner = None):
             if websocket_player2:
                 await manager.send_personal_message({"type": "round_over", "winner": winner_username, "info": info_str},
                                                     websocket_player2)
-                
+
         current_game = game_fields_to_dict(current_game)
 
-        await get_db().matches.update_one({"_id": current_game.id},
-                                          {"$set": {"board_configuration": current_game.board_configuration,
-                                                    "status": current_game.status,
-                                                    "available": current_game.available,
-                                                    "dice": current_game.dice,
-                                                    "turn": current_game.turn,
-                                                    "startDice": current_game.startDice,
-                                                    "doublingCube": current_game.doublingCube,
-                                                    "winsP1": current_game.winsP1,
-                                                    "winsP2": current_game.winsP2,
-                                                    "ai_suggestions": current_game.ai_suggestions}})
+        await update_match({"_id": current_game.id},
+                           {"$set": {"board_configuration": current_game.board_configuration,
+                                     "status": current_game.status,
+                                     "available": current_game.available,
+                                     "dice": current_game.dice,
+                                     "turn": current_game.turn,
+                                     "startDice": current_game.startDice,
+                                     "doublingCube": current_game.doublingCube,
+                                     "winsP1": current_game.winsP1,
+                                     "winsP2": current_game.winsP2,
+                                     "ai_suggestions": current_game.ai_suggestions}})
 
 
 async def get_players_data(current_game):
@@ -128,9 +157,8 @@ def game_fields_to_dict(game: Match):
     return game
 
 
-async def update_rating(current_game: Match, p1_data, p2_data, winner):
-
-    win_multiplier = compute_win_multiplier(current_game, winner)
+async def update_rating(current_game: Match, p1_data, p2_data, winner, is_timeout: bool = False):
+    win_multiplier = 1 if is_timeout else compute_win_multiplier(current_game, winner)
 
     if winner == 1:
         # Player 1 won the current round
@@ -150,17 +178,16 @@ async def update_rating(current_game: Match, p1_data, p2_data, winner):
 
 
 def compute_win_multiplier(current_game: Match, winner: int) -> int:
-
     if isinstance(current_game.doublingCube, DoublingCube):
-        doubling_value = 2**current_game.doublingCube.count
+        doubling_value = 2 ** current_game.doublingCube.count
     else:
-        doubling_value = 2**int(current_game.doublingCube['count'])
+        doubling_value = 2 ** int(current_game.doublingCube['count'])
 
     if not isinstance(current_game.board_configuration, BoardConfiguration):
         board = BoardConfiguration(**current_game.board_configuration)
-    else: 
+    else:
         board = current_game.board_configuration
-        
+
     is_player1 = winner == 1
 
     if is_backgammon(board, is_player1):
@@ -172,12 +199,11 @@ def compute_win_multiplier(current_game: Match, winner: int) -> int:
 
 
 def get_winning_info_str(current_game: Match, winner: int):
-
     if isinstance(current_game.board_configuration, BoardConfiguration):
         board = current_game.board_configuration
     else:
         board = BoardConfiguration(**current_game.board_configuration)
-        
+
     is_player1 = winner == 1
 
     print(board)
@@ -226,7 +252,9 @@ async def quit_the_game(current_game: Match, manager, winner):
     current_game.board_configuration = BoardConfiguration().dict(by_alias=True)
 
     for _ in range(matches_left):
-        loser_username, old_loser_rating, old_winner_rating, winner_username = await update_rating(current_game, p1_data, p2_data, winner)
+        loser_username, old_loser_rating, old_winner_rating, winner_username = await update_rating(current_game,
+                                                                                                   p1_data, p2_data,
+                                                                                                   winner)
 
     if current_game.winsP1 == current_game.rounds_to_win or current_game.winsP2 == current_game.rounds_to_win:
         await update_on_match_win(current_game, loser_username, manager, old_loser_rating, old_winner_rating,
