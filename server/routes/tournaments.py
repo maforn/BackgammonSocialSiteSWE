@@ -44,7 +44,6 @@ async def game(token: str = Depends(oauth2_scheme)):
     current_tournament = await get_current_tournament(user.username)
     if not current_tournament:
         raise HTTPException(status_code=404, detail="No started tournament found")
-    print(current_tournament)
     return current_tournament.model_dump(by_alias=True)
 
 

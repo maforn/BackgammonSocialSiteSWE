@@ -3,7 +3,7 @@ from httpx import AsyncClient
 from services.database import get_db
 from tests.conftest import clear_tournaments, clear_matches
 from services.tournament import create_new_tournament, add_participant_to_tournament, start_tournament, create_round_robin_tournament_round, get_tournament_of_game, update_tournament_of_game, update_tournament_stats, end_tournament
-from models.tournament import CreateTournamentRequest, Tournament
+from models.tournament import CreateTournamentRequest, Tournament, JoinTournamentRequest
 from models.board_configuration import Match
 from unittest.mock import AsyncMock, patch
 from fastapi import HTTPException
@@ -89,6 +89,51 @@ async def test_tournament_exists(client: AsyncClient, token: str):
     response = await client.get(tournaments_route + "/exists", headers={"Authorization": f"Bearer {token}"})
     assert response.json() == True
 
+@pytest.mark.anyio
+async def test_join_tournament(client: AsyncClient, token: str):
+    await clear_tournaments()
+
+    mock_request_data = CreateTournamentRequest(
+        name="test", 
+        open=True, 
+        participants=["testuser2"], 
+        rounds_to_win=2,
+        type="round_robin"
+    )
+    await create_new_tournament(mock_request_data, owner="testuser2")
+
+    join_request = JoinTournamentRequest(owner="testuser2", name="test")
+
+    response = await client.post(tournaments_route+"/join", json=join_request.model_dump(),
+                                 headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["tournament"] is not None
+    tournament = Tournament(**data["tournament"])
+    assert tournament.participants == ['testuser2', 'testuser']
+    assert tournament.confirmed_participants == ['testuser2', 'testuser']
+
+@pytest.mark.anyio
+async def test_available_tournaments(client: AsyncClient, token: str):
+    await clear_tournaments()
+
+    mock_request_data = CreateTournamentRequest(
+        name="test", 
+        open=True, 
+        participants=["testuser2"], 
+        rounds_to_win=2,
+        type="round_robin"
+    )
+    await create_new_tournament(mock_request_data, owner="testuser2")
+    tournament = await get_tournament_as_class_object("testuser2")
+
+    response = await client.get(tournaments_route+"/available", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data is not None
+    assert len(data) == 1
+    received_tournament = Tournament(**data[0])
+    assert tournament == received_tournament
 
 @pytest.mark.anyio
 async def test_add_participant_to_open_tournament():
