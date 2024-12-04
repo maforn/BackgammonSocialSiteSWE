@@ -59,7 +59,7 @@ async def check_winner(current_game: Match, manager):
 
     # Check if someone won the current round
     if winner != 0:
-        loser_username, old_loser_rating, old_winner_rating, winner_username = await update_rating(current_game,
+        loser_username, old_loser_rating, old_winner_rating, winner_username, gained_points = await update_rating(current_game,
                                                                                                    p1_data, p2_data,
                                                                                                    winner)
 
@@ -69,8 +69,7 @@ async def check_winner(current_game: Match, manager):
                                       winner, winner_username)
             
             from services.tournament import update_tournament_of_game
-            print("Updating tournament stats")
-            await update_tournament_of_game(current_game, winner_username, loser_username)
+            await update_tournament_of_game(current_game, winner_username, loser_username, gained_points)
         else:
             # Message for round end (gammon/backgammon/normal win)
             info_str = get_winning_info_str(current_game, winner)
@@ -122,7 +121,7 @@ async def update_rating(current_game: Match, p1_data, p2_data, winner):
         loser_username = p1_data["username"]
         old_winner_rating = p2_data["rating"]
         old_loser_rating = p1_data["rating"]
-    return loser_username, old_loser_rating, old_winner_rating, winner_username
+    return loser_username, old_loser_rating, old_winner_rating, winner_username, win_multiplier * 1
 
 
 def compute_win_multiplier(current_game: Match, winner: int) -> int:

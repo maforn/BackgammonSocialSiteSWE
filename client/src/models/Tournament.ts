@@ -3,11 +3,13 @@ class TournamentStats {
     wins: number;
     losses: number;
     matches: number;
-    constructor(username: string, wins: number, losses: number, matches: number){
+    points: number;
+    constructor(username: string, wins: number, losses: number, matches: number, points: number){
         this.username = username;
         this.wins = wins;
         this.losses = losses;
         this.matches = matches;
+        this.points = points;
     }
 }
 

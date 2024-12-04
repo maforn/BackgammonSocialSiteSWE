@@ -121,7 +121,7 @@ async def add_participant_to_tournament(tournament_id: str, participant=str):
 async def start_tournament(tournament_id: str):
 
     tournament = await get_db().tournaments.find_one({"_id": tournament_id})
-    stats = [TournamentStats(username=participant, wins=0, losses=0, matches=0) for participant in tournament["confirmed_participants"]]
+    stats = [TournamentStats(username=participant, wins=0, losses=0, matches=0, points=0) for participant in tournament["confirmed_participants"]]
 
     if tournament:
         await get_db().tournaments.update_one(
@@ -168,14 +168,14 @@ async def get_tournament_of_game(game_id: str):
     return tournament
 
 
-async def update_tournament_of_game(game: Match, winner_username: str, loser_username: str):
+async def update_tournament_of_game(game: Match, winner_username: str, loser_username: str, gained_points: int):
     tournament = await get_tournament_of_game(game.id)
     
     if tournament:
-        await update_tournament_stats(tournament, winner_username, loser_username)
+        await update_tournament_stats(tournament, winner_username, loser_username, gained_points)
         tournament = await get_db().tournaments.find_one({"_id": tournament.id})
 
-        total_games = sum(stat['matches'] for stat in tournament['stats']) // 2
+        total_games = sum(stat['wins'] for stat in tournament['stats'])
 
         if tournament['type'] == "round_robin":
             if total_games >= (len(tournament['confirmed_participants']) * (len(tournament['confirmed_participants']) - 1)) // 2:
@@ -184,11 +184,12 @@ async def update_tournament_of_game(game: Match, winner_username: str, loser_use
                 await create_round_robin_tournament_round(tournament['_id'], total_games // 2 + 1)
 
 
-async def update_tournament_stats(tournament: Tournament, winner_username: str, loser_username: str):
+async def update_tournament_stats(tournament: Tournament, winner_username: str, loser_username: str, gained_points: int):
     winner_stats = next((stat for stat in tournament.stats if stat.username == winner_username), None)
     if winner_stats:
         winner_stats.wins += 1
         winner_stats.matches += 1
+        winner_stats.points += gained_points
     loser_stats = next((stat for stat in tournament.stats if stat.username == loser_username), None)
     if loser_stats:
         loser_stats.losses += 1
@@ -207,6 +208,8 @@ async def end_tournament(tournament: Tournament):
     )
 
     winner = max(tournament['stats'], key=lambda x: x["wins"])
+    if len([stat for stat in tournament['stats'] if stat["wins"] == winner["wins"]]) > 1:
+        winner = max([stat for stat in tournament['stats'] if stat["wins"] == winner["wins"]], key=lambda x: x["points"])
 
     # TODO: update ratings
 

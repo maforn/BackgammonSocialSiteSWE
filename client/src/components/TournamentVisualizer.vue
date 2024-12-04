@@ -16,6 +16,7 @@
                             <th class="py-2 px-4">Wins</th>
                             <th class="py-2 px-4">Losses</th>
                             <th class="py-2 px-4">Matches</th>
+                            <th class="py-2 px-4">Points</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -24,6 +25,7 @@
                             <td class="border px-4 py-2">{{ stat.wins }}</td>
                             <td class="border px-4 py-2">{{ stat.losses }}</td>
                             <td class="border px-4 py-2">{{ stat.matches }}</td>
+                            <td class="border px-4 py-2">{{ stat.points }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -52,7 +54,12 @@ export default defineComponent({
     },
     computed: {
         sortedStats() {
-            return this.tournament?.stats.sort((a, b) => b.wins - a.wins);
+            return this.tournament?.stats.sort((a, b) => {
+                if (b.wins === a.wins) {
+                    return b.points - a.points;
+                }
+                return b.wins - a.wins;
+            });
         }
     }
 });

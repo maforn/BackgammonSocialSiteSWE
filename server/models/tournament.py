@@ -8,6 +8,7 @@ class TournamentStats(BaseModel):
     wins: int
     losses: int
     matches: int
+    points: int
 
 class Tournament(BaseModel):
     id: str = Field(default_factory=default_id, alias="_id")
