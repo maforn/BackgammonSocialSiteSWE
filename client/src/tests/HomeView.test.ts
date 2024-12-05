@@ -7,7 +7,7 @@ import MockAdapter from 'axios-mock-adapter';
 import { createPinia, setActivePinia } from 'pinia';
 
 describe('HomeView.vue', () => {
-	let mock: MockAdapter;
+	let mock: InstanceType<typeof MockAdapter>;;
 	const pinia = createPinia();
 
 	beforeAll(() => {
@@ -86,4 +86,31 @@ describe('HomeView.vue', () => {
 		await nextTick();
 		expect(wrapper.findAll('.overlay-content ul li').length).toBe(1);
 	});
+
+	it('calls the correct endpoint when acceptInvite is called', async () => {
+		const wrapper = mount(HomeView, {
+		  pinia
+		})
+	  
+		const invites = [
+		  { _id: 'invite1', player1: 'player1', rounds_to_win: 3 },
+		  { _id: 'invite2', player1: 'player2', rounds_to_win: 5 }
+		]
+		wrapper.vm.invites = invites
+	  
+		const postSpy = vi.spyOn(axiosInstance, 'post')
+		mock.onPost('/invites/accept').reply(200)
+	  
+		await wrapper.vm.acceptInvite(0)
+		expect(postSpy).toHaveBeenCalledWith('/invites/accept', { invite_id: 'invite1' })
+	  })
+
+	it('closes overlay', async () => {
+		const wrapper = mount(HomeView);
+		wrapper.vm.showOverlay = true;
+		await nextTick();
+		wrapper.vm.closeOverlay();
+		await nextTick();
+		expect(wrapper.vm.showOverlay).toBe(false);
+	})
 });

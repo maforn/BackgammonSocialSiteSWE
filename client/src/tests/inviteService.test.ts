@@ -8,7 +8,7 @@ import { useWsStore } from '@/stores/wsStore';
 import axios from 'axios'
 
 describe('invite service', () => {
-  let mock: MockAdapter;
+  let mock: InstanceType<typeof MockAdapter>;;
 
   beforeAll(() => {
     const pinia = createPinia();

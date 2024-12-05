@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import PasswordRecoveryView from '@/views/PasswordRecoveryView.vue'
 
 describe('PasswordRecoveryView.vue', () => {
-  let mock: MockAdapter
+  let mock: InstanceType<typeof MockAdapter>;
 
   beforeEach(() => {
     mock = new MockAdapter(axios)

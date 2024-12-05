@@ -36,3 +36,17 @@ export const fetchActiveTournament = async () => {
 		return null;
 	}
 }
+
+export const fetchConcludedTournaments = async () => {
+	try {
+		const response = await axiosInstance.get('/tournaments/concluded');
+		return response.data;
+	} catch (error) {
+		if (axios.isAxiosError(error) && error.response) {
+			useWsStore().addError(error.response.data.detail);
+		} else {
+			console.error('Error fetching concluded tournaments:', error);
+		}
+		return [];
+	}
+}

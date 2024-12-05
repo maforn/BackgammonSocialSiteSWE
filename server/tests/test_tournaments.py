@@ -78,6 +78,20 @@ async def test_get_tournament(client: AsyncClient, token: str):
     assert res_data['participants'] == ['testuser']
     assert res_data['rounds_to_win'] == 2
 
+@pytest.mark.anyio
+async def test_get_concluded_tournaments(client: AsyncClient, token: str):
+    await clear_tournaments()
+    response = await client.get(tournaments_route+"/concluded", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    assert response.json() == []
+
+    await create_new_tournament(mock_request_data, owner="testuser")
+    await get_db().tournaments.update_one({"owner": "testuser"}, {"$set": {"status": "finished"}})
+    response = await client.get(tournaments_route+"/concluded", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+    assert response.json()[0]["owner"] == "testuser"
+    assert response.json()[0]["name"] == "test"
 
 @pytest.mark.anyio
 async def test_tournament_exists(client: AsyncClient, token: str):
