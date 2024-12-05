@@ -9,6 +9,7 @@ class UserInDB(BaseModel):
     email: EmailStr
     password: Optional[str] = None
     rating: int = DEFAULT_RATING
+    stats: dict = { "matches_played": 0, "matches_won": 0, "tournaments_won": 0, "highest_rating": DEFAULT_RATING}
 
 class UserInLeaderboard(BaseModel):
     id: str = Field(default_factory=default_id, alias="_id")
