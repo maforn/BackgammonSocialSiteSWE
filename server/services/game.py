@@ -80,7 +80,7 @@ async def check_winner(current_game: Match, manager, winner = None, is_timeout=F
 
     # Check if someone won the current round
     if winner != 0:
-        loser_username, old_loser_rating, old_winner_rating, winner_username = await update_rating(current_game,
+        loser_username, old_loser_rating, old_winner_rating, winner_username, gained_points = await update_rating(current_game,
                                                                                                    p1_data, p2_data,
                                                                                                    winner)
 
@@ -90,6 +90,9 @@ async def check_winner(current_game: Match, manager, winner = None, is_timeout=F
             current_game.doublingCube.proposer = 0
             await update_on_match_win(current_game, loser_username, manager, old_loser_rating, old_winner_rating,
                                       winner, winner_username)
+            
+            from services.tournament import update_tournament_of_game
+            await update_tournament_of_game(current_game, winner_username, loser_username, gained_points)
         else:
             # Message for round end (gammon/backgammon/normal win)
             info_str = get_winning_info_str(current_game, winner) if not is_timeout else " due to timeout"
@@ -174,7 +177,7 @@ async def update_rating(current_game: Match, p1_data, p2_data, winner, is_timeou
         loser_username = p1_data["username"]
         old_winner_rating = p2_data["rating"]
         old_loser_rating = p1_data["rating"]
-    return loser_username, old_loser_rating, old_winner_rating, winner_username
+    return loser_username, old_loser_rating, old_winner_rating, winner_username, win_multiplier * 1
 
 
 def compute_win_multiplier(current_game: Match, winner: int) -> int:
@@ -205,9 +208,7 @@ def get_winning_info_str(current_game: Match, winner: int):
         board = BoardConfiguration(**current_game.board_configuration)
 
     is_player1 = winner == 1
-
-    print(board)
-
+    
     if is_backgammon(board, is_player1):
         return " with a backgammon"
     elif is_gammon(board, is_player1):
@@ -219,6 +220,11 @@ def get_winning_info_str(current_game: Match, winner: int):
 async def update_on_match_win(current_game, loser_username, manager, old_loser_rating, old_winner_rating, winner,
                               winner_username):
     current_game.status = "player_" + str(winner) + "_won"
+
+    await get_db().matches.update_one({"_id": current_game.id},
+                                      {"$set": {"status": current_game.status}}
+                                      )
+
     # Logic for player ratings update and match end
     (new_winner_rating, new_loser_rating) = new_ratings_after_match(old_winner_rating, old_loser_rating)
     await get_db().users.update_one({"username": winner_username},
@@ -252,7 +258,7 @@ async def quit_the_game(current_game: Match, manager, winner):
     current_game.board_configuration = BoardConfiguration().dict(by_alias=True)
 
     for _ in range(matches_left):
-        loser_username, old_loser_rating, old_winner_rating, winner_username = await update_rating(current_game,
+        loser_username, old_loser_rating, old_winner_rating, winner_username, _ = await update_rating(current_game,
                                                                                                    p1_data, p2_data,
                                                                                                    winner)
 
