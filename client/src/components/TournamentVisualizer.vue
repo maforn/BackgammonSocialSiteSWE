@@ -3,12 +3,12 @@
         <h2 class="text-center text-xl font-bold py-2 border-b-2 mb-4">
             {{ tournament?.name }}
         </h2>
-        <p v-if="tournament?.status!=='started'" class="text-center w-4/5">
+        <p v-if="tournament?.status=='pending'" class="text-sm text-gray-500 italic text-center">
             The tournament has not started yet. Please, wait for the other participants to join.
         </p>
         <div v-else>
-            <div v-if="tournament.type=='round_robin'">
-                <table class="min-w-full text-center shadow-md">
+            <div v-if="tournament?.type=='round_robin'">
+                <table class="w-full text-center shadow-md">
                     <caption class="sr-only">Tournament Statistics</caption>
                     <thead class="border-2 bg-gray-100">
                         <tr class="text-gray-700">
@@ -36,21 +36,22 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { fetchActiveTournament } from '@/services/tournamentService';
 import { Tournament } from '@/models/Tournament';
 
 export default defineComponent({
     name: 'TournamentVisualizer',
     data(){
-		return {
-			tournament: null as Tournament | null
-		}
+
 	},
+    props: {
+        tournament: {
+            type: Object as () => Tournament,
+            required: true,
+            default: null
+        }
+    },
     methods: {
 
-    },
-    async mounted() {
-        this.tournament = await fetchActiveTournament();
     },
     computed: {
         sortedStats() {

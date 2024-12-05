@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import PasswordResetView from '@/views/PasswordResetView.vue'
 
 describe('PasswordResetView.vue', () => {
-  let mock: MockAdapter
+  let mock: InstanceType<typeof MockAdapter>;
 
   beforeEach(() => {
     mock = new MockAdapter(axios);

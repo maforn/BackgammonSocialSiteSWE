@@ -2,24 +2,9 @@ import { mount } from '@vue/test-utils';
 import { describe, it, expect, vi } from 'vitest';
 import type { Mock } from 'vitest';
 import TournamentVisualizer from '@/components/TournamentVisualizer.vue';
-import { fetchActiveTournament } from '@/services/tournamentService';
-
-vi.mock('@/services/tournamentService', () => ({
-    fetchActiveTournament: vi.fn(),
-}));
+import { Tournament } from '@/models/Tournament';
 
 describe('TournamentVisualizer.vue', () => {
-    it('calls fetchActiveTournament on mounted', async () => {
-        (fetchActiveTournament as Mock).mockResolvedValue({
-            name: 'Test Tournament',
-            status: 'started',
-            type: 'round_robin',
-            stats: [],
-        });
-
-        mount(TournamentVisualizer);
-        expect(fetchActiveTournament).toHaveBeenCalled();
-    });
 
     it('computes sortedStats correctly', async () => {
         const stats = [
@@ -28,14 +13,14 @@ describe('TournamentVisualizer.vue', () => {
             { username: 'user3', wins: 3, losses: 0, matches: 3, points: 9 },
         ];
 
-        (fetchActiveTournament as Mock).mockResolvedValue({
-            name: 'Test Tournament',
-            status: 'started',
-            type: 'round_robin',
-            stats,
-        });
+        const tournament = new Tournament('owner', ['user1', 'user2', 'user3'], true, 'testTournament', 'round_robin', 'started', [], 2 );
+        tournament.stats = stats;
 
-        const wrapper = mount(TournamentVisualizer);
+        const wrapper = mount(TournamentVisualizer, {
+            props: {
+                tournament
+            }
+        });
         await wrapper.vm.$nextTick();
 
         const sortedStats = wrapper.vm.sortedStats;

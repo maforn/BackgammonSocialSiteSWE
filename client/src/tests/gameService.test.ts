@@ -275,7 +275,7 @@ describe('doRandomMove', () => {
 })
 
 describe('updateAISuggestions', () => {
-  let mock: MockAdapter
+  let mock: InstanceType<typeof MockAdapter>;
   const pinia = createPinia()
 
   beforeAll(() => {

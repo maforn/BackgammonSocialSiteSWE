@@ -6,7 +6,7 @@ import MockAdapter from 'axios-mock-adapter';
 import { createPinia, setActivePinia } from 'pinia';
 import axiosInstance from '@/axios';
 
-let mock: MockAdapter;
+let mock: InstanceType<typeof MockAdapter>;
 const pinia = createPinia();
 
 beforeAll(() => {

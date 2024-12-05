@@ -7,7 +7,7 @@ import { BoardConfiguration, PointConfiguration } from '@/models/BoardConfigurat
 import { Match } from '@/models/Match';
 
 describe('game store', () => {
-  let mock: MockAdapter;
+  let mock: InstanceType<typeof MockAdapter>;
 
   beforeEach(() => {
     setActivePinia(createPinia());

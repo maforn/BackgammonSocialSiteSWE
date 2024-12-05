@@ -509,7 +509,7 @@ export default defineComponent({
       else if (newVal === 1 && this.isPlayer1 || newVal === 2 && !this.isPlayer1)
         this.initialText = 'You start!'
       else if (newVal === 1 && !this.isPlayer1 || newVal === 2 && this.isPlayer1)
-        this.initialText = `${this.player2} starts!`
+        this.initialText = `Opponent starts!`
     },
     winsP1(newVal, oldVal) {
       (newVal === this.rounds_to_win) && this.$router.push({

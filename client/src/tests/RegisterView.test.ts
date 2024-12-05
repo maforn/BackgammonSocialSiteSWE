@@ -7,7 +7,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { createRouter, createWebHistory } from 'vue-router';
 
 describe('RegisterView.vue', () => {
-	let mock: MockAdapter;
+	let mock: InstanceType<typeof MockAdapter>;;
 	const pinia = createPinia();
 	let wrapper: VueWrapper<any>;
 

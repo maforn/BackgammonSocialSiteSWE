@@ -9,7 +9,7 @@ import { useWsStore } from '@/stores/wsStore'
 import { BoardConfiguration } from '@/models/BoardConfiguration'
 
 describe('GameView.vue', () => {
-  let mock: MockAdapter
+  let mock: InstanceType<typeof MockAdapter>;
   const pinia = createPinia()
 
   beforeAll(() => {
@@ -256,4 +256,106 @@ describe('GameView.vue', () => {
 
     expect(postSpy).toHaveBeenCalledWith('/game/request_timeout')
   })
+
+  it('should update when starter changes', async () => {
+    const gameStore = useGameStore()
+    const wrapper = mount(GameView, {
+      pinia
+    })
+
+    gameStore.starter = -1
+    await wrapper.vm.$nextTick()
+    gameStore.starter = 1
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.started).toBe(true)
+
+    wrapper.vm.player1 = 'Player 1'
+    wrapper.vm.player2 = 'Player 2'
+    wrapper.vm.username = 'Player 2'
+    wrapper.vm.starter = 0
+    await wrapper.vm.$nextTick()
+    wrapper.vm.starter = 2
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.initialText).toBe('You start!')
+
+    wrapper.vm.starter = 1
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.initialText).toBe('Opponent starts!')
+  })
+
+  it('should update when winsP1 changes', async () => {
+    const gameStore = useGameStore()
+    const wrapper = mount(GameView, {
+      pinia
+    })
+
+    gameStore.winsP1 = 2
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.winsP1).toBe(2)
+  })
+
+  it('should return the correct game over share text for player 2 winning', async () => {
+    const wrapper = mount(GameView, {
+      pinia
+    })
+
+    wrapper.vm.player1 = 'Player 1'
+    wrapper.vm.player2 = 'Player 2'
+    wrapper.vm.username = 'Player 2'
+    wrapper.vm.status = 'player_2_won'
+    await wrapper.vm.$nextTick()
+
+    const shareText = wrapper.vm.getGameOverShareText()
+    expect(shareText).toBe('I just won a game of backgammon against Player 1! 🏆 Play now!')
+  })
+
+  it('should return the correct game over share text for player 2 losing', async () => {
+    const wrapper = mount(GameView, {
+      pinia
+    })
+
+    wrapper.vm.player1 = 'Player 1'
+    wrapper.vm.player2 = 'Player 2'
+    wrapper.vm.username = 'Player 2'
+    wrapper.vm.status = 'player_1_won'
+    await wrapper.vm.$nextTick()
+
+    const shareText = wrapper.vm.getGameOverShareText()
+    expect(shareText).toBe('I just lost a game of backgammon against Player 1! 😢 Help me out, play now!')
+  })
+
+  it('calls the correct endpoint when passTheTurn is called', async () => {
+    const wrapper = mount(GameView, {
+      pinia
+    })
+
+    const postSpy = vi.spyOn(axiosInstance, 'post')
+    mock.onPost('/game/pass_turn').reply(200)
+
+    await wrapper.vm.passTheTurn()
+    expect(postSpy).toHaveBeenCalledWith('/game/pass_turn')
+  })
+
+  it('calls the correct endpoint when confirmQuit is called', async () => {
+    const wrapper = mount(GameView, {
+      pinia
+    })
+  
+    const postSpy = vi.spyOn(axiosInstance, 'post')
+    mock.onPost('/game/quit').reply(200)
+  
+    await wrapper.vm.confirmQuit()
+    expect(postSpy).toHaveBeenCalledWith('/game/quit')
+  })
+
+  it('calls the correct endpoint when cancelQuit is called', async () => {
+    const wrapper = mount(GameView, {
+      pinia
+    })
+  
+    wrapper.vm.isModalVisible = true
+    wrapper.vm.cancelQuit()
+    expect(wrapper.vm.isModalVisible).toBe(false)
+  })
+  
 })

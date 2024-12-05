@@ -21,7 +21,7 @@ async def get_current_tournament(username: str) -> Tournament:
     return None
 
 
-async def get_available_tournaments(username: str) -> List[Tournament] | None:
+async def get_available_tournaments(username: str) -> List[Tournament]:
     # Get all tournaments that are closed tournaments that the user is invited to OR open tournaments with less than 4 participants 
     tournament_data = await get_db().tournaments.find({
         "$and": [
@@ -36,6 +36,16 @@ async def get_available_tournaments(username: str) -> List[Tournament] | None:
             ]
         }
     ]
+    }).to_list(length=None)
+    if tournament_data:
+        return [Tournament(**tournament) for tournament in tournament_data]
+    return []
+
+
+async def get_concluded_tournaments(username: str) -> List[Tournament]:
+    tournament_data = await get_db().tournaments.find({
+        "confirmed_participants": {"$in": [username]},
+        "status": "finished"
     }).to_list(length=None)
     if tournament_data:
         return [Tournament(**tournament) for tournament in tournament_data]
