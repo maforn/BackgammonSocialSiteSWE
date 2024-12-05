@@ -58,16 +58,16 @@ export const useGameStore = defineStore('game', {
     starter: -1,
     startDice: { roll1: 0, count1: 0, roll2: 0, count2: 0 },
     ai_suggestions: [0, 0],
-		doublingCube: { count: 0, last_usage: 0, proposed: false, proposer: 0 },
-		last_updated: new Date(),
+    doublingCube: { count: 0, last_usage: 0, proposed: false, proposer: 0 },
+    last_updated: new Date()
   }),
   actions: {
     async initializeWasm() {
       if (!this.goInstance) {
         this.goInstance = new Go()
         const result = await WebAssembly.instantiateStreaming(fetch('lib.wasm'), this.goInstance.importObject)
+        this.goInstance.run(result.instance)
         this.loaded = true
-        await this.goInstance.run(result.instance)
       }
     },
     fetchGame() {
@@ -96,14 +96,14 @@ export const useGameStore = defineStore('game', {
       this.updated_at = new Date(data.updated_at)
       this.status = data.status
       this.rounds_to_win = data.rounds_to_win
-			this.winsP1 = data.winsP1;
-			this.winsP2 = data.winsP2;
-      this.starter = data.starter;
-      this.startDice = data.startDice;
-      this.doublingCube = data.doublingCube;
-      this.ai_suggestions = data.ai_suggestions;
+      this.winsP1 = data.winsP1
+      this.winsP2 = data.winsP2
+      this.starter = data.starter
+      this.startDice = data.startDice
+      this.doublingCube = data.doublingCube
+      this.ai_suggestions = data.ai_suggestions
       this.last_updated = new Date(data.last_updated)
-      setTimeout(async () => await this.checkAITurn(), 1000)
+      setTimeout(async() => await this.checkAITurn(), 500)
     },
     async getAISuggestions(isPlayer1: boolean) {
       if (this.ai_suggestions[isPlayer1 ? 1 : 0] >= 3) {
@@ -164,8 +164,8 @@ export const useGameStore = defineStore('game', {
     },
     async checkAITurn() {
       const isPlayer1 = this.player1 === useAuthStore().username
-      const isYourTurn = (this.turn % 2 === 0 && isPlayer1) || (this.turn % 2 === 1 && !isPlayer1)
-      if (!isYourTurn && isPlayer1 ? ai_players.includes(this.player2) : ai_players.includes(this.player1)) {
+      const isYourTurn = ((this.turn % 2 === 0 && isPlayer1) || (this.turn % 2 === 1 && !isPlayer1))
+      if (!isYourTurn && (isPlayer1 ? ai_players.includes(this.player2) : ai_players.includes(this.player1)) && this.turn >= 0) {
         const diceRoll = this.dice.roll.length === 0 ? [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1] : this.dice.roll
         this.dice.roll = diceRoll
         this.dice.available = diceRoll
@@ -221,8 +221,7 @@ export const useGameStore = defineStore('game', {
     makeAIMove(move: any) {
       const isPlayer1 = this.player1 === useAuthStore().username
       const newBoard = !isPlayer1 ? { ...this.boardConfiguration } : swapPlayers(this.boardConfiguration)
-      move.play.forEach((piece_move, index) => {
-
+      move.play.forEach(async(piece_move, index) => {
         const srcIndex = piece_move.from === 'bar' ? 24 : piece_move.from - 1
         const dstIndex = piece_move.to === 'off' ? -1 : piece_move.to - 1
 
@@ -236,7 +235,7 @@ export const useGameStore = defineStore('game', {
         }
 
         this.boardConfiguration = isPlayer1 ? swapPlayers(newBoard) : newBoard
-      })
+      });
 
       axiosInstance.post('/move/ai', {
         board: this.boardConfiguration
@@ -244,6 +243,9 @@ export const useGameStore = defineStore('game', {
     },
     async getMovesFromWasm(input: any) {
       await this.initializeWasm()
+      while (!this.loaded) {
+        await new Promise(resolve => setTimeout(resolve, 100))
+      }
       console.log(JSON.stringify(input))
       const output = globalThis.wasm_get_moves(JSON.stringify(input))
       return JSON.parse(output)
@@ -253,12 +255,12 @@ export const useGameStore = defineStore('game', {
       this.dice.available = available
     },
     setStartDice(roll1: number, count1: number, roll2: number, count2: number) {
-			this.startDice = { roll1, count1, roll2, count2 };
+      this.startDice = { roll1, count1, roll2, count2 }
 
-		},
-		setStarter(starter: number, turn: number) {
-			this.starter = starter;
-			this.turn = turn;
-		}
+    },
+    setStarter(starter: number, turn: number) {
+      this.starter = starter
+      this.turn = turn
+    }
   }
 })
