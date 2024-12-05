@@ -119,7 +119,7 @@ async def start_dice_endpoint(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=400, detail="You have already thrown the start dice. Wait for the other player")
 
     result = throw_dice()
-    starter, turn = await get_dices(current_game, is_player1, old_start_dice, result)
+    starter, turn, old_start_dice = await get_dices(current_game, is_player1, old_start_dice, result)
 
     await update_match({"_id": current_game.id},
                        {"$set": {"startDice": jsonable_encoder(old_start_dice), "starter": starter, "turn": turn}})
@@ -143,7 +143,7 @@ async def get_dices(current_game, is_player1, old_start_dice, result):
     else:
         old_start_dice.roll2, old_start_dice.count2 = result[0], old_start_dice.count2 + 1
         if current_game.player1 in ai_names:
-            old_start_dice.roll2, old_start_dice.count2 = result[1], old_start_dice.count2 + 1
+            old_start_dice.roll1, old_start_dice.count1 = result[1], old_start_dice.count1 + 1
 
     starter, turn = 0, -1
     if old_start_dice.count1 == old_start_dice.count2:
@@ -151,7 +151,7 @@ async def get_dices(current_game, is_player1, old_start_dice, result):
             starter, turn = 1, 0
         elif old_start_dice.roll2 > old_start_dice.roll1:
             starter, turn = 2, 1
-    return starter, turn
+    return starter, turn, old_start_dice
 
 
 @router.get("/throw_dice")
