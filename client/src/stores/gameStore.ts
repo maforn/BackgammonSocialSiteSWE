@@ -164,8 +164,8 @@ export const useGameStore = defineStore('game', {
     },
     async checkAITurn() {
       const isPlayer1 = this.player1 === useAuthStore().username
-      const isYourTurn = (this.turn % 2 === 0 && isPlayer1) || (this.turn % 2 === 1 && !isPlayer1)
-      if (!isYourTurn && isPlayer1 ? ai_players.includes(this.player2) : ai_players.includes(this.player1)) {
+      const isYourTurn = ((this.turn % 2 === 0 && isPlayer1) || (this.turn % 2 === 1 && !isPlayer1))
+      if (!isYourTurn && (isPlayer1 ? ai_players.includes(this.player2) : ai_players.includes(this.player1)) && this.turn >= 0) {
         const diceRoll = this.dice.roll.length === 0 ? [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1] : this.dice.roll
         this.dice.roll = diceRoll
         this.dice.available = diceRoll
