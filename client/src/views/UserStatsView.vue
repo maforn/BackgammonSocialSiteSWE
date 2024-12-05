@@ -1,60 +1,71 @@
-<template>
+  <template>
     <div class="user-stats-view">
-      <div class="bg"></div>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+      <div class="bg fixed inset-0 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-800"></div>
 
-      <div class="w-screen h-screen flex flex-col pt-20 items-center">
+      <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      />
 
-        <h1 class="text-center text-6xl font-black text-white">YOUR STATS</h1>
+      <div class="w-full h-full px-12 py-8">
+        <div class="flex items-center mb-8">
+          <button
+            @click="goHome"
+            class="px-4 py-3 bg-white text-black rounded-full shadow-lg hover:bg-gray-300 transition-colors mr-6"
+          >
+            <i class="fas fa-home"></i>
+          </button>
+          <h1 class="text-5xl font-extrabold text-white drop-shadow-lg flex-1 text-center">YOUR STATS</h1>
+        </div>
 
-        <div v-if="myData"
-             class="flex flex-col mt-20 w-5/6 sm:p-8 p-6 shadow-md rounded-md gap-3 pl-3 py-2 text-sm md:text-lg bg-white items-center">
-            <h3 class="text-center text-3xl font-black text-black underline">{{myData.username}}</h3>
+        <div class="w-full max-w-7xl mx-auto bg-white bg-opacity-90 backdrop-blur-md shadow-xl rounded-lg p-8 flex gap-12">
+          <div class="flex-1 flex flex-col items-center">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">{{ myData.username }}</h2>
+            <pie-chart
+              :percent="myData.stats.matches_won / (myData.stats.matches_played == 0 ? 1 : myData.stats.matches_played) * 100"
+              :stroke-width="1"
+              :label="`${truncate2decimal(myData.stats.matches_won / (myData.stats.matches_played == 0 ? 1 : myData.stats.matches_played) * 100)}%`"
+              label-small="Win rate"
+              color="#16a34a"
+              :opacity="0.8"
+              class="w-1/2 transform transition-transform hover:scale-110"
+            />
+          </div>
 
-            <div class="flex justify-center w-1/6">
-                <pie-chart
-                :percent="myData.stats.matches_won / (myData.stats.matches_played == 0 ? 1 : myData.stats.matches_played) * 100"
-                :stroke-width=3
-                :label="`${myData.stats.matches_won / (myData.stats.matches_played == 0 ? 1 : myData.stats.matches_played) * 100}%`"
-                label-small="Win rate"
-                color=#16a34a
-                :opacity=0.7
-                class="font-bold"
-                />
+          <div class="flex-1 flex flex-col gap-4">
+            <div
+              class="flex justify-between items-center bg-indigo-100 rounded-lg p-4 shadow-md transform hover:scale-105 transition-transform"
+            >
+              <p class="text-lg font-medium text-indigo-700">Matches Won</p>
+              <p class="text-2xl font-bold text-indigo-900">{{ myData.stats.matches_won }}</p>
             </div>
-
-
-            <div class="flex justify-evenly w-full">
-                <div class="flex flex-col items-center justify-evenly">
-                    <p class="text-lg font-semibold">Matches won</p>
-                    <p class="text-2xl font-bold">{{myData.stats.matches_won}}</p>
-                    <p class="text-lg font-semibold">Current rating</p>
-                    <p class="text-2xl font-bold">{{myData.rating}}</p>
-                </div>
-
-                <div class="flex flex-col items-center justify-evenly">
-                    <p class="text-lg font-semibold">Tournaments won</p>
-                    <p class="text-2xl font-bold">{{myData.stats.tournaments_won}}</p>
-                </div>
-
-                <div class="flex flex-col items-center justify-evenly">
-                    <p class="text-lg font-semibold">Matches played</p>
-                    <p class="text-2xl font-bold">{{myData.stats.matches_played}}</p>
-                    <p class="text-lg font-semibold">Highest rating</p>
-                    <p class="text-2xl font-bold">{{myData.stats.highest_rating}}</p>
-                </div>
-
+            <div
+              class="flex justify-between items-center bg-blue-100 rounded-lg p-4 shadow-md transform hover:scale-105 transition-transform"
+            >
+              <p class="text-lg font-medium text-blue-700">Tournaments Won</p>
+              <p class="text-2xl font-bold text-blue-900">{{ myData.stats.tournaments_won }}</p>
             </div>
-
-
+            <div
+              class="flex justify-between items-center bg-purple-100 rounded-lg p-4 shadow-md transform hover:scale-105 transition-transform"
+            >
+              <p class="text-lg font-medium text-purple-700">Matches Played</p>
+              <p class="text-2xl font-bold text-purple-900">{{ myData.stats.matches_played }}</p>
+            </div>
+            <div
+              class="flex justify-between items-center bg-green-100 rounded-lg p-4 shadow-md transform hover:scale-105 transition-transform"
+            >
+              <p class="text-lg font-medium text-green-700">Current Rating</p>
+              <p class="text-2xl font-bold text-green-900">{{ myData.rating }}</p>
+            </div>
+            <div
+              class="flex justify-between items-center bg-red-100 rounded-lg p-4 shadow-md transform hover:scale-105 transition-transform"
+            >
+              <p class="text-lg font-medium text-red-700">Highest Rating</p>
+              <p class="text-2xl font-bold text-red-900">{{ myData.stats.highest_rating }}</p>
+            </div>
+          </div>
         </div>
       </div>
-
-      <button @click="goHome" id="home-btn"
-              class="absolute top-4 left-4 px-4 py-2 bg-white text-black rounded-md hover:bg-gray-400">
-        <v-icon
-          name="io-home-sharp" />
-      </button>
     </div>
   </template>
 
@@ -95,6 +106,12 @@
       async goHome() {
         await router.push({ name: 'home' })
       },
+      truncate2decimal(number2trunc :number) {
+        if (number2trunc.toString().includes('.') && number2trunc.toString().split('.')[1].length > 2) {
+          return parseFloat(number2trunc.toFixed(2));
+        }
+        return number2trunc;
+      }
     }
   })
   </script>
