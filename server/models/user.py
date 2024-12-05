@@ -18,6 +18,14 @@ class UserInLeaderboard(BaseModel):
     rating: int = DEFAULT_RATING
     username: str
 
+class UserWithStats(BaseModel):
+    id: str = Field(default_factory=default_id, alias="_id")
+    position: int = 0
+    email: EmailStr
+    rating: int = DEFAULT_RATING
+    username: str
+    stats: dict = { "matches_played": 0, "matches_won": 0, "tournaments_won": 0, "highest_rating": DEFAULT_RATING}
+
 class UserOnline(BaseModel):
     id: str = Field(default_factory=default_id, alias="_id")
     username: str
