@@ -5,15 +5,17 @@
     <div class="flex flex-col items-center justify-between h-full lg:w-4/5 gap-4 max-w-5xl">
       <div class="flex justify-center w-full gap-4 mt-6" v-if="started">
         <div id="p1-display"
-             class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
+             class="flex flex-col justify-center items-center px-8 py-4 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
              :class="username == player1 ? 'player-turn-1' : 'player-turn-2'">
-          <v-icon :name="[ai_names.includes(player1) ? 'fa-robot' : 'io-person']" class="text-white" />
-          {{ player1 }}
-          <div class="flex justify-evenly absolute bottom-1">
+             <div class="flex gap-3 items-center justify-center">
+              <v-icon :name="[ai_names.includes(player1) ? 'fa-robot' : 'io-person']" class="text-white" />
+              {{ player1 }}
+              <div class="flex justify-evenly -mt-1">
             <div v-for="i in rounds_to_win">
-              <v-icon :name="i <= winsP1 ? 'bi-circle-fill' : 'bi-circle'" width="0.4em" height="0.4em" />
+              <v-icon :name="i <= winsP1 ? 'bi-circle-fill' : 'bi-circle'" width="0.6em" height="0.6em" />
             </div>
           </div>
+             </div>
         </div>
 
         <div class="flex items-center text-white font-bold">
@@ -21,15 +23,17 @@
         </div>
 
         <div id="p2-display"
-             class="flex flex-col justify-center items-center px-8 py-3 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
+             class="flex flex-col justify-center items-center px-8 py-2 text-white rounded-r-full rounded-l-full shadow-md font-medium relative"
              :class="username == player2 ? 'player-turn-1' : 'player-turn-2'">
+             <div class="flex gap-3 items-center justify-center">
           <v-icon :name="[ai_names.includes(player2) ? 'fa-robot' : 'io-person']" class="text-white" />
           {{ player2 }}
-          <div class="flex justify-evenly absolute bottom-1">
+          <div class="flex justify-evenly -mt-1">
             <div v-for="i in rounds_to_win">
-              <v-icon :name="i <= winsP2 ? 'bi-circle-fill' : 'bi-circle'" width="0.4em" height="0.4em" />
+              <v-icon :name="i <= winsP2 ? 'bi-circle-fill' : 'bi-circle'" width="0.6em" height="0.6em" />
             </div>
           </div>
+        </div>
         </div>
       </div>
       <div id="game-over" class="font-medium relative p-2 rounded" v-if="gameOver">
@@ -91,7 +95,7 @@
           Start playing!
         </button>
       </div>
-      <div class="flex gap-2" v-if="started">
+      <div class="flex gap-2 flex-wrap" v-if="started">
         <div :class="[
           'flex',
           'items-center',
@@ -123,7 +127,7 @@
           {{ isYourTurn ? 'Your turn' : 'Opponent\'s turn' }} | Remaining time:
           00:{{ remainingTime.toString().padStart(2, '0') }}
         </div>
-        <button class="bg-blue-300 rounded-full px-8 h-12 py-3 flex items-center" v-if="!isYourTurn"
+        <button class="bg-blue-300 rounded-full px-8 h-12 py-3 flex items-center shadow-md" v-if="!isYourTurn"
                 @click="requestTimeout">Request victory by timeout
         </button>
         <div v-if="diceThrown" :class="[
@@ -149,30 +153,32 @@
         </div>
       </div>
       <div class="flex gap-2 mt-4 flex-wrap" v-if="configuration && started">
-        <button v-for="msg in preformedMessages" :key="msg"
-                class="btn-preformed p-2 rounded bg-blue-500 text-white cursor-pointer"
-                @click="sendPreformedMessage(msg)">
-          {{ msg }}
-        </button>
-      </div>
-      <div class="flex gap-2 mt-4 flex-wrap" v-if="configuration && started">
-        <button
-          class="p-2 mb-2 bg-red-500 text-white rounded shadow-md hover:bg-red-600"
-          @click="isModalVisible = true">
-          Quit the match
-        </button>
-
         <button v-if="isYourTurn&&diceThrown"
-                class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer"
+                class="btn-pass-turn py-2.5 px-4 shadow-md rounded-l-full rounded-r-full bg-yellow-600 hover:bg-yellow-700 text-white cursor-pointer"
                 @click="getAISuggestion">Get AI Suggestion {{ ai_suggestions[isPlayer1 ? 1 : 0] }}/3
         </button>
         <div>
           <button v-if="showPassButton && isYourTurn&&diceThrown"
-                  class="btn-pass-turn p-2 mb-2 rounded bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">
+                  class="btn-pass-turn py-2.5 px-4 shadow-md rounded-l-full rounded-r-full bg-yellow-600 text-white cursor-pointer" @click="passTheTurn()">
             Pass the turn
           </button>
         </div>
       </div>
+      <div class="z-10 absolute bottom-4 right-4 bg-slate-200 border-2 max-w-[500px] rounded-md shadow-md" v-if="configuration && started && showMessages">
+        <button @click.stop="showMessages=false" class="absolute top-0 right-0 m-2 text-black x-receive-invites">
+          <v-icon name="io-close-sharp" scale="1.5" />
+        </button>
+        <div class="flex flex-wrap mt-7 gap-2 p-4 items-center justify-center">
+          <button v-for="msg in preformedMessages" :key="msg"
+                class="btn-preformed p-2 rounded bg-blue-500 hover:bg-blue-600 text-white cursor-pointer"
+                @click.stop="sendPreformedMessage(msg)">
+          {{ msg }}
+        </button>
+        </div>
+      </div>
+      <button class="absolute bottom-4 right-4 py-3 px-5 mb-2 bg-blue-500 text-white rounded shadow-md hover:bg-blue-600" @click.stop="showMessages=true" v-if="configuration && started">
+        <v-icon name="bi-chat-dots-fill" scale="1.5"/>
+      </button>
     </div>
     <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" v-if="doublingCube.proposed">
       <div class="bg-white p-10 rounded-lg shadow-lg">
@@ -194,11 +200,19 @@
         </div>
       </div>
     </div>
-    <button @click="goHome" id="home-btn"
-            class="absolute top-4 left-4 px-4 py-2 bg-white text-black rounded-md hover:bg-gray-400">
+    <div class="flex flex-col gap-2 absolute top-4 left-4">
+      <button @click="goHome" id="home-btn"
+            class="px-4 py-2 bg-white text-black rounded-md hover:bg-gray-400">
       <v-icon
         name="io-home-sharp" />
     </button>
+
+    <button
+          class="py-2 px-4 bg-red-500 text-white rounded shadow-md hover:bg-red-600"
+          @click="isModalVisible = true">
+          <v-icon name="md-exittoapp"/>
+  </button>
+    </div>
   </div>
 </template>
 
@@ -255,7 +269,8 @@ export default defineComponent({
         }
       })
 
-    const preformedMessages = ['Ottima mossa!', 'Per poco!', 'Buona fortuna!', 'Oops', 'È il tuo turno!', 'Che peccato!']
+
+    const preformedMessages = ['Ottima mossa! 👍', 'Per poco! 😅', 'Buona fortuna! 🍀', 'Oops 😬', 'È il tuo turno! ⏳', 'Che peccato! 😢']
 
     const sendPreformedMessage = async (message: string) => {
       try {
@@ -268,7 +283,7 @@ export default defineComponent({
     }
 
     const started = starter.value > 0
-    const ai_names = ['ai_easy', 'ai_normal', 'ai_hard']
+    const ai_names = ['ai_easy', 'ai_medium', 'ai_hard']
 
     const passTheTurn = async () => {
       showPassButton.value = false
@@ -330,6 +345,8 @@ export default defineComponent({
       gameStore.getAISuggestions(player1.value == username)
     }
 
+    const showMessages = ref(false);
+
     return {
       configuration: computed(() => boardConfiguration.value),
       thrower: computed(() => (turn.value % 2) + 1),
@@ -367,7 +384,8 @@ export default defineComponent({
       doublingCube,
       remainingTime,
       last_updated,
-      updateRemainingTime
+      updateRemainingTime,
+      showMessages
     }
   },
   methods: {
@@ -485,6 +503,9 @@ export default defineComponent({
       const playerNumber = this.isPlayer1 ? 1 : 2
       const opponentUsername = this.isPlayer1 ? this.player2 : this.player1
 
+      console.log(opponentUsername)
+      console.log(this.ai_names.includes(opponentUsername))
+
       console.log(this.doublingCube.last_usage)
 
       return this.isYourTurn && !this.diceThrown && this.doublingCube.last_usage != playerNumber && this.doublingCube.count < maxDouble
@@ -512,13 +533,13 @@ export default defineComponent({
         this.initialText = `Opponent starts!`
     },
     winsP1(newVal, oldVal) {
-      (newVal === this.rounds_to_win) && this.$router.push({
+      (newVal >= this.rounds_to_win) && this.$router.push({
         name: 'match-over',
         props: { player1: this.player1, player2: this.player2 }
       })
     },
     winsP2(newVal, oldVal) {
-      (newVal === this.rounds_to_win) && this.$router.push({
+      (newVal >= this.rounds_to_win) && this.$router.push({
         name: 'match-over',
         props: { player1: this.player1, player2: this.player2 }
       })

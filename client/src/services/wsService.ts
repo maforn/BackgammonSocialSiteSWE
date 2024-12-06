@@ -85,7 +85,6 @@ class WebSocketService {
         break
       case 'tournament_over':
         this.showMessage(data.winner + " won the tournament!")
-        // TODO: show rating changes
         break
       default:
         console.warn('Unknown event:', data.type)

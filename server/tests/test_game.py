@@ -1,7 +1,8 @@
 import pytest
 from httpx import AsyncClient
 from services.database import get_db
-from services.game import create_started_match, update_match
+from services.game import create_started_match, update_match, reset_match_for_new_tournament
+from models.board_configuration import BoardConfiguration, StartDice, DoublingCube, Match
 
 from tests.conftest import clear_matches
 
@@ -301,3 +302,20 @@ async def test_quit_game(client: AsyncClient, token: str):
     ended_match = await get_db().matches.find_one({"player1": "testuser"})
     assert ended_match["status"] == "player_2_won"
     assert ended_match["winsP2"] == ended_match["rounds_to_win"]
+
+@pytest.mark.anyio
+async def test_reset_match_for_new_tournament():
+    await clear_matches()
+    await create_started_match("testuser1", "testuser2")
+    match = await get_db().matches.find_one({"player1": "testuser1"})
+
+    reset_match = reset_match_for_new_tournament(Match(**match), "testuser2")
+
+    assert reset_match.board_configuration == BoardConfiguration().dict(by_alias=True)
+    assert reset_match.available == []
+    assert reset_match.dice == []
+    assert reset_match.ai_suggestions == [0, 0]
+    assert reset_match.turn == 1
+    assert reset_match.starter == 0
+    assert reset_match.startDice == StartDice()
+    assert reset_match.doublingCube == DoublingCube()

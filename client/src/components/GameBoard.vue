@@ -202,8 +202,6 @@ export default defineComponent({
      * @param dstPointIndex Index of the destination point.
      */
     movePiece(srcPointIndex: number, dstPointIndex: number) {
-      // TODO: Possibly replace all this code with a single API call to move a piece
-
       this.checkMoveValidity(srcPointIndex, dstPointIndex)
 
       // Move the piece

@@ -3,19 +3,19 @@
   <div class="background"></div>
   <div class="flex justify-center items-center min-h-screen px-4">
 
-    <div class="flex flex-col items-center w-full p-6 space-y-8 bg-gray-100 rounded-lg shadow-lg">
+    <div class="flex flex-col items-center w-full p-6 space-y-8 bg-gray-100 rounded-lg shadow-lg max-w-5xl">
       <!-- Share Buttons -->
       <div id="game-over" class="font-medium relative p-2 rounded" >
         <div class="flex gap-2 mt-4">
-          <button @click="shareOnWhatsApp" class="btn-share p-2 rounded bg-green-600 text-white cursor-pointer">
+          <button @click="shareOnWhatsApp" class="btn-share p-2 rounded bg-green-600 text-white cursor-pointer transition-all duration-300 transform hover:scale-105">
             <v-icon name="io-logo-whatsapp" />
             Share on Whatsapp
           </button>
-          <button @click="shareOnTwitter" class="btn-share p-2 rounded bg-blue-500 text-white cursor-pointer">
+          <button @click="shareOnTwitter" class="btn-share p-2 rounded bg-blue-500 text-white cursor-pointer transition-all duration-300 transform hover:scale-105">
             <v-icon name="io-logo-twitter" />
             Share on X
           </button>
-          <button @click="shareOnFacebook" class="btn-share p-2 rounded bg-blue-700 text-white cursor-pointer">
+          <button @click="shareOnFacebook" class="btn-share p-2 rounded bg-blue-700 text-white cursor-pointer transition-all duration-300 transform hover:scale-105">
             <v-icon name="io-logo-facebook" />
             Share on Facebook
           </button>
@@ -114,7 +114,7 @@ export default {
 
     const router = useRouter();
     const username = useAuthStore().username
-    const ai_names = ["ai_easy", "ai_normal", "ai_hard"];
+    const ai_names = ["ai_easy", "ai_medium", "ai_hard"];
 
     const goHome = () => {
       router.push({name: 'home'});

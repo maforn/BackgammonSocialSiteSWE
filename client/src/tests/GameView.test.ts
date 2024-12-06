@@ -62,12 +62,16 @@ describe('GameView.vue', () => {
       pinia
     })
 
+    let buttons = wrapper.findAll('.btn-preformed')
+    expect(buttons.length).toBe(0) // Assuming there are 6 preformed messages
+
     wrapper.vm.started = true
+    wrapper.vm.showMessages = true
     await wrapper.vm.$nextTick()
 
-    const buttons = wrapper.findAll('.btn-preformed')
+    buttons = wrapper.findAll('.btn-preformed')
     expect(buttons.length).toBe(6) // Assuming there are 6 preformed messages
-    expect(buttons[0].text()).toBe('Ottima mossa!')
+    expect(buttons[0].text()).toBe('Ottima mossa! 👍')
   })
 
   it('should send preformed message on button click', async () => {
@@ -79,12 +83,13 @@ describe('GameView.vue', () => {
     })
 
     wrapper.vm.started = true
+    wrapper.vm.showMessages = true
     await wrapper.vm.$nextTick()
 
     const button = wrapper.find('.btn-preformed')
     await button.trigger('click')
 
-    expect(postSpy).toHaveBeenCalledWith('/game/message', { message: 'Ottima mossa!' })
+    expect(postSpy).toHaveBeenCalledWith('/game/message', { message: 'Ottima mossa! 👍' })
   })
 
   it('shows the winner when the game is over', async () => {
