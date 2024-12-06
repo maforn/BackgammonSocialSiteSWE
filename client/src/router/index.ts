@@ -10,6 +10,7 @@ import PasswordRecoveryView from '@/views/PasswordRecoveryView.vue'
 import PasswordResetView from '@/views/PasswordResetView.vue'
 import LeaderboardView from '@/views/LeaderboardView.vue';
 import MatchOverView from "@/views/MatchOverView.vue";
+import UserStatsView from '@/views/UserStatsView.vue';
 
 const routes = [
 	{
@@ -62,12 +63,18 @@ const routes = [
 		name: 'leaderboard',
 		component: LeaderboardView,
 	},
-  {
-    meta: { requiresAuth: true },
-    path: '/match-over',
-    name: 'match-over',
-    component: MatchOverView,
-  }
+	{
+		meta: { requiresAuth: true },
+		path: '/match-over',
+		name: 'match-over',
+		component: MatchOverView,
+	},
+	{
+		meta: { requiresAuth: true },
+		path: '/user-stats',
+		name: 'user-stats',
+		component: UserStatsView,
+	},
 ];
 
 const router = createRouter({
