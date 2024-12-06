@@ -8,11 +8,11 @@
 	<packages>
 		<package name="." line-rate="0.9688" branch-rate="0" complexity="0">
 			<classes>
-				<class name="__init__.py" filename="__init__.py" complexity="0" line-rate="1" branch-rate="0">
+				<class name="__init__.py" filename="server/__init__.py" complexity="0" line-rate="1" branch-rate="0">
 					<methods/>
 					<lines/>
 				</class>
-				<class name="main.py" filename="main.py" complexity="0" line-rate="0.9688" branch-rate="0">
+				<class name="main.py" filename="server/main.py" complexity="0" line-rate="0.9688" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -53,11 +53,11 @@
 		</package>
 		<package name="core" line-rate="1" branch-rate="0" complexity="0">
 			<classes>
-				<class name="__init__.py" filename="core/__init__.py" complexity="0" line-rate="1" branch-rate="0">
+				<class name="__init__.py" filename="server/core/__init__.py" complexity="0" line-rate="1" branch-rate="0">
 					<methods/>
 					<lines/>
 				</class>
-				<class name="config.py" filename="core/config.py" complexity="0" line-rate="1" branch-rate="0">
+				<class name="config.py" filename="server/core/config.py" complexity="0" line-rate="1" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -83,11 +83,11 @@
 		</package>
 		<package name="middlewares" line-rate="0.8182" branch-rate="0" complexity="0">
 			<classes>
-				<class name="__init__.py" filename="middlewares/__init__.py" complexity="0" line-rate="1" branch-rate="0">
+				<class name="__init__.py" filename="server/middlewares/__init__.py" complexity="0" line-rate="1" branch-rate="0">
 					<methods/>
 					<lines/>
 				</class>
-				<class name="auth.py" filename="middlewares/auth.py" complexity="0" line-rate="0.8182" branch-rate="0">
+				<class name="auth.py" filename="server/middlewares/auth.py" complexity="0" line-rate="0.8182" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -118,11 +118,11 @@
 		</package>
 		<package name="models" line-rate="0.9918" branch-rate="0" complexity="0">
 			<classes>
-				<class name="__init__.py" filename="models/__init__.py" complexity="0" line-rate="1" branch-rate="0">
+				<class name="__init__.py" filename="server/models/__init__.py" complexity="0" line-rate="1" branch-rate="0">
 					<methods/>
 					<lines/>
 				</class>
-				<class name="board_configuration.py" filename="models/board_configuration.py" complexity="0" line-rate="0.9846" branch-rate="0">
+				<class name="board_configuration.py" filename="server/models/board_configuration.py" complexity="0" line-rate="0.9846" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -192,7 +192,7 @@
 						<line number="118" hits="1"/>
 					</lines>
 				</class>
-				<class name="tournament.py" filename="models/tournament.py" complexity="0" line-rate="1" branch-rate="0">
+				<class name="tournament.py" filename="server/models/tournament.py" complexity="0" line-rate="1" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -227,7 +227,7 @@
 						<line number="35" hits="1"/>
 					</lines>
 				</class>
-				<class name="user.py" filename="models/user.py" complexity="0" line-rate="1" branch-rate="0">
+				<class name="user.py" filename="server/models/user.py" complexity="0" line-rate="1" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -263,7 +263,7 @@
 		</package>
 		<package name="routes" line-rate="0.8548" branch-rate="0" complexity="0">
 			<classes>
-				<class name="__init__.py" filename="routes/__init__.py" complexity="0" line-rate="1" branch-rate="0">
+				<class name="__init__.py" filename="server/routes/__init__.py" complexity="0" line-rate="1" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -274,7 +274,7 @@
 						<line number="7" hits="1"/>
 					</lines>
 				</class>
-				<class name="auth.py" filename="routes/auth.py" complexity="0" line-rate="0.8765" branch-rate="0">
+				<class name="auth.py" filename="server/routes/auth.py" complexity="0" line-rate="0.8765" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -360,7 +360,7 @@
 						<line number="122" hits="1"/>
 					</lines>
 				</class>
-				<class name="game.py" filename="routes/game.py" complexity="0" line-rate="0.8125" branch-rate="0">
+				<class name="game.py" filename="server/routes/game.py" complexity="0" line-rate="0.8125" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -621,7 +621,7 @@
 						<line number="404" hits="0"/>
 					</lines>
 				</class>
-				<class name="invites.py" filename="routes/invites.py" complexity="0" line-rate="0.8286" branch-rate="0">
+				<class name="invites.py" filename="server/routes/invites.py" complexity="0" line-rate="0.8286" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -696,7 +696,7 @@
 						<line number="93" hits="1"/>
 					</lines>
 				</class>
-				<class name="tournaments.py" filename="routes/tournaments.py" complexity="0" line-rate="0.9074" branch-rate="0">
+				<class name="tournaments.py" filename="server/routes/tournaments.py" complexity="0" line-rate="0.9074" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -755,7 +755,7 @@
 						<line number="70" hits="1"/>
 					</lines>
 				</class>
-				<class name="users.py" filename="routes/users.py" complexity="0" line-rate="0.9481" branch-rate="0">
+				<class name="users.py" filename="server/routes/users.py" complexity="0" line-rate="0.9481" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -841,11 +841,11 @@
 		</package>
 		<package name="services" line-rate="0.9036" branch-rate="0" complexity="0">
 			<classes>
-				<class name="__init__.py" filename="services/__init__.py" complexity="0" line-rate="1" branch-rate="0">
+				<class name="__init__.py" filename="server/services/__init__.py" complexity="0" line-rate="1" branch-rate="0">
 					<methods/>
 					<lines/>
 				</class>
-				<class name="ai.py" filename="services/ai.py" complexity="0" line-rate="1" branch-rate="0">
+				<class name="ai.py" filename="server/services/ai.py" complexity="0" line-rate="1" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -854,7 +854,7 @@
 						<line number="5" hits="1"/>
 					</lines>
 				</class>
-				<class name="auth.py" filename="services/auth.py" complexity="0" line-rate="0.9067" branch-rate="0">
+				<class name="auth.py" filename="server/services/auth.py" complexity="0" line-rate="0.9067" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -934,7 +934,7 @@
 						<line number="118" hits="1"/>
 					</lines>
 				</class>
-				<class name="board.py" filename="services/board.py" complexity="0" line-rate="1" branch-rate="0">
+				<class name="board.py" filename="server/services/board.py" complexity="0" line-rate="1" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -959,7 +959,7 @@
 						<line number="67" hits="1"/>
 					</lines>
 				</class>
-				<class name="database.py" filename="services/database.py" complexity="0" line-rate="1" branch-rate="0">
+				<class name="database.py" filename="server/services/database.py" complexity="0" line-rate="1" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -980,7 +980,7 @@
 						<line number="24" hits="1"/>
 					</lines>
 				</class>
-				<class name="game.py" filename="services/game.py" complexity="0" line-rate="0.8397" branch-rate="0">
+				<class name="game.py" filename="server/services/game.py" complexity="0" line-rate="0.8397" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -1141,7 +1141,7 @@
 						<line number="276" hits="1"/>
 					</lines>
 				</class>
-				<class name="invite.py" filename="services/invite.py" complexity="0" line-rate="1" branch-rate="0">
+				<class name="invite.py" filename="server/services/invite.py" complexity="0" line-rate="1" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -1159,7 +1159,7 @@
 						<line number="19" hits="1"/>
 					</lines>
 				</class>
-				<class name="rating.py" filename="services/rating.py" complexity="0" line-rate="1" branch-rate="0">
+				<class name="rating.py" filename="server/services/rating.py" complexity="0" line-rate="1" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -1174,7 +1174,7 @@
 						<line number="14" hits="1"/>
 					</lines>
 				</class>
-				<class name="tournament.py" filename="services/tournament.py" complexity="0" line-rate="0.9231" branch-rate="0">
+				<class name="tournament.py" filename="server/services/tournament.py" complexity="0" line-rate="0.9231" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -1296,7 +1296,7 @@
 						<line number="234" hits="0"/>
 					</lines>
 				</class>
-				<class name="user.py" filename="services/user.py" complexity="0" line-rate="1" branch-rate="0">
+				<class name="user.py" filename="server/services/user.py" complexity="0" line-rate="1" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>
@@ -1319,7 +1319,7 @@
 						<line number="29" hits="1"/>
 					</lines>
 				</class>
-				<class name="websocket.py" filename="services/websocket.py" complexity="0" line-rate="0.8958" branch-rate="0">
+				<class name="websocket.py" filename="server/services/websocket.py" complexity="0" line-rate="0.8958" branch-rate="0">
 					<methods/>
 					<lines>
 						<line number="1" hits="1"/>

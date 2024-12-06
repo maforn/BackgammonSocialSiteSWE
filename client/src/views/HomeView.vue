@@ -75,9 +75,9 @@
       </div>
     </div>
     <div class="fixed top-0 left-2 p-4 flex justify-start">
-      <v-icon name="fa-user-circle" class="text-white" scale="3" />
+      <v-icon @click="$router.push('/user-stats')" name="fa-user-circle" class="text-white" scale="3" style="cursor: pointer;" />
       <div class="flex flex-col justify-evenly ms-2">
-        <div class="text-lg text-white font-bold text-left">{{ username }}</div>
+        <router-link to="/user-stats" class="text-lg text-white font-bold text-left">{{ username }}</router-link>
         <div id="logout" @click="logout" class="text-sm text-left text-white hover:underline hover:cursor-pointer">
           Logout</div>
       </div>
@@ -108,16 +108,15 @@ export default defineComponent({
     const showOverlay = ref(false)
     const invites = ref<Invite[]>([]);
     const hasSuspendedGame = ref(true)
+    const gameStore = useGameStore()
 
     onMounted(async () => {
       username.value = await axiosInstance.get('/users/me').then(res => res.data.username)
+      const suspendedGame = await gameStore.checkSuspendedGameExists()
+      hasSuspendedGame.value = suspendedGame
+      if (suspendedGame)
+        await gameStore.fetchGame()
     })
-
-    useGameStore()
-      .checkSuspendedGameExists()
-      .then((exists) => {
-        hasSuspendedGame.value = exists
-      });
 
 		const logout = () => {
 			authLogout();
@@ -142,6 +141,7 @@ export default defineComponent({
       const invite_id = invites.value[index]._id
       try {
         await acceptInviteService(invite_id)
+        await gameStore.fetchGame()
         router.push({ name: 'game' })
       } catch (error) {
         console.error('Error in acceptInvite:', error)

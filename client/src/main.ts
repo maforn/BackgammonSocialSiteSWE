@@ -17,7 +17,9 @@ import {
 	BiCircleFill,
 	FaMedal,
 	FaDiceD20,
-	FaEllipsisH, IoLogoWhatsapp, IoLogoFacebook, IoLogoTwitter
+	FaEllipsisH, IoLogoWhatsapp, IoLogoFacebook, IoLogoTwitter,
+	MdExittoapp,
+	BiChatDotsFill
 } from 'oh-vue-icons/icons'
 import App from './App.vue';
 import router from './router';
@@ -25,7 +27,11 @@ import './assets/tailwind.css';
 import './index.css';
 import piniaPluginPersistedState from 'pinia-plugin-persistedstate';
 
+import PieChart from 'vue-pie-chart/src/PieChart.vue'
+
 const app = createApp(App);
+
+app.component('pie-chart', PieChart)
 
 addIcons(
 	IoPerson,
@@ -46,7 +52,9 @@ addIcons(
 	FaDiceD20,
 	IoLogoWhatsapp,
 	IoLogoFacebook,
-	IoLogoTwitter
+	IoLogoTwitter,
+	MdExittoapp,
+	BiChatDotsFill
 );
 
 app.component('v-icon', OhVueIcon);

@@ -24,7 +24,7 @@ describe('Empty Board component tests', () => {
 	beforeEach(() => {
 		wrapper = mount(GameBoard, {
 			props: {
-				configuration: new BoardConfiguration(Array(24).fill({ player1: 0, player2: 0 }), { player1: 0, player2: 0 }),
+				configuration: new BoardConfiguration(Array(24).fill(new PointConfiguration(0, 0)), new PointConfiguration(0, 0)),
 				dice: [],
 				yourTurn: false,
 			},
