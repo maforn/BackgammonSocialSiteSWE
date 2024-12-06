@@ -17,7 +17,9 @@ import {
 	BiCircleFill,
 	FaMedal,
 	FaDiceD20,
-	FaEllipsisH, IoLogoWhatsapp, IoLogoFacebook, IoLogoTwitter
+	FaEllipsisH, IoLogoWhatsapp, IoLogoFacebook, IoLogoTwitter,
+	MdExittoapp,
+	BiChatDotsFill
 } from 'oh-vue-icons/icons'
 import App from './App.vue';
 import router from './router';
@@ -46,7 +48,9 @@ addIcons(
 	FaDiceD20,
 	IoLogoWhatsapp,
 	IoLogoFacebook,
-	IoLogoTwitter
+	IoLogoTwitter,
+	MdExittoapp,
+	BiChatDotsFill
 );
 
 app.component('v-icon', OhVueIcon);
