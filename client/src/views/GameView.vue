@@ -176,7 +176,7 @@
         </button>
         </div>
       </div>
-      <button class="absolute bottom-4 right-4 py-3 px-5 mb-2 bg-blue-500 text-white rounded shadow-md hover:bg-blue-600" @click.stop="showMessages=true">
+      <button class="absolute bottom-4 right-4 py-3 px-5 mb-2 bg-blue-500 text-white rounded shadow-md hover:bg-blue-600" @click.stop="showMessages=true" v-if="configuration && started">
         <v-icon name="bi-chat-dots-fill" scale="1.5"/>
       </button>
     </div>
