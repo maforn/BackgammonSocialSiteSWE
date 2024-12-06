@@ -6,6 +6,7 @@ from services.game import create_started_match, get_current_game
 from models.board_configuration import Match
 from services.websocket import manager as websocket_manager
 from fastapi.encoders import jsonable_encoder
+from services.ai import ai_names
 
 
 MAX_TOURNMENT_PARTICIPANTS = 4
@@ -21,7 +22,7 @@ async def get_current_tournament(username: str) -> Tournament:
     return None
 
 
-async def get_available_tournaments(username: str) -> List[Tournament] | None:
+async def get_available_tournaments(username: str) -> List[Tournament]:
     # Get all tournaments that are closed tournaments that the user is invited to OR open tournaments with less than 4 participants 
     tournament_data = await get_db().tournaments.find({
         "$and": [
@@ -42,10 +43,26 @@ async def get_available_tournaments(username: str) -> List[Tournament] | None:
     return []
 
 
+async def get_concluded_tournaments(username: str) -> List[Tournament]:
+    tournament_data = await get_db().tournaments.find({
+        "confirmed_participants": {"$in": [username]},
+        "status": "finished"
+    }).to_list(length=None)
+    if tournament_data:
+        return [Tournament(**tournament) for tournament in tournament_data]
+    return []
+
+
 async def create_new_tournament(request: CreateTournamentRequest, owner: str):
+    confirmed_participants = [owner]
+    for participant in request.participants:
+        if participant in ai_names:
+            confirmed_participants.append(participant)
+    if len(set(confirmed_participants).intersection(ai_names)) > 1:
+        raise HTTPException(status_code=400, detail="Cannot have more than 1 AI players in a tournament")
     new_tournament = Tournament(owner=owner, 
                                 participants= [owner] if (request.open and len(request.participants)==0 ) else request.participants,
-                                confirmed_participants=[owner], 
+                                confirmed_participants=confirmed_participants,
                                 open=request.open,
                                 name=request.name,
                                 match_ids=[],
@@ -217,5 +234,5 @@ async def end_tournament(tournament: Tournament):
 
     for participant in tournament['confirmed_participants']:
         websocket = await websocket_manager.get_user(participant)
-    if websocket:
-        await websocket_manager.send_personal_message({"type": "tournament_over", "winner": winner["username"]}, websocket)
+        if websocket:
+            await websocket_manager.send_personal_message({"type": "tournament_over", "winner": winner["username"]}, websocket)

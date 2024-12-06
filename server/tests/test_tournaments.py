@@ -78,6 +78,20 @@ async def test_get_tournament(client: AsyncClient, token: str):
     assert res_data['participants'] == ['testuser']
     assert res_data['rounds_to_win'] == 2
 
+@pytest.mark.anyio
+async def test_get_concluded_tournaments(client: AsyncClient, token: str):
+    await clear_tournaments()
+    response = await client.get(tournaments_route+"/concluded", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    assert response.json() == []
+
+    await create_new_tournament(mock_request_data, owner="testuser")
+    await get_db().tournaments.update_one({"owner": "testuser"}, {"$set": {"status": "finished"}})
+    response = await client.get(tournaments_route+"/concluded", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+    assert response.json()[0]["owner"] == "testuser"
+    assert response.json()[0]["name"] == "test"
 
 @pytest.mark.anyio
 async def test_tournament_exists(client: AsyncClient, token: str):
@@ -205,22 +219,7 @@ async def test_add_participant_to_closed_tournament_not_invited():
 
 @pytest.mark.anyio
 async def test_start_tournament():
-    await clear_tournaments()
-    await create_new_tournament(mock_request_data, owner="testuser")
-
-    await get_db().tournaments.update_one(
-        {"owner": "testuser"},
-        {"$set": {
-            "participants": ["testuser", "testuser2", "testuser3", "testuser4"],
-            "confirmed_participants": ["testuser", "testuser2", "testuser3", "testuser4"]
-            }
-        }
-    )
-
-    tournament = await get_db().tournaments.find_one({"owner": "testuser"})
-    tournament_id = tournament["_id"]
-    await start_tournament(tournament_id)
-    tournament = await get_db().tournaments.find_one({"owner": "testuser"})
+    tournament, _ = await setup_basic_tournament()
 
     assert tournament["status"] == "started"
     assert tournament["confirmed_participants"] == ["testuser", "testuser2", "testuser3", "testuser4"]
@@ -236,24 +235,7 @@ async def test_start_tournament():
 
 @pytest.mark.anyio
 async def test_create_round_robin_tournament_round():
-    await clear_tournaments()
-    await create_new_tournament(mock_request_data, owner="testuser")
-
-    await get_db().tournaments.update_one(
-        {"owner": "testuser"},
-        {"$set": {
-            "participants": ["testuser", "testuser2", "testuser3", "testuser4"],
-            "confirmed_participants": ["testuser", "testuser2", "testuser3", "testuser4"]
-            }
-        }
-    )
-
-    tournament = await get_db().tournaments.find_one({"owner": "testuser"})
-    tournament_id = tournament["_id"]
-    
-    await start_tournament(tournament_id)
-
-    tournament = await get_db().tournaments.find_one({"owner": "testuser"})
+    tournament, tournament_id = await setup_basic_tournament()
     g1_id, g2_id = tournament["match_ids"]
 
     assert g1_id != g2_id
@@ -295,6 +277,25 @@ async def test_create_round_robin_tournament_round():
     assert g2_p1_2 in ["testuser", "testuser2", "testuser3", "testuser4"]
     assert g2_p2_2 in ["testuser", "testuser2", "testuser3", "testuser4"]
     assert g2_p1_2 != g2_p2_2
+
+
+async def setup_basic_tournament():
+    await clear_tournaments()
+    await create_new_tournament(mock_request_data, owner="testuser")
+    await get_db().tournaments.update_one(
+        {"owner": "testuser"},
+        {"$set": {
+            "participants": ["testuser", "testuser2", "testuser3", "testuser4"],
+            "confirmed_participants": ["testuser", "testuser2", "testuser3", "testuser4"]
+        }
+        }
+    )
+    tournament = await get_db().tournaments.find_one({"owner": "testuser"})
+    tournament_id = tournament["_id"]
+    await start_tournament(tournament_id)
+    tournament = await get_db().tournaments.find_one({"owner": "testuser"})
+    return tournament, tournament_id
+
 
 @pytest.mark.anyio
 async def test_get_tournament_of_game():

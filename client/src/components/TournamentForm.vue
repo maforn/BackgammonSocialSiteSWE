@@ -2,7 +2,7 @@
     <form class="w-full flex flex-col items-center gap-4" @submit="createTournament">
         <input type="text" placeholder="Tournament Name" required v-model="tournamentName"
             class="text-center text-xl font-bold py-2 border-b-2 mb-4">
-		
+
 		<div class="flex justify-center items-center pl-3 py-2 gap-x-2 self-center">
 			<label for="roundsToWin" class="text-right">Rounds to win</label>
 			<div class="container">
@@ -107,6 +107,11 @@ export default defineComponent({
 				} else {
 					this.users = []
 				}
+        if (this.searchQuery.toLowerCase().startsWith('ai')) {
+          this.users.push({ id: 0, username: 'ai_easy' })
+          this.users.push({ id: 1, username: 'ai_normal' })
+          this.users.push({ id: 2, username: 'ai_hard' })
+        }
 				this.showDropdown = this.filteredUsers.length > 0
 			} catch (error) {
 				console.error('Error fetching users:', error)

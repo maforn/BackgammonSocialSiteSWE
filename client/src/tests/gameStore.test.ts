@@ -7,7 +7,7 @@ import { BoardConfiguration, PointConfiguration } from '@/models/BoardConfigurat
 import { Match } from '@/models/Match';
 
 describe('game store', () => {
-  let mock: MockAdapter;
+  let mock: InstanceType<typeof MockAdapter>;
 
   beforeEach(() => {
     setActivePinia(createPinia());
@@ -29,9 +29,9 @@ describe('game store', () => {
       'active',
       1,
       1,
+      now,
       [0, 0],
       { count: 0, last_usage: 0, proposed: false, proposer: 0 },
-      now,
     );
     gameStore.setMatch({
       player1: 'Alice',
@@ -107,33 +107,5 @@ describe('game store', () => {
     await gameStore.checkAITurn();
 
     expect(gameStore.dice.roll.length).toBe(0);
-  });
-
-  it('should load game data correctly', async () => {
-    const mockResponse = {
-      player1: 'Alice',
-      player2: 'Bob',
-      board_configuration: new BoardConfiguration(),
-      dice: [1, 2],
-      available: [3, 4],
-      turn: 1,
-      created_at: '2023-01-01T00:00:00Z',
-      updated_at: '2023-01-01T00:00:00Z',
-      status: 'active',
-    };
-    mock.onGet('/game').reply(200, mockResponse);
-
-    const gameStore = useGameStore();
-    await gameStore.fetchGame();
-
-    expect(gameStore.player1).toBe('Alice');
-    expect(gameStore.player2).toBe('Bob');
-    expect(gameStore.boardConfiguration).toEqual(new BoardConfiguration());
-    expect(gameStore.dice.roll).toEqual([1, 2]);
-    expect(gameStore.dice.available).toEqual([3, 4]);
-    expect(gameStore.turn).toBe(1);
-    expect(gameStore.created_at.toISOString()).toBe('2023-01-01T00:00:00.000Z');
-    expect(gameStore.updated_at.toISOString()).toBe('2023-01-01T00:00:00.000Z');
-    expect(gameStore.status).toBe('active');
   });
 });

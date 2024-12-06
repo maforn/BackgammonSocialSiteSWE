@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { logout, registerOrLogin, requestPasswordRecovery, resetPassword, isAuthenticated, loginWithGoogle } from '@/services/authService';
+import { logout, registerOrLogin, requestPasswordRecovery, resetPassword } from '@/services/authService';
 import { useAuthStore } from '@/stores/authStore';
 import { createPinia, setActivePinia } from 'pinia';
 
 describe('auth service', () => {
- let mock: MockAdapter;
+ let mock: InstanceType<typeof MockAdapter>;
 
  beforeEach(() => {
   setActivePinia(createPinia());

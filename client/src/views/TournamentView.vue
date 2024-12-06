@@ -10,17 +10,37 @@
 			<div
 				class="mt-10 flex items-center justify-center rounded-l-full rounded-r-full overflow-hidden bg-gray-400 text-white font-semibold">
 				<button :class="['px-8 py-2 flex-1', showCreate ? 'bg-green-800' : '']" v-if="!hasCreatedTournament"
-					@click="showCreate = true">Create</button>
-				<button :class="['px-8 py-2 flex-1', !showCreate ? 'bg-green-800' : '']" v-if="!hasCreatedTournament"
-					@click="showCreate = false">Join</button>
-				<div :class="['px-8 py-2 flex-1', 'bg-green-800']" v-if="hasCreatedTournament">Active</div>
+					@click="showCreatePanel">Create</button>
+				<button :class="['px-8 py-2 flex-1', showJoin ? 'bg-green-800' : '']" v-if="!hasCreatedTournament"
+					@click="showJoinPanel">Join</button>
+				<button :class="['px-8 py-2 flex-1', showActive ? 'bg-green-800' : '']" v-if="hasCreatedTournament"
+					@click="showActivePanel">Active</button>
+				<button :class="['px-8 py-2 flex-1', showConcluded ? 'bg-green-800' : '']"
+					@click="showConcludedPanel">Concluded</button>
 			</div>
 
 			<div
-				class="flex flex-col mt-6 w-1/2 sm:p-8 p-6 shadow-md items-center rounded-md gap-6 pl-3 py-2 text-sm md:text-lg bg-white">
-				<TournamentVisualizer v-if="hasCreatedTournament" />
+				class="flex flex-col mt-6 lg:w-1/2 md:w-3/4 sm:p-8 p-6 shadow-md items-center rounded-md gap-6 pl-3 py-2 text-sm md:text-lg bg-white">
+				<TournamentVisualizer v-if="hasCreatedTournament && showActive" :tournament="activeTournament"/>
 				<TournamentForm v-if="!hasCreatedTournament && showCreate" @created-tournament="updateTournament" />
-				<TournamentLists v-if="!hasCreatedTournament && !showCreate" @joined-tournament="updateTournament" />
+				<TournamentLists v-if="!hasCreatedTournament && showJoin" @joined-tournament="updateTournament" />
+				<div v-if="showConcluded" class="w-full flex flex-col justify-center items-center gap-y-2">
+					<button v-if="concludedTournaments.length > 0" v-for="tournament,index in concludedTournaments" :key="index" 
+					class="flex justify-center items-center w-5/6 px-3 py-2 bg-green-600 text-white rounded-r-full rounded-l-full hover:bg-green-700 shadow-md"
+					@click="showTournamentResultPanel(tournament)">
+						{{ tournament.name }}
+				</button>
+				<p v-else class="text-sm text-gray-500 italic text-center">No concluded tournament found.</p>
+			</div>
+			</div>
+		</div>
+
+		<div v-if="showTournamentResult" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-80 flex justify-center items-center z-50">
+			<div class="bg-white p-5 rounded-lg w-4/5 max-w-lg text-center relative">
+				<button @click="hideTournamentResultPanel" class="absolute top-0 right-0 m-2 text-black x-receive-invites">
+		<v-icon name="io-close-sharp" scale="1.5" />
+	  </button>
+				<TournamentVisualizer :tournament="selectedTournament" />
 			</div>
 		</div>
 
@@ -35,7 +55,7 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 import router from '@/router';
-import { checkCreatedTournamentExists } from '@/services/tournamentService';
+import { checkCreatedTournamentExists, fetchActiveTournament, fetchConcludedTournaments } from '@/services/tournamentService';
 import TournamentForm from '@/components/TournamentForm.vue';
 import TournamentVisualizer from '@/components/TournamentVisualizer.vue';
 import TournamentLists from '@/components/TournamentLists.vue';
@@ -50,15 +70,30 @@ export default defineComponent({
 	},
 	setup() {
 		const hasCreatedTournament = ref(false)
-		checkCreatedTournamentExists().then(exists => {
+		const activeTournament = ref(null)
+		const concludedTournaments = ref([] as Array<Tournament>)
+
+		checkCreatedTournamentExists().then(async exists => {
 			hasCreatedTournament.value = exists
+			if (exists) {
+				activeTournament.value = await fetchActiveTournament()
+			}
 		})
-		return { hasCreatedTournament }
+
+		fetchConcludedTournaments().then(tournaments => {
+			concludedTournaments.value = tournaments
+		})
+
+		return { hasCreatedTournament, activeTournament, concludedTournaments }
 	},
 	data() {
 		return {
 			showCreate: true,
-			activeTournament: null as Tournament | null,
+			showJoin: false,
+			showActive: true,
+			showConcluded: false,
+			showTournamentResult: false,
+			selectedTournament: null
 		}
 	},
 	methods: {
@@ -66,8 +101,38 @@ export default defineComponent({
 			await router.push({ name: 'home' });
 		},
 		async updateTournament(tournament: Tournament) {
-			if (tournament)
+			if (tournament){
 				this.hasCreatedTournament = true;
+				this.activeTournament = tournament;
+				this.showActivePanel();	
+			}
+		},
+		showCreatePanel() {
+			this.showCreate = true;
+			this.showJoin = false;
+			this.showConcluded = false;
+		},
+		showJoinPanel() {
+			this.showCreate = false;
+			this.showJoin = true;
+			this.showConcluded = false;
+		},
+		showActivePanel() {
+			this.showActive = true;
+			this.showConcluded = false;
+		},
+		showConcludedPanel() {
+			this.showCreate = false;
+			this.showJoin = false;
+			this.showActive = false;
+			this.showConcluded = true;
+		},
+		showTournamentResultPanel(tournament: Tournament) {
+			this.selectedTournament = tournament;
+			this.showTournamentResult = true;
+		},
+		hideTournamentResultPanel() {
+			this.showTournamentResult = false;
 		}
 	},
 	computed: {

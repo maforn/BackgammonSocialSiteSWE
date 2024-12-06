@@ -6,7 +6,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import axiosInstance from '@/axios';
 
 describe('TournamentLists.vue', () => {
-    let mock: MockAdapter
+    let mock: InstanceType<typeof MockAdapter>;
     const pinia = createPinia();
 
     beforeAll(() => {

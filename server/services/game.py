@@ -1,12 +1,12 @@
 import random
-
-from time import strptime
 from datetime import datetime, timedelta
+from time import strptime
+
 from models.board_configuration import Match, BoardConfiguration, StartDice, DoublingCube
 from services.ai import ai_names, ai_rating
+from services.board import is_gammon, is_backgammon
 from services.database import get_db
 from services.rating import new_ratings_after_match
-from services.board import is_gammon, is_backgammon
 
 
 async def update_match(selector, data):
@@ -69,7 +69,7 @@ def check_win_condition(match: Match):
     return {"winner": 1} if player1_counter == 0 else {"winner": 2}
 
 
-async def check_winner(current_game: Match, manager, winner = None, is_timeout=False):
+async def check_winner(current_game: Match, manager, winner=None, is_timeout=False):
     if is_timeout:
         winner = await check_timeout_winner(current_game)
     elif winner is None:
@@ -80,9 +80,10 @@ async def check_winner(current_game: Match, manager, winner = None, is_timeout=F
 
     # Check if someone won the current round
     if winner != 0:
-        loser_username, old_loser_rating, old_winner_rating, winner_username, gained_points = await update_rating(current_game,
-                                                                                                   p1_data, p2_data,
-                                                                                                   winner)
+        loser_username, old_loser_rating, old_winner_rating, winner_username, gained_points = await update_rating(
+            current_game,
+            p1_data, p2_data,
+            winner)
 
         # Check if someone won the entire match (won rounds_to_win rounds)
         if current_game.winsP1 >= current_game.rounds_to_win or current_game.winsP2 >= current_game.rounds_to_win:
@@ -90,7 +91,7 @@ async def check_winner(current_game: Match, manager, winner = None, is_timeout=F
             current_game.doublingCube.proposer = 0
             await update_on_match_win(current_game, loser_username, manager, old_loser_rating, old_winner_rating,
                                       winner, winner_username)
-            
+
             from services.tournament import update_tournament_of_game
             await update_tournament_of_game(current_game, winner_username, loser_username, gained_points)
         else:
@@ -118,32 +119,34 @@ async def check_winner(current_game: Match, manager, winner = None, is_timeout=F
                 await manager.send_personal_message({"type": "round_over", "winner": winner_username, "info": info_str},
                                                     websocket_player2)
 
-        current_game = game_fields_to_dict(current_game)
+    current_game = game_fields_to_dict(current_game)
 
-        await update_match({"_id": current_game.id},
-                           {"$set": {"board_configuration": current_game.board_configuration,
-                                     "status": current_game.status,
-                                     "available": current_game.available,
-                                     "dice": current_game.dice,
-                                     "turn": current_game.turn,
-                                     "startDice": current_game.startDice,
-                                     "doublingCube": current_game.doublingCube,
-                                     "winsP1": current_game.winsP1,
-                                     "winsP2": current_game.winsP2,
-                                     "ai_suggestions": current_game.ai_suggestions}})
+    await update_match({"_id": current_game.id},
+                       {"$set": {"board_configuration": current_game.board_configuration,
+                                 "status": current_game.status,
+                                 "available": current_game.available,
+                                 "dice": current_game.dice,
+                                 "turn": current_game.turn,
+                                 "startDice": current_game.startDice,
+                                 "doublingCube": current_game.doublingCube,
+                                 "winsP1": current_game.winsP1,
+                                 "winsP2": current_game.winsP2,
+                                 "ai_suggestions": current_game.ai_suggestions}})
 
 
 async def get_players_data(current_game):
     p1_data = await get_db().users.find_one({
         "username": current_game.player1
-    })
+    }) or {}
     p2_data = await get_db().users.find_one({
         "username": current_game.player2
-    })
-    p2_data = p2_data or {}
+    }) or {}
     if current_game.player2 in ai_names:
         p2_data["username"] = current_game.player2
         p2_data["rating"] = ai_rating[ai_names.index(current_game.player2)]
+    elif current_game.player1 in ai_names:
+        p1_data["username"] = current_game.player1
+        p1_data["rating"] = ai_rating[ai_names.index(current_game.player1)]
     return p1_data, p2_data
 
 
@@ -208,7 +211,7 @@ def get_winning_info_str(current_game: Match, winner: int):
         board = BoardConfiguration(**current_game.board_configuration)
 
     is_player1 = winner == 1
-    
+
     if is_backgammon(board, is_player1):
         return " with a backgammon"
     elif is_gammon(board, is_player1):
@@ -271,13 +274,16 @@ async def quit_the_game(current_game: Match, manager, winner):
     current_game.board_configuration = BoardConfiguration().dict(by_alias=True)
 
     for _ in range(matches_left):
-        loser_username, old_loser_rating, old_winner_rating, winner_username, _ = await update_rating(current_game,
-                                                                                                   p1_data, p2_data,
-                                                                                                   winner)
+        loser_username, old_loser_rating, old_winner_rating, winner_username, gained_points = await update_rating(
+            current_game,
+            p1_data, p2_data,
+            winner)
 
     if current_game.winsP1 == current_game.rounds_to_win or current_game.winsP2 == current_game.rounds_to_win:
         await update_on_match_win(current_game, loser_username, manager, old_loser_rating, old_winner_rating,
                                   winner, winner_username)
+        from services.tournament import update_tournament_of_game
+        await update_tournament_of_game(current_game, winner_username, loser_username, gained_points)
 
     await get_db().matches.update_one({"_id": current_game.id},
                                       {"$set": {"board_configuration": current_game.board_configuration,

@@ -1,13 +1,18 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import axiosInstance from '@/axios';
 import MockAdapter from 'axios-mock-adapter';
 import { createPinia, setActivePinia } from 'pinia';
-import { checkCreatedTournamentExists, createTournament, fetchActiveTournament } from '@/services/tournamentService'; // Adjust import path
+import { checkCreatedTournamentExists, createTournament, fetchActiveTournament, fetchConcludedTournaments } from '@/services/tournamentService'; // Adjust import path
 import { Tournament } from '@/models/Tournament';
 
+vi.mock('@/stores/wsStore', () => ({
+    useWsStore: vi.fn(() => ({
+        addError: vi.fn(),
+    })),
+}));
 
 describe('checkCreatedTournamentExists', () => {
-    let mock: MockAdapter;
+    let mock: InstanceType<typeof MockAdapter>;
 
     beforeEach(() => {
         setActivePinia(createPinia());
@@ -15,22 +20,15 @@ describe('checkCreatedTournamentExists', () => {
     });
 
     it('should return tournament exists data', async () => {
-        // Prepare mock response
         const mockResponse = true;
-
-        // Mock axios get method
         mock.onGet('tournaments/exists').reply(200, mockResponse);
-
-        // Call the function
         const result = await checkCreatedTournamentExists();
-
-        // Assertions
         expect(result).toEqual(true);
     });
 });
 
 describe('createTournament', () => {
-    let mock: MockAdapter;
+    let mock: InstanceType<typeof MockAdapter>;
 
     beforeEach(() => {
         setActivePinia(createPinia());
@@ -44,6 +42,7 @@ describe('createTournament', () => {
                 ['testuser'],
                 true,
                 'testTournament',
+                'round_robin',
                 'pending',
                 [],
                 2
@@ -51,14 +50,20 @@ describe('createTournament', () => {
         }
 
         mock.onPost('/tournaments').reply(200, mockResponse);
-        const result = await createTournament('testUser', true, [], 2);
+        const result = await createTournament('testUser', true, [], 2, 'round_robin');
         expect(result).toEqual(mockResponse.tournament);
+    });
+
+    it('should handle error', async () => {
+        mock.onPost('/tournaments').reply(500, { detail: 'Error creating tournament' });
+        const result = await createTournament('testUser', true, [], 2, 'round_robin');
+        expect(result).toBeNull();
     });
     
 });
 
 describe('fetchActiveTournament', () => {
-    let mock: MockAdapter;
+    let mock: InstanceType<typeof MockAdapter>;
 
     beforeEach(() => {
         setActivePinia(createPinia());
@@ -72,6 +77,7 @@ describe('fetchActiveTournament', () => {
                 ['testuser'],
                 true,
                 'testTournament',
+                'round_robin',
                 'pending',
                 [],
                 2
@@ -80,5 +86,55 @@ describe('fetchActiveTournament', () => {
         mock.onGet('/tournaments').reply(200, mockResponse);
         const result = await fetchActiveTournament();
         expect(result).toEqual(mockResponse);
+    });
+
+    it('should handle error', async () => {
+        mock.onGet('/tournaments').reply(500, { detail: 'Error fetching tournament' });
+        const result = await fetchActiveTournament();
+        expect(result).toBeNull();
+    });
+});
+
+describe('fetchConcludedTournaments', () => {
+    let mock: InstanceType<typeof MockAdapter>;
+
+    beforeEach(() => {
+        setActivePinia(createPinia());
+        mock = new MockAdapter(axiosInstance);
+    });
+
+    it('should return concluded tournaments', async () => {
+        const mockResponse = [
+            new Tournament(
+                'testUser1',
+                ['testuser1'],
+                true,
+                'testTournament1',
+                'round_robin',
+                'concluded',
+                [],
+                2
+            ),
+            new Tournament(
+                'testUser2',
+                ['testuser2'],
+                true,
+                'testTournament2',
+                'round_robin',
+                'concluded',
+                [],
+                2
+            )
+        ];
+
+        mock.onGet('/tournaments/concluded').reply(200, mockResponse);
+        const result = await fetchConcludedTournaments();
+        expect(result).toEqual(mockResponse);
+    });
+
+    it('should handle error', async () => {
+        mock.onGet('/tournaments/concluded').reply(500, { detail: 'Error fetching concluded tournaments' });
+        const result = await fetchConcludedTournaments();
+        expect(result).toEqual([]);
     });
 });

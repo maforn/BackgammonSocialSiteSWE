@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from services.auth import oauth2_scheme, get_user_from_token
 from models.tournament import CreateTournamentRequest, JoinTournamentRequest
-from services.tournament import get_current_tournament, get_available_tournaments, create_new_tournament, get_tournament_id_from_owner_and_name, add_participant_to_tournament
+from services.tournament import get_current_tournament, get_available_tournaments, get_concluded_tournaments, create_new_tournament, get_tournament_id_from_owner_and_name, add_participant_to_tournament
 from routes.game import game_exists
 from fastapi.encoders import jsonable_encoder
 
@@ -47,12 +47,17 @@ async def game(token: str = Depends(oauth2_scheme)):
     return current_tournament.model_dump(by_alias=True)
 
 
+@router.get("/tournaments/concluded")
+async def concluded_tournaments(token: str = Depends(oauth2_scheme)):
+    user = await get_user_from_token(token)
+    concluded_tournaments = await get_concluded_tournaments(user.username)
+    return [tournament.model_dump(by_alias=True) for tournament in concluded_tournaments]
+
+
 @router.get("/tournaments/available")
 async def available_tournaments(token: str = Depends(oauth2_scheme)):
     user = await get_user_from_token(token)
     available_tournaments = await get_available_tournaments(user.username)
-    if not available_tournaments:
-        raise HTTPException(status_code=404, detail="No available tournaments found")
     return [tournament.model_dump(by_alias=True) for tournament in available_tournaments]
 
 

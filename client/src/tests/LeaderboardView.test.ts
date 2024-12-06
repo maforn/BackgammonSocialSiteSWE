@@ -23,7 +23,7 @@ function setup(mock) {
 }
 
 describe('LeaderboardView.vue', () => {
-  let mock: MockAdapter;
+  let mock: InstanceType<typeof MockAdapter>;;
   const pinia = createPinia();
 
   beforeAll(() => {
@@ -89,5 +89,22 @@ describe('LeaderboardView.vue', () => {
     await flushPromises();
 
     expect(wrapper.vm.usersData[0].username).toBe('googleuser1');
+  });
+
+  it('toggles to leaderboard', async () => {
+    setup(mock)
+
+    const wrapper = mount(LeaderboardView, {
+      global: {
+        plugins: [pinia]
+      }
+    });
+    
+    wrapper.vm.showGoogleFriends = false;
+    await wrapper.vm.$nextTick();
+    await wrapper.vm.toggleGoogleFriends();
+    await flushPromises();
+
+    expect(wrapper.vm.usersData[0].username).toBe('user1');
   });
 });
