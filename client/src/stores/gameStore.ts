@@ -107,7 +107,7 @@ export const useGameStore = defineStore('game', {
     },
     async getAISuggestions(isPlayer1: boolean) {
       if (this.ai_suggestions[isPlayer1 ? 1 : 0] >= 3) {
-        useWsStore().addNotification('AI suggestions limit reached')
+        useWsStore().addError('AI suggestions limit reached')
         return
       }
 
@@ -215,8 +215,8 @@ export const useGameStore = defineStore('game', {
           usedDice = findUsedDie(this.dice.available, randomMove.src, randomMove.dst)
         }
         console.log('random', usedDice)
-        return usedDice
       }
+      return usedDice
     },
     makeAIMove(move: any) {
       const isPlayer1 = this.player1 === useAuthStore().username
@@ -256,7 +256,6 @@ export const useGameStore = defineStore('game', {
     },
     setStartDice(roll1: number, count1: number, roll2: number, count2: number) {
       this.startDice = { roll1, count1, roll2, count2 }
-
     },
     setStarter(starter: number, turn: number) {
       this.starter = starter

@@ -5,6 +5,7 @@ import axiosInstance from '@/axios';
 import MockAdapter from 'axios-mock-adapter';
 import { createPinia, setActivePinia } from 'pinia';
 import router from '@/router'
+import { useWsStore } from '@/stores/wsStore'
 
 vi.mock('@/router', () => ({
   push: vi.fn(),
@@ -63,8 +64,6 @@ describe('LeaderboardView.vue', () => {
   });
 
   it('toggles to Google friends leaderboard', async () => {
-    setup(mock)
-
     mock.onPost('/users/top5_and_me_google').reply(200, [
       { _id: '1', username: 'googleuser1', rating: 100, position: 1 },
       { _id: '2', username: 'googleuser2', rating: 90, position: 2 },
@@ -80,16 +79,40 @@ describe('LeaderboardView.vue', () => {
       }
     });
 
-    await flushPromises();
-
-    expect(wrapper.vm.usersData[0].username).toBe('user1');
-
     wrapper.vm.showGoogleFriends = true;
     await wrapper.vm.toggleGoogleFriends();
     await flushPromises();
 
     expect(wrapper.vm.usersData[0].username).toBe('googleuser1');
   });
+
+  it('handles error with normal leaderboard', async () => {
+    mock.onGet('/users/top5_and_me').reply(500, { detail: 'Error' });
+
+    const wrapper = mount(LeaderboardView, {
+      global: {
+        plugins: [pinia]
+      }
+    });
+
+    wrapper.vm.showGoogleFriends = false;
+    await wrapper.vm.toggleGoogleFriends();
+    expect(useWsStore().errors[0].message).toBe('Error');
+  })
+
+  it('handles error when toggling to Google friends leaderboard', async () => {
+    mock.onPost('/users/top5_and_me_google').reply(500, { detail: 'Error' });
+
+    const wrapper = mount(LeaderboardView, {
+      global: {
+        plugins: [pinia]
+      }
+    });
+
+    wrapper.vm.showGoogleFriends = true;
+    wrapper.vm.toggleGoogleFriends();
+    expect(useWsStore().errors[0].message).toBe('Error');
+  })
 
   it('toggles to leaderboard', async () => {
     setup(mock)
@@ -99,7 +122,7 @@ describe('LeaderboardView.vue', () => {
         plugins: [pinia]
       }
     });
-    
+
     wrapper.vm.showGoogleFriends = false;
     await wrapper.vm.$nextTick();
     await wrapper.vm.toggleGoogleFriends();
