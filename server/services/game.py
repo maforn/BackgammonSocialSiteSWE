@@ -236,13 +236,25 @@ async def update_on_match_win(current_game, loser_username, manager, old_loser_r
     await get_db().matches.update_one({"_id": current_game.id},
                                       {"$set": {"status": current_game.status}}
                                       )
-
-    # Logic for player ratings update and match end
+    
+    # Logic for player ratings & stats update and match end
     (new_winner_rating, new_loser_rating) = new_ratings_after_match(old_winner_rating, old_loser_rating)
-    await get_db().users.update_one({"username": winner_username},
-                                    {"$set": {"rating": new_winner_rating}})
-    await get_db().users.update_one({"username": loser_username},
-                                    {"$set": {"rating": new_loser_rating}})
+    await get_db().users.update_one(
+        {"username": winner_username},
+        {"$set": {"rating": new_winner_rating}, "$inc": {"stats.matches_played": 1, "stats.matches_won": 1}}
+    )
+    await get_db().users.update_one(
+        {"username": loser_username},
+        {"$set": {"rating": new_loser_rating}, "$inc": {"stats.matches_played": 1}}
+    )
+    
+    #Update highest rating for winner if applicable
+    if(winner_username not in ai_names):
+        winner_data = await get_db().users.find_one({"username": winner_username})
+        winner_highest_rating = winner_data.get("stats", {}).get("highest_rating", 1500) # Default value is provided solely for the sake of test users
+        if new_winner_rating > winner_highest_rating:
+            await get_db().users.update_one({"username": winner_username},
+                                            {"$set": {"stats.highest_rating": new_winner_rating}})
 
     # Message for match end, US #103
     websocket_player1 = await manager.get_user(current_game.player1)

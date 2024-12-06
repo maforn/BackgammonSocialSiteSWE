@@ -226,6 +226,12 @@ async def end_tournament(tournament: Tournament):
     if len([stat for stat in tournament['stats'] if stat["wins"] == winner["wins"]]) > 1:
         winner = max([stat for stat in tournament['stats'] if stat["wins"] == winner["wins"]], key=lambda x: x["points"])
 
+    #Increment tournament wins stat for winner
+    await get_db().users.update_one(
+        {"username": winner["username"]},
+        {"$inc": {"stats.tournaments_won": 1}}
+    )
+
     for participant in tournament['confirmed_participants']:
         websocket = await websocket_manager.get_user(participant)
         if websocket:

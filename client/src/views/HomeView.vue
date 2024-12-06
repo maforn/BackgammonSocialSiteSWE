@@ -75,9 +75,9 @@
       </div>
     </div>
     <div class="fixed top-0 left-2 p-4 flex justify-start">
-      <v-icon name="fa-user-circle" class="text-white" scale="3" />
+      <v-icon @click="$router.push('/user-stats')" name="fa-user-circle" class="text-white" scale="3" style="cursor: pointer;" />
       <div class="flex flex-col justify-evenly ms-2">
-        <div class="text-lg text-white font-bold text-left">{{ username }}</div>
+        <router-link to="/user-stats" class="text-lg text-white font-bold text-left">{{ username }}</router-link>
         <div id="logout" @click="logout" class="text-sm text-left text-white hover:underline hover:cursor-pointer">
           Logout</div>
       </div>
