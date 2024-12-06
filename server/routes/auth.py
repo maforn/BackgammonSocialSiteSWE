@@ -57,6 +57,12 @@ async def register_user(user: UserCreate):
     user_dict["password"] = get_password_hash(user_dict.pop("password"))
     user_dict["_id"] = default_id()
     user_dict["rating"] = DEFAULT_RATING
+    user_dict["stats"] = {
+        "matches_played": 0,
+        "matches_won": 0,
+        "tournaments_won": 0,
+        "highest_rating": DEFAULT_RATING,
+    }
 
     if is_ai(user_dict["username"]):
         raise HTTPException(
