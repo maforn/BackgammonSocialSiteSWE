@@ -270,8 +270,7 @@ export default defineComponent({
       })
 
 
-    const preformedMessages = ['Ottima mossa! 👍', 'Per poco! 😅', 'Buona fortuna! 🍀', 'Oops 😬', 'È il tuo turno! ⏳', 'Che peccato! 😢']
-
+    const preformedMessages = ['Great move! 👍', 'So close! 😅', 'Good luck! 🍀', 'Oops 😬', 'It\'s your turn! ⏳', 'What a pity! 😢']
     const sendPreformedMessage = async (message: string) => {
       try {
         await axiosInstance.post('/game/message', { message })
@@ -445,7 +444,8 @@ export default defineComponent({
       window.open(url, '_blank')
     },
     startPlaying() {
-      this.started = true
+      this.started = true;
+      setTimeout(async () => await useGameStore().checkAITurn(), 500);
     },
     throwStartDice() {
       axiosInstance

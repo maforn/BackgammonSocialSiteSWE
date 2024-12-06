@@ -1,7 +1,7 @@
+from unittest.mock import patch
+
 import pytest
 from httpx import AsyncClient
-
-from unittest.mock import patch
 from services.database import get_db
 
 
@@ -15,6 +15,7 @@ async def test_register_user(client: AsyncClient):
     })
     assert response.status_code == 200
     assert "access_token" in response.json()
+
 
 @pytest.mark.anyio
 async def test_login_user(client: AsyncClient):
@@ -33,6 +34,7 @@ async def test_password_recovery(client: AsyncClient):
     assert response.status_code == 200
     assert response.json()["message"] == "Password recovery email sent"
 
+
 @pytest.mark.anyio
 async def test_password_reset(client: AsyncClient, token: str):
     new_password = "new_password123"
@@ -44,9 +46,9 @@ async def test_password_reset(client: AsyncClient, token: str):
 @pytest.mark.anyio
 @patch("server.routes.auth.id_token.verify_oauth2_token")
 async def test_google_login(mock_verify_oauth2_token, client: AsyncClient):
+    get_db().users.delete_one({"username": "testuser1"})
     mock_verify_oauth2_token.return_value = {"email": "testuser@test.com"}
     response = await client.post("/google-login", json={"accessToken": "mock_code"})
     assert response.status_code == 200
     assert "access_token" in response.json()
-    print(response.json())
     assert response.json()["username"] == "testuser1"

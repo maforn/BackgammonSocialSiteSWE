@@ -71,7 +71,7 @@ describe('GameView.vue', () => {
 
     buttons = wrapper.findAll('.btn-preformed')
     expect(buttons.length).toBe(6) // Assuming there are 6 preformed messages
-    expect(buttons[0].text()).toBe('Ottima mossa! 👍')
+    expect(buttons[0].text()).toBe('Great move! 👍')
   })
 
   it('should send preformed message on button click', async () => {
@@ -89,7 +89,7 @@ describe('GameView.vue', () => {
     const button = wrapper.find('.btn-preformed')
     await button.trigger('click')
 
-    expect(postSpy).toHaveBeenCalledWith('/game/message', { message: 'Ottima mossa! 👍' })
+    expect(postSpy).toHaveBeenCalledWith('/game/message', { message: 'Great move! 👍' })
   })
 
   it('shows the winner when the game is over', async () => {
@@ -345,10 +345,10 @@ describe('GameView.vue', () => {
     const wrapper = mount(GameView, {
       pinia
     })
-  
+
     const postSpy = vi.spyOn(axiosInstance, 'post')
     mock.onPost('/game/quit').reply(200)
-  
+
     await wrapper.vm.confirmQuit()
     expect(postSpy).toHaveBeenCalledWith('/game/quit')
   })
@@ -357,10 +357,10 @@ describe('GameView.vue', () => {
     const wrapper = mount(GameView, {
       pinia
     })
-  
+
     wrapper.vm.isModalVisible = true
     wrapper.vm.cancelQuit()
     expect(wrapper.vm.isModalVisible).toBe(false)
   })
-  
+
 })

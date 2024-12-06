@@ -69,6 +69,25 @@ async def test_move_piece(client: AsyncClient, token: str):
 
 
 @pytest.mark.anyio
+async def test_move_final_piece(client: AsyncClient, token: str):
+    await clear_matches()
+    await create_started_match("testuser", "testuser2")
+    await update_match({"player1": "testuser"}, {"$set": {"dice": [3, 5], "available": [3], "turn": 0}})
+    move_data = {
+        "board": {
+            "points": [{"player1": 1, "player2": 0} for _ in range(24)],
+            "bar": {"player1": 0, "player2": 0}
+        },
+        "dice": 3,
+    }
+    response = await client.post(MOVE_PIECE_URL, json=move_data, headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    updated_game = await get_db().matches.find_one({"player1": "testuser"})
+    assert updated_game["turn"] == 1
+    assert updated_game["dice"] == []
+
+
+@pytest.mark.anyio
 async def test_send_in_game_message(client: AsyncClient, token: str):
     await clear_matches()
     message_data = {
