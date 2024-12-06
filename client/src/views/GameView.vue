@@ -247,14 +247,6 @@ export default defineComponent({
 
     const username = useAuthStore().username
 
-    useGameStore()
-      .fetchGame()
-      .catch(error => {
-        if (isAxiosError(error)) {
-          wsStore.addError(error?.response?.data?.detail)
-        }
-      })
-
     const preformedMessages = ['Ottima mossa!', 'Per poco!', 'Buona fortuna!', 'Oops', 'È il tuo turno!', 'Che peccato!']
 
     const sendPreformedMessage = async (message: string) => {

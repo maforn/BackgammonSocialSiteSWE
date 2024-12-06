@@ -108,16 +108,15 @@ export default defineComponent({
     const showOverlay = ref(false)
     const invites = ref<Invite[]>([]);
     const hasSuspendedGame = ref(true)
+    const gameStore = useGameStore()
 
     onMounted(async () => {
       username.value = await axiosInstance.get('/users/me').then(res => res.data.username)
+      const suspendedGame = await gameStore.checkSuspendedGameExists()
+      hasSuspendedGame.value = suspendedGame
+      if (suspendedGame)
+        await gameStore.fetchGame()
     })
-
-    useGameStore()
-      .checkSuspendedGameExists()
-      .then((exists) => {
-        hasSuspendedGame.value = exists
-      });
 
 		const logout = () => {
 			authLogout();
@@ -142,6 +141,7 @@ export default defineComponent({
       const invite_id = invites.value[index]._id
       try {
         await acceptInviteService(invite_id)
+        await gameStore.fetchGame()
         router.push({ name: 'game' })
       } catch (error) {
         console.error('Error in acceptInvite:', error)
