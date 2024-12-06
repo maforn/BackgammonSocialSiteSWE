@@ -49,8 +49,8 @@ export class Match {
 		this.winsP2 = 0;
 		this.starter = starter;
 		this.startDice = {roll1: 0, count1: 0, roll2: 0, count2: 0};
-		this.doublingCube = {count: 0, last_usage: 0, proposed: false, proposer: 0};
-    this.ai_suggestions = [0, 0];
+		this.doublingCube = this.doublingCube || {count: 0, last_usage: 0, proposed: false, proposer: 0};
+    this.ai_suggestions = this.ai_suggestions || [0, 0];
     this.last_updated = last_updated;
 	}
 }
