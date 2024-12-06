@@ -1,12 +1,11 @@
 import { mount } from '@vue/test-utils';
-import { beforeAll, afterEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, afterEach, describe, expect, it, vi, Mock } from 'vitest';
 import PlayHumanView from '../views/PlayHumanView.vue';
 import MockAdapter from 'axios-mock-adapter';
 import axiosInstance from '@/axios';
 import { createPinia, setActivePinia } from 'pinia';
 import router from '@/router'
 import { getGoogleContactsEmails, sendInviteService, getRandomOpponentService } from '@/services/invitesService';
-import { debounce } from 'lodash';
 
 vi.mock('@/services/invitesService', () => ({
 	getGoogleContactsEmails: vi.fn(),
@@ -91,7 +90,7 @@ describe('PlayHumanView.vue', () => {
   it('fetches Google friends when switch is toggled', async () => {
     const wrapper = mount(PlayHumanView);
     const mockEmails = ['friend1@gmail.com', 'friend2@gmail.com'];
-    (getGoogleContactsEmails as vi.Mock).mockResolvedValue(mockEmails);
+    (getGoogleContactsEmails as Mock).mockResolvedValue(mockEmails);
 
     wrapper.vm.inviteGoogleFriends = true;
     await wrapper.vm.toggleGoogleFriends();
@@ -130,7 +129,7 @@ describe('PlayHumanView.vue', () => {
 
   it('calls getRandomOpponentService and sendInviteService with correct parameters', async () => {
     const wrapper = mount(PlayHumanView);
-    (getRandomOpponentService as vi.Mock).mockResolvedValue('randomuser');
+    (getRandomOpponentService as Mock).mockResolvedValue('randomuser');
 
     await wrapper.vm.sendRandomInvite();
 

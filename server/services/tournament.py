@@ -67,7 +67,7 @@ async def create_new_tournament(request: CreateTournamentRequest, owner: str):
                                 name=request.name,
                                 match_ids=[],
                                 status="pending",
-                                type=request.type, # TODO: Add support for other tournament types
+                                type=request.type,
                                 rounds_to_win=request.rounds_to_win,
                                 stats=[]
                             )
@@ -225,8 +225,6 @@ async def end_tournament(tournament: Tournament):
     winner = max(tournament['stats'], key=lambda x: x["wins"])
     if len([stat for stat in tournament['stats'] if stat["wins"] == winner["wins"]]) > 1:
         winner = max([stat for stat in tournament['stats'] if stat["wins"] == winner["wins"]], key=lambda x: x["points"])
-
-    # TODO: update ratings
 
     for participant in tournament['confirmed_participants']:
         websocket = await websocket_manager.get_user(participant)

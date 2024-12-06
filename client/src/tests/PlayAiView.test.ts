@@ -1,7 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { beforeAll, describe, it, expect, vi } from 'vitest'
 import PlayAiView from '@/views/PlayAiView.vue'
-import { sendInviteService } from '@/services/invitesService'
 import router from '@/router'
 import { createPinia, setActivePinia } from 'pinia';
 
