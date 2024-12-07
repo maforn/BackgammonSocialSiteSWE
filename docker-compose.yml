@@ -42,7 +42,7 @@ services:
     depends_on:
       - client
 
-  server-client:
+  deploy:
     build:
       context: ./
     ports:

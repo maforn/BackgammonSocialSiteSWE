@@ -17,6 +17,10 @@ COPY server/.env ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY server/ ./
 
+# Set the timezone to CET
+ENV TZ=CET
+RUN ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && echo "$TZ" > /etc/timezone
+
 # Copy built Vue application from the previous stage
 COPY --from=build /app/dist /app/client/dist
 
