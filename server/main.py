@@ -1,9 +1,9 @@
 import contextlib
 import uvicorn
 from fastapi import FastAPI
-from starlette.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from core import config
