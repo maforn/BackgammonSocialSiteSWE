@@ -49,6 +49,11 @@ Check test coverage:
 npx vitest run --coverage
 ```
 
+or (custom command)
+``sh
+npm run coverage
+``
+
 ### Lint with [ESLint](https://eslint.org/)
 
 ```sh

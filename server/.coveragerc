@@ -1,4 +1,4 @@
 [coverage:run]
-relative_files = False
-source = ./
-omit = tests/*
+relative_files = True
+include = ./*
+omit = tests/*,venv/*

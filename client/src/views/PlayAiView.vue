@@ -91,7 +91,8 @@ export default defineComponent({
     },
     async startGame() {
       try {
-        await sendInviteService("ai_" + this.difficulty, this.rounds_to_win)
+        await sendInviteService("ai_" + this.difficulty, this.rounds_to_win, false)
+        await useGameStore().fetchGame();
         await router.push({ name: 'game' });
       } catch (error) {
         console.error('Error sending invite:', error)

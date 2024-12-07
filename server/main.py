@@ -4,7 +4,6 @@ from fastapi import FastAPI
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from core import config
@@ -49,7 +48,7 @@ class SPAStaticFiles(StaticFiles):
     async def get_response(self, path: str, scope):
         try:
             return await super().get_response(path, scope)
-        except (HTTPException, StarletteHTTPException) as ex:
+        except (HTTPException) as ex:
             if ex.status_code == 404:
                 return await super().get_response("index.html", scope)
             else:
@@ -66,7 +65,6 @@ async def websocket_endpoint(websocket: WebSocket, token: str):
             await manager.handle_message(data, websocket, username)
     except WebSocketDisconnect:
         manager.disconnect(websocket, username)
-        await manager.broadcast(f"{username} left the chat")
 
 
 app.mount('/', SPAStaticFiles(directory=config.CLIENT_DIST,

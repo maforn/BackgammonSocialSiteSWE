@@ -1,4 +1,6 @@
 from fastapi.security import OAuth2PasswordBearer
+from copy import deepcopy
+from datetime import datetime
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 from typing import List
@@ -45,10 +47,12 @@ DEFAULT_POINTS: List[Point] = [
 
 
 class BoardConfiguration(BaseModel):
-    points: List[Point] = DEFAULT_POINTS
-    bar: Point = Point(player1=0, player2=0)
+    points: List[Point]
+    bar: Point
 
-    def __init__(self, points: List[Point] = DEFAULT_POINTS, bar: Point = Point(player1=0, player2=0)):
+    def __init__(self, points: List[Point] = None, bar: Point = None):
+        points = deepcopy(DEFAULT_POINTS) if points is None else points
+        bar = Point(player1=0, player2=0) if bar is None else bar
         super().__init__(points=points, bar=bar)
 
 
@@ -62,6 +66,16 @@ class StartDice(BaseModel):
         super().__init__(roll1=roll1, count1=count1, roll2=roll2, count2=count2)
 
 
+class DoublingCube(BaseModel):
+    count: int
+    last_usage: int
+    proposed: bool
+    proposer: int
+
+    def __init__(self, count: int = 0, last_usage: int = 0, proposed: bool = False, proposer: int = 0):
+        super().__init__(count=count, last_usage=last_usage, proposed=proposed, proposer=proposer)
+
+
 class Match(BaseModel):
     id: str = Field(default_factory=default_id, alias="_id")
     player1: str
@@ -69,18 +83,35 @@ class Match(BaseModel):
     board_configuration: BoardConfiguration = BoardConfiguration()
     dice: List[int] = []
     available: List[int] = []
-    turn: int = 0
+    turn: int = -1
+    last_updated: str = Field(default_factory=lambda: datetime.now().replace(microsecond=0).isoformat()) #ISO format without microseconds
     status: str = "pending"
     rounds_to_win: int
     winsP1: int = 0
     winsP2: int = 0
     starter: int = 0
     startDice: StartDice = StartDice()
+    ai_suggestions: List[int] = Field(default_factory=lambda: [0, 0])
+    doublingCube: DoublingCube = DoublingCube()
+
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.isoformat()
+        }
+
+    def __setattr__(self, name, value):
+        if name != "last_updated":
+            super().__setattr__("last_updated", datetime.now().replace(microsecond=0).isoformat())
+        super().__setattr__(name, value)
+
+    def get_last_modified_time(self) -> str:
+        return self.last_updated
 
 
 class CreateInviteRequest(BaseModel):
     opponent_username: str
     rounds_to_win: int
+    use_email: bool = False
 
 
 class AcceptInviteRequest(BaseModel):

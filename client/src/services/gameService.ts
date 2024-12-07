@@ -1,4 +1,11 @@
 import { BoardConfiguration } from '@/models/BoardConfiguration';
+import axiosInstance from '@/axios'
+
+export const updateAISuggestions = async () => {
+  await axiosInstance.post('/ai/suggestions');
+}
+
+export const NUMBER_OF_PLAYER_PIECES = 15;
 
 export const swapPlayers = (board: BoardConfiguration): BoardConfiguration => {
 	const newBoard = JSON.parse(JSON.stringify(board));
@@ -27,7 +34,8 @@ export const moveOnBoard = (
 	srcPointIndex: number,
 	dstPointIndex: number,
 ) => {
-	checkMoveValidity(board, dice, srcPointIndex, dstPointIndex);
+  console.log(board, dice, srcPointIndex, dstPointIndex)
+	dstPointIndex != -1 && checkMoveValidity(board, dice, srcPointIndex, dstPointIndex);
 
 	if (srcPointIndex === 24) {
 		board.bar.player1--;
@@ -47,7 +55,7 @@ export const moveOnBoard = (
 };
 
 export const findUsedDie = (dice: number[], srcPointIndex: number, dstPointIndex: number) => {
-	let usedDice = dice.reduce((min, die) => {
+	const usedDice = dice.reduce((min, die) => {
 		if (srcPointIndex - die <= dstPointIndex && die < min) {
 			return die;
 		}
@@ -135,3 +143,61 @@ export const doRandomMove = (board: BoardConfiguration, dice: number[]) => {
 
 	return null;
 };
+
+/**
+ * Determines if a player committed a gammon.
+ *
+ * @param boardConfig The configuration of the game board.
+ * @param isPlayer1 Whether to check for gammon by player1 or player2.
+ * @returns Whether the player has committed a gammon.
+ */
+export const isGammon = (boardConfig: BoardConfiguration, isPlayer1: boolean): boolean => {
+    const [onBoardPlayer, onBarPlayer] = getPiecesSummary(boardConfig, isPlayer1);
+    const [onBoardOpp, onBarOpp] = getPiecesSummary(boardConfig, !isPlayer1);
+
+    return onBoardPlayer + onBarPlayer === 0 && onBoardOpp + onBarOpp === NUMBER_OF_PLAYER_PIECES;
+}
+
+/**
+ * Determines if a player committed a backgammon.
+ *
+ * @param boardConfig The configuration of the game board.
+ * @param isPlayer1 Whether to check for backgammon by player1 or player2.
+ * @returns Whether the player has committed a backgammon.
+ */
+export const isBackgammon = (boardConfig: BoardConfiguration, isPlayer1: boolean): boolean => {
+    const [onBoardPlayer, onBarPlayer] = getPiecesSummary(boardConfig, isPlayer1);
+    const [onBoardOpp, onBarOpp, onOppBaseOpp] = getPiecesSummary(boardConfig, !isPlayer1);
+
+    return (
+        onBoardPlayer + onBarPlayer === 0 &&
+        onBoardOpp + onBarOpp === NUMBER_OF_PLAYER_PIECES &&
+        onBarOpp + onOppBaseOpp > 0
+    );
+}
+
+/**
+ * Returns a summary of the player's pieces distribution on a given board.
+ *
+ * @param boardConfig The game board configuration.
+ * @param isPlayer1 Whether to count for player1 or player2.
+ * @returns A tuple containing:
+ *          - The number of pieces on the board.
+ *          - The number of pieces on the bar.
+ *          - The number of pieces in the opponent's home board.
+ */
+export const getPiecesSummary = (boardConfig: BoardConfiguration, isPlayer1: boolean): [number, number, number] => {
+    if (isPlayer1) {
+        const onBoard = boardConfig.points.reduce((sum, point) => sum + point.player1, 0);
+        const onBar = boardConfig.bar.player1;
+        const onOpponentBase = boardConfig.points.slice(18, 24).reduce((sum, point) => sum + point.player1, 0);
+
+        return [onBoard, onBar, onOpponentBase];
+    } else {
+        const onBoard = boardConfig.points.reduce((sum, point) => sum + point.player2, 0);
+        const onBar = boardConfig.bar.player2;
+        const onOpponentBase = boardConfig.points.slice(0, 6).reduce((sum, point) => sum + point.player2, 0);
+
+        return [onBoard, onBar, onOpponentBase];
+    }
+}
