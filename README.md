@@ -24,12 +24,12 @@ Sprint Zero was essential for planning the project, outlining the main features,
 - **Communication**: Notifications and messaging for tournaments and challenges.
 
 ## Team Roles
-- **Scrum Master**: Cristian Orsi
-- **Product Owner**: Enis Brajevic
-- **Developer 1**: Matteo Fornaini
-- **Developer 2**: Mattia Ferrarini
-- **Developer 3**: Enrico Mazzotti
-- **Developer 4**: Lorenzo Giarrusso
+- **Scrum Master**: [Cristian Orsi](mailto:cristiam.orsi2@studio.unibo.it)
+- **Product Owner**: [Enis Brajevic](mailto:enis.brajevic@studio.unibo.it)
+- **Developer 1**: [Matteo Fornaini](mailto:matteo.fornaini@studio.unibo.it)
+- **Developer 2**: [Mattia Ferrarini](mailto:mattia.ferrarini3@studio.unibo.it)
+- **Developer 3**: [Enrico Mazzotti](mailto:enrico.mazzotti2@studio.unibo.it)
+- **Developer 4**: [Lorenzo Giarrusso](mailto:lorenzo.giarrusso@studio.unibo.it)
 
 ## Working Methodology
 The team works five days a week, with flexible hours for each member. Communication occurs via Mattermost for messaging and Microsoft Teams for video calls, while English is the primary language for code and technical documentation.
