@@ -11,7 +11,8 @@ from services.websocket import ConnectionManager
 
 
 async def update_match(selector, data):
-    data["$set"]["last_updated"] = datetime.now().replace(microsecond=0).isoformat()
+    data["$set"]["last_updated"] = datetime.now().replace(
+        microsecond=0).isoformat()
     await get_db().matches.update_one(selector, data)
 
 
@@ -32,16 +33,19 @@ async def get_current_game(username: str) -> Match:
 
 
 async def create_started_match(player1: str, player2: str, rounds_to_win: int = 1):
-    new_match = Match(player1=player1, player2=player2, status="started", rounds_to_win=rounds_to_win)
+    new_match = Match(player1=player1, player2=player2,
+                      status="started", rounds_to_win=rounds_to_win)
     match_data = new_match.dict(by_alias=True)
     await get_db().matches.insert_one(match_data)
 
 
 async def check_timeout_condition(match: Match):
-    current_time = datetime.now().replace(microsecond=0)  # Remove microseconds from current time
+    # Remove microseconds from current time
+    current_time = datetime.now().replace(microsecond=0)
 
     print("current_time: ", current_time)
-    print("dt(strptime) out: ", datetime(*strptime(match.last_updated, "%Y-%m-%dT%H:%M:%S")[:6]))
+    print("dt(strptime) out: ", datetime(
+        *strptime(match.last_updated, "%Y-%m-%dT%H:%M:%S")[:6]))
 
     # Convert last_updated to tuple, then to datetime object and compare with current time
     return current_time - datetime(*strptime(match.last_updated, "%Y-%m-%dT%H:%M:%S")[:6]) > timedelta(seconds=30)
@@ -49,7 +53,7 @@ async def check_timeout_condition(match: Match):
 
 async def check_timeout_winner(current_game: Match):
     if await check_timeout_condition(current_game):
-        if current_game.turn == 0:  # Player 1's turn timed out, winner should be player 2
+        if current_game.turn % 2 == 0:  # Player 1's turn timed out, winner should be player 2
             return 2
         else:  # Player 2's turn timed out, winner should be player 1
             return 1
@@ -70,7 +74,7 @@ def check_win_condition(match: Match):
     return {"winner": 1} if player1_counter == 0 else {"winner": 2}
 
 
-async def check_winner(current_game: Match, manager: ConnectionManager, winner:int=None, is_timeout:bool=False):
+async def check_winner(current_game: Match, manager: ConnectionManager, winner: int = None, is_timeout: bool = False):
     if is_timeout:
         winner = await check_timeout_winner(current_game)
     elif winner is None:
@@ -97,11 +101,13 @@ async def check_winner(current_game: Match, manager: ConnectionManager, winner:i
             await update_tournament_of_game(current_game, winner_username, loser_username, gained_points)
         else:
             # Message for round end (gammon/backgammon/normal win)
-            info_str = get_winning_info_str(current_game, winner) if not is_timeout else " due to timeout"
+            info_str = get_winning_info_str(
+                current_game, winner) if not is_timeout else " due to timeout"
 
             # Must proceed to next round
             # Reset the board configuration, turn, dice and available
-            current_game = reset_match_for_new_tournament(current_game, winner_username)
+            current_game = reset_match_for_new_tournament(
+                current_game, winner_username)
 
             # Message for round end
             await notify_players_of_round_end(manager, current_game, winner_username, info_str)
@@ -137,7 +143,7 @@ async def notify_players_of_round_end(manager: ConnectionManager, current_game: 
     websocket_player1 = await manager.get_user(current_game.player1)
     if websocket_player1:
         await manager.send_personal_message({"type": "round_over", "winner": winner_username, "info": info_str}, websocket_player1)
-    
+
     websocket_player2 = await manager.get_user(current_game.player2)
     if websocket_player2:
         await manager.send_personal_message({"type": "round_over", "winner": winner_username, "info": info_str}, websocket_player2)
@@ -161,19 +167,23 @@ async def get_players_data(current_game):
 
 def game_fields_to_dict(game: Match):
     board = game.board_configuration
-    game.board_configuration = board.model_dump(by_alias=True) if isinstance(board, BoardConfiguration) else board
+    game.board_configuration = board.model_dump(
+        by_alias=True) if isinstance(board, BoardConfiguration) else board
 
     doubling = game.doublingCube
-    game.doublingCube = doubling.model_dump(by_alias=True) if isinstance(doubling, DoublingCube) else doubling
+    game.doublingCube = doubling.model_dump(by_alias=True) if isinstance(
+        doubling, DoublingCube) else doubling
 
     start_dice = game.startDice
-    game.startDice = start_dice.model_dump(by_alias=True) if isinstance(start_dice, StartDice) else start_dice
+    game.startDice = start_dice.model_dump(by_alias=True) if isinstance(
+        start_dice, StartDice) else start_dice
 
     return game
 
 
 async def update_rating(current_game: Match, p1_data, p2_data, winner, is_timeout: bool = False):
-    win_multiplier = 1 if is_timeout else compute_win_multiplier(current_game, winner)
+    win_multiplier = 1 if is_timeout else compute_win_multiplier(
+        current_game, winner)
 
     if winner == 1:
         # Player 1 won the current round
@@ -236,22 +246,26 @@ async def update_on_match_win(current_game, loser_username, manager, old_loser_r
     await get_db().matches.update_one({"_id": current_game.id},
                                       {"$set": {"status": current_game.status}}
                                       )
-    
+
     # Logic for player ratings & stats update and match end
-    (new_winner_rating, new_loser_rating) = new_ratings_after_match(old_winner_rating, old_loser_rating)
+    (new_winner_rating, new_loser_rating) = new_ratings_after_match(
+        old_winner_rating, old_loser_rating)
     await get_db().users.update_one(
         {"username": winner_username},
-        {"$set": {"rating": new_winner_rating}, "$inc": {"stats.matches_played": 1, "stats.matches_won": 1}}
+        {"$set": {"rating": new_winner_rating}, "$inc": {
+            "stats.matches_played": 1, "stats.matches_won": 1}}
     )
     await get_db().users.update_one(
         {"username": loser_username},
         {"$set": {"rating": new_loser_rating}, "$inc": {"stats.matches_played": 1}}
     )
-    
-    #Update highest rating for winner if applicable
-    if(winner_username not in ai_names):
+
+    # Update highest rating for winner if applicable
+    if (winner_username not in ai_names):
         winner_data = await get_db().users.find_one({"username": winner_username})
-        winner_highest_rating = winner_data.get("stats", {}).get("highest_rating", 1500) # Default value is provided solely for the sake of test users
+        # Default value is provided solely for the sake of test users
+        winner_highest_rating = winner_data.get(
+            "stats", {}).get("highest_rating", 1500)
         if new_winner_rating > winner_highest_rating:
             await get_db().users.update_one({"username": winner_username},
                                             {"$set": {"stats.highest_rating": new_winner_rating}})

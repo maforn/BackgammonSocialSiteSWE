@@ -51,7 +51,7 @@ export const acceptInviteService = async (invite_id: string) => {
 
 export const getRandomOpponentService = async () => {
 	try {
-		const response = await axiosInstance.get('/users/');
+		const response = await axiosInstance.get('/users');
 
 		//Extract list of usernames, remove the current user's username
 		const usernames_list = response.data.map((user: any) => user.username).filter((username: string) => username !== useAuthStore().username);

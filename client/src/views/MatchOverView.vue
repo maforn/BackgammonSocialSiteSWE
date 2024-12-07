@@ -26,7 +26,7 @@
         <!-- Player 1 -->
         <div
           id="p1-display"
-          class="flex flex-col items-center w-1/3 p-4 text-center text-white rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
+          class="flex flex-col items-center w-2/5 p-4 text-center text-white rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
           :class="username === player1 ? 'player-turn-1' : 'player-turn-2'">
           <v-icon :name="[ai_names.includes(player1) ? 'fa-robot' : 'io-person']" class="mb-2 text-3xl" />
           <h2 class="text-xl font-semibold">{{ player1 }}</h2>
@@ -52,7 +52,7 @@
         <!-- Player 2 -->
         <div
           id="p2-display"
-          class="flex flex-col items-center w-1/3 p-4 text-center  text-white rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
+          class="flex flex-col items-center w-2/5 p-4 text-center  text-white rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
           :class="username === player2 ? 'player-turn-1' : 'player-turn-2'">
           <v-icon :name="[ai_names.includes(player2) ? 'fa-robot' : 'io-person']" class="mb-2 text-3xl" />
           <h2 class="text-xl font-semibold">{{ player2 }}</h2>
