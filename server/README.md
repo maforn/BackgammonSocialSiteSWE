@@ -161,7 +161,7 @@ pytest --cov --cov-report=xml:coverage.xml --cov-config=.coveragerc
 
 ## Authors
 
-The authors of this project are students of the University of Bologna, Italy. The team members are:
+The SCRUM team for this project consists of the following members:
 
 - **Scrum Master**: [Cristian Orsi](mailto:cristiam.orsi2@studio.unibo.it)      
 - **Product Owner**: [Enis Brajevic](mailto:enis.brajevic@studio.unibo.it)     
