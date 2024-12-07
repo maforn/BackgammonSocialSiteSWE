@@ -125,7 +125,7 @@ npm run test
 ```
 Check test coverage:
 ```sh
-npm run coverage
+npm run test:coverage
 ```
 
 ### Lint with [ESLint](https://eslint.org/)

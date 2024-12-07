@@ -2,6 +2,8 @@
 
 This repository contains the backend server for the Backgammon application, built using **FastAPI**, a modern, fast (high-performance) web framework for building APIs with Python.
 
+A **swagger interface** is automatically provided by FastAPI, and can be accessed at `serveraddressexample.com/docs`, so for example at [localhost:8000/docs](http://localhost:8000/docs)
+
 ---
 
 ## Table of Contents
@@ -156,6 +158,8 @@ To generate an HTML code coverage report that can be opened in the browser:
 ```sh
 pytest --cov --cov-report=xml:coverage.xml --cov-config=.coveragerc
 ```
+
+Afterwards **remember to replace** all `filename=` with `filename=server/`, as sonarqube requires the coverage to be relative to the absolute path of the root folder.
 
 ---
 
