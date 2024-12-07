@@ -26,7 +26,7 @@
         <!-- Player 1 -->
         <div
           id="p1-display"
-          class="flex flex-col items-center w-1/3 p-4 text-center text-white rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
+          class="flex flex-col items-center w-2/5 p-4 text-center text-white rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
           :class="username === player1 ? 'player-turn-1' : 'player-turn-2'">
           <v-icon :name="[ai_names.includes(player1) ? 'fa-robot' : 'io-person']" class="mb-2 text-3xl" />
           <h2 class="text-xl font-semibold">{{ player1 }}</h2>
@@ -46,13 +46,13 @@
         <!-- VS Section -->
         <div class="flex flex-col items-center">
           <div class="text-xl font-bold text-gray-700">VS</div>
-          <div class="text-lg font-medium bg-yellow-500 text-gray-700 p-2 rounded-lg">{{ matchResult }}</div>
+          <div class="text-md font-medium bg-yellow-500 text-gray-700 p-2 rounded-lg">{{ matchResult }}</div>
         </div>
 
         <!-- Player 2 -->
         <div
           id="p2-display"
-          class="flex flex-col items-center w-1/3 p-4 text-center  text-white rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
+          class="flex flex-col items-center w-2/5 p-4 text-center  text-white rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
           :class="username === player2 ? 'player-turn-1' : 'player-turn-2'">
           <v-icon :name="[ai_names.includes(player2) ? 'fa-robot' : 'io-person']" class="mb-2 text-3xl" />
           <h2 class="text-xl font-semibold">{{ player2 }}</h2>
