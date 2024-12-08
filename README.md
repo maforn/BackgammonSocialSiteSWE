@@ -87,10 +87,10 @@ The GitLab CI/CD pipeline automates the build, test, and security analysis proce
    git checkout deploy/main
    ```
 
-3. Copy the `.env.local` files to `.env` and edit their content to contain the right variables, such as your hostname, google password and secret and so on
+3. Copy the `.env.example` files to `.env` and edit their content to contain the right variables, such as your hostname, google password and secret and so on
    ```bash
-   cp server/.env.local server/.env
-   cp client/.env.local client/.env
+   cp server/.env.example server/.env
+   cp client/.env.example client/.env
    vim server/.env # or use any ide to edit the file
    vim client/.env # or use any ide to edit the file
    ```
