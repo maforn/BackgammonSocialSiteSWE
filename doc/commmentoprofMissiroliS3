@@ -12,12 +12,13 @@ Sprint preparation:
 Sprint review: 
 	S1:Video più demo che review
 	S2:Presente (bella)
-	S3: Manca, e neppure un video esplicativo, visto il problema 
+	S3: bello il video review anche se l'audio è pessimo
+Git Stats 
 Retrospective: 
 	S1:OK
 	S2: Presente relazione
-	S3: Manca
-Git Stats 
+	S3: Presente, OK,
+Git	
         Tag presenti
 	Si conferma squilibro git: poco daorsi e Brajevic
 Testing/Coverage: Presenti test sia in front che back (questi ultimi sembrano tutti integration test, voluto?)
