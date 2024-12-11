@@ -41,7 +41,7 @@ export class BoardConfiguration {
 	bar: PointConfiguration;
 
 	constructor(points?: PointConfiguration[], bar?: PointConfiguration) {
-		this.points = points ?? DEFAULT_POINTS;
+		this.points = points ?? JSON.parse(JSON.stringify(DEFAULT_POINTS));
 		this.bar = bar ?? new PointConfiguration(0, 0);
 	}
 }

@@ -25,13 +25,15 @@
           </div>
 
           <div class="flex justify-center items-center pl-3 py-2 gap-x-2">
-            <label for="rounds_to_win" class="text-right">Rounds to win</label>
+            <label for="rounds_to_win" class="text-right">Points to win</label>
             <div class="container">
               <div class="select">
                 <select name="rounds_to_win" id="rounds_to_win" v-model="rounds_to_win">
                   <option value="1">1</option>
-                  <option value="2">2</option>
                   <option value="3">3</option>
+                  <option value="7">7</option>
+                  <option value="11">11</option>
+                  <option value="15">15</option>
                 </select>
               </div>
             </div>
@@ -91,7 +93,8 @@ export default defineComponent({
     },
     async startGame() {
       try {
-        await sendInviteService("ai_" + this.difficulty, this.rounds_to_win)
+        await sendInviteService("ai_" + this.difficulty, this.rounds_to_win, false)
+        await useGameStore().fetchGame();
         await router.push({ name: 'game' });
       } catch (error) {
         console.error('Error sending invite:', error)

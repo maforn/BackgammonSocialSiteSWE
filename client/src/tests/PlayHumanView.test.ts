@@ -1,12 +1,24 @@
 import { mount } from '@vue/test-utils';
-import { beforeAll, afterEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, afterEach, describe, expect, it, vi, Mock } from 'vitest';
 import PlayHumanView from '../views/PlayHumanView.vue';
 import MockAdapter from 'axios-mock-adapter';
 import axiosInstance from '@/axios';
 import { createPinia, setActivePinia } from 'pinia';
+import router from '@/router'
+import { getGoogleContactsEmails, sendInviteService, getRandomOpponentService } from '@/services/invitesService';
+
+vi.mock('@/services/invitesService', () => ({
+	getGoogleContactsEmails: vi.fn(),
+	sendInviteService: vi.fn(),
+	getRandomOpponentService: vi.fn()
+  }));
+
+  vi.mock('lodash', () => ({
+	debounce: vi.fn((fn) => fn)
+  }));
 
 describe('PlayHumanView.vue', () => {
-	let mock: MockAdapter;
+	let mock: InstanceType<typeof MockAdapter>;;
 	const pinia = createPinia();
 
 	beforeAll(() => {
@@ -27,6 +39,12 @@ describe('PlayHumanView.vue', () => {
 		const wrapper = mount(PlayHumanView);
 		const roundsSelect = wrapper.find('#rounds_to_win');
 		expect(roundsSelect.exists()).toBe(true);
+	});
+
+	it('displays the button to challenge a random opponent', () => {
+		const wrapper = mount(PlayHumanView);
+		const challengeRandomButton = wrapper.find('#random-btn');
+		expect(challengeRandomButton.exists()).toBe(true);
 	});
 
 	it('disables the invite button initially', () => {
@@ -68,4 +86,104 @@ describe('PlayHumanView.vue', () => {
 		await wrapper.vm.fetchUsers();
 		expect(wrapper.vm.showDropdown).toBe(false);
 	});
+
+  it('fetches Google friends when switch is toggled', async () => {
+    const wrapper = mount(PlayHumanView);
+    const mockEmails = ['friend1@gmail.com', 'friend2@gmail.com'];
+    (getGoogleContactsEmails as Mock).mockResolvedValue(mockEmails);
+
+    wrapper.vm.inviteGoogleFriends = true;
+    await wrapper.vm.toggleGoogleFriends();
+
+    expect(getGoogleContactsEmails).toHaveBeenCalled();
+    expect(wrapper.vm.emails).toEqual(mockEmails);
+  });
+
+  it('selects a Google friend from the dropdown', async () => {
+    const wrapper = mount(PlayHumanView);
+    const mockEmails = ['friend1@gmail.com', 'friend2@gmail.com'];
+    await wrapper.setData({ inviteGoogleFriends: true, emails: mockEmails, searchQuery: 'friend', showDropdown: true });
+
+    wrapper.vm.selectEmail(mockEmails[0]);
+
+    expect(wrapper.vm.searchQuery).toBe(mockEmails[0]);
+    expect(wrapper.vm.showDropdown).toBe(false);
+    expect(wrapper.vm.hasSelectedOpponent).toBe(true);
+  });
+
+  it('calls sendInviteService with correct parameters and resets state', async () => {
+    const wrapper = mount(PlayHumanView);
+    wrapper.setData({
+      searchQuery: 'testuser',
+      rounds_to_win: 2,
+      inviteGoogleFriends: false,
+      hasSelectedOpponent: true
+    });
+
+    await wrapper.vm.sendInvite();
+
+    expect(sendInviteService).toHaveBeenCalledWith('testuser', 2, false);
+    expect(wrapper.vm.searchQuery).toBe('');
+    expect(wrapper.vm.hasSelectedOpponent).toBe(false);
+  });
+
+  it('calls getRandomOpponentService and sendInviteService with correct parameters', async () => {
+    const wrapper = mount(PlayHumanView);
+    (getRandomOpponentService as Mock).mockResolvedValue('randomuser');
+
+    await wrapper.vm.sendRandomInvite();
+
+    expect(getRandomOpponentService).toHaveBeenCalled();
+    expect(sendInviteService).toHaveBeenCalledWith('randomuser', wrapper.vm.rounds_to_win, false);
+  });
+  
+  it('should navigate to home on goHome method call', async () => {
+	const wrapper = mount(PlayHumanView, {
+		global: {
+			plugins: [router]
+		}
+	})
+	const goHomeSpy = vi.spyOn(wrapper.vm, 'goHome')
+	await wrapper.vm.goHome()
+	expect(goHomeSpy).toHaveBeenCalled()
+})
+
+it('filters emails based on searchQuery', async () => {
+    const wrapper = mount(PlayHumanView);
+    await wrapper.setData({
+      emails: ['test1@example.com', 'test2@example.com', 'user@example.com'],
+      searchQuery: 'test'
+    });
+
+    expect(wrapper.vm.filteredEmails).toEqual(['test1@example.com', 'test2@example.com']);
+
+    await wrapper.setData({ searchQuery: 'user' });
+    expect(wrapper.vm.filteredEmails).toEqual(['user@example.com']);
+
+    await wrapper.setData({ searchQuery: 'example' });
+    expect(wrapper.vm.filteredEmails).toEqual(['test1@example.com', 'test2@example.com', 'user@example.com']);
+
+    await wrapper.setData({ searchQuery: 'nonexistent' });
+    expect(wrapper.vm.filteredEmails).toEqual([]);
+  });
+
+  it('handles input correctly', async () => {
+    const wrapper = mount(PlayHumanView);
+    const fetchUsersSpy = vi.spyOn(wrapper.vm, 'fetchUsers');
+
+    await wrapper.setData({ searchQuery: 'a', inviteGoogleFriends: false });
+    wrapper.vm.onInput();
+    await wrapper.vm.$nextTick();
+    expect(wrapper.vm.hasSelectedOpponent).toBe(false);
+    expect(wrapper.vm.showDropdown).toBe(false);
+    expect(fetchUsersSpy).not.toHaveBeenCalled();
+
+    await wrapper.setData({ searchQuery: 'abc', inviteGoogleFriends: false });
+    wrapper.vm.onInput();
+    await wrapper.vm.$nextTick();
+    expect(wrapper.vm.hasSelectedOpponent).toBe(false);
+    expect(wrapper.vm.showDropdown).toBe(false);
+    expect(fetchUsersSpy).toHaveBeenCalled();
+  });
+
 });
