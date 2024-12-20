@@ -6,7 +6,7 @@
     </div>
     <div class="flex flex-col mt-20 w-4/5 sm:w-3/5 lg:w-2/5 gap-4 text-lg content-center">
 
-      <router-link :to="hasSuspendedGame ? '/game' : '/human'"
+      <router-link :to="hasSuspendedGame ? '/game' : '/human'" v-if="!hasSuspendedTournament || hasSuspendedGame"
         class="flex justify-end items-center pl-3 py-2 bg-white text-black rounded-r-full rounded-l-full hover:bg-gray-300 shadow-md">
         <div class="circle flex items-center justify-center rounded-full">
           <v-icon v-if="hasSuspendedGame" name="io-hourglass-sharp" class="text-white" scale="1.5" />
@@ -16,7 +16,7 @@
           {{ hasSuspendedGame ? "RESUME MATCH" : "PLAY HUMAN" }}
         </div>
       </router-link>
-      <router-link v-if="!hasSuspendedGame" to="/ai"
+      <router-link v-if="!hasSuspendedGame && !hasSuspendedTournament" to="/ai"
         class="flex justify-end items-center pl-3 py-2 bg-white text-black rounded-r-full rounded-l-full hover:bg-gray-300 shadow-md">
         <div class="circle flex items-center justify-center rounded-full">
           <v-icon name="fa-robot" class="text-white" scale="1.5" />
@@ -25,7 +25,7 @@
           PLAY AI
         </div>
       </router-link>
-      <router-link to="/tournament"
+      <router-link to="/tournament" v-if="!hasSuspendedGame || hasSuspendedTournament"
         class="flex justify-end items-center pl-3 py-2 bg-white text-black rounded-r-full rounded-l-full hover:bg-gray-300 shadow-md">
         <div class="circle flex items-center justify-center rounded-full">
           <v-icon name="io-trophy-sharp" class="text-white" scale="1.5" />
@@ -92,6 +92,7 @@ import { acceptInviteService, receiveInviteService } from '@/services/invitesSer
 import { useRouter } from 'vue-router'
 import { useGameStore } from '@/stores/gameStore';
 import axiosInstance from '@/axios';
+import { checkCreatedTournamentExists } from '@/services/tournamentService';
 
 interface Invite {
 	_id: string;
@@ -109,10 +110,12 @@ export default defineComponent({
     const invites = ref<Invite[]>([]);
     const hasSuspendedGame = ref(true)
     const gameStore = useGameStore()
+    const hasSuspendedTournament = ref(true)
 
     onMounted(async () => {
       username.value = await axiosInstance.get('/users/me').then(res => res.data.username)
       const suspendedGame = await gameStore.checkSuspendedGameExists()
+      hasSuspendedTournament.value = await checkCreatedTournamentExists()
       hasSuspendedGame.value = suspendedGame
       if (suspendedGame)
         await gameStore.fetchGame()
@@ -154,7 +157,7 @@ export default defineComponent({
 			showOverlay.value = false;
 		};
 
-    return { logout, receiveInvites, showInvites, closeOverlay, showOverlay, invites, acceptInvite, username, hasSuspendedGame }
+    return { logout, receiveInvites, showInvites, closeOverlay, showOverlay, invites, acceptInvite, username, hasSuspendedGame, hasSuspendedTournament }
   }
 })
 </script>
@@ -214,3 +217,4 @@ export default defineComponent({
 	transform: scale(1.3);
 }
 </style>
+
