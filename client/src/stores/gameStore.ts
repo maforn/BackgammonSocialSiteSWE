@@ -111,7 +111,7 @@ export const useGameStore = defineStore('game', {
         return
       }
 
-      const board = isPlayer1 ? swapPlayers(this.boardConfiguration) : this.boardConfiguration
+      const board = isPlayer1 ? this.boardConfiguration : swapPlayers(this.boardConfiguration)
       const boardConfig = this.getBoardConfig(board)
 
       const input = {

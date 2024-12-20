@@ -46,7 +46,7 @@
         <!-- VS Section -->
         <div class="flex flex-col items-center">
           <div class="text-xl font-bold text-gray-700">VS</div>
-          <div class="text-lg font-medium bg-yellow-500 text-gray-700 p-2 rounded-lg">{{ matchResult }}</div>
+          <div class="text-md font-medium bg-yellow-500 text-gray-700 p-2 rounded-lg">{{ matchResult }}</div>
         </div>
 
         <!-- Player 2 -->
